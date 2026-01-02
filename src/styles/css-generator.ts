@@ -1,6 +1,10 @@
 /**
  * @fileoverview CSS 样式生成器
  * @module styles/css-generator
+ *
+ * @description
+ * 根据主题配置生成完整的 CSS 样式字符串。
+ * 支持基准单位系统，所有尺寸值从主题配置中获取。
  */
 
 import type { Theme } from '../types/theme'
@@ -8,6 +12,8 @@ import { defaultTheme } from './default-theme'
 
 /**
  * 合并主题配置
+ * @param customTheme - 自定义主题配置（部分）
+ * @returns 合并后的完整主题
  */
 export function mergeTheme(customTheme?: Partial<Theme>): Theme {
   if (!customTheme) return defaultTheme
@@ -23,6 +29,18 @@ export function mergeTheme(customTheme?: Partial<Theme>): Theme {
 
 /**
  * 生成 CSS 样式字符串
+ * @param theme - 主题配置
+ * @returns 完整的 CSS 样式字符串
+ *
+ * @description
+ * 生成的 CSS 包含：
+ * - 基础样式（重置、页面布局）
+ * - 页眉页脚样式
+ * - 各区块类型样式（info-grid、table、checkbox-grid 等）
+ * - 打印媒体查询
+ * - 水印样式
+ *
+ * 所有尺寸值从主题配置中获取，支持通过基准单位系统实现整体缩放。
  */
 export function generateCss(theme: Theme): string {
   return `
@@ -57,6 +75,16 @@ export function generateCss(theme: Theme): string {
 .print-page.a5.landscape {
   width: 210mm;
   min-height: 148mm;
+}
+
+.print-page.16k {
+  width: 195mm;
+  min-height: 270mm;
+}
+
+.print-page.16k.landscape {
+  width: 270mm;
+  min-height: 195mm;
 }
 
 /* 页眉 */
@@ -210,6 +238,44 @@ export function generateCss(theme: Theme): string {
   
   @page {
     margin: ${theme.spacing.pageMargin};
+  }
+
+  /* 分页控制 */
+  .page-break-before {
+    page-break-before: always;
+  }
+
+  .page-break-after {
+    page-break-after: always;
+  }
+
+  .no-page-break {
+    page-break-inside: avoid;
+  }
+
+  /* 避免在表格行中间分页 */
+  .data-table tr {
+    page-break-inside: avoid;
+  }
+
+  /* 避免在区块标题后分页 */
+  .section-title {
+    page-break-after: avoid;
+  }
+
+  /* 签名区域避免分页 */
+  .signature-area {
+    page-break-inside: avoid;
+  }
+
+  /* 表格表头避免与内容分离 */
+  .data-table thead {
+    display: table-header-group;
+  }
+
+  /* 表格页脚避免与内容分离 */
+  .data-table tfoot {
+    display: table-footer-group;
   }
 }
 

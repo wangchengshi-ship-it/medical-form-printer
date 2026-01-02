@@ -5,7 +5,7 @@
  */
 
 /** 页面尺寸 */
-export type PageSize = 'A4' | 'A5'
+export type PageSize = 'A4' | 'A5' | '16K'
 
 /** 页面方向 */
 export type PageOrientation = 'portrait' | 'landscape'
@@ -18,9 +18,22 @@ export type SectionType =
   | 'signature-area'
   | 'notes'
   | 'free-text'
+  | 'section-title'
+  | 'medical-checkbox-row'
+  | 'inline-row'
+  | 'container'
 
 /** 单元格数据类型 */
-export type CellType = 'text' | 'checkbox' | 'date' | 'number' | 'signature'
+export type CellType = 
+  | 'text' 
+  | 'checkbox' 
+  | 'date' 
+  | 'number' 
+  | 'signature'
+  | 'checkbox-inline'
+  | 'compound'
+  | 'textarea'
+  | 'checkbox-text'
 
 /** 页眉配置 */
 export interface PrintHeader {
@@ -54,6 +67,22 @@ export interface InfoGridCell {
   span?: number
   /** 数据类型 */
   type?: CellType
+  /** 后缀（如 '℃', 'kg'） */
+  suffix?: string
+  /** 自定义宽度 */
+  width?: string
+  /** checkbox-inline 选项（如 ['无', '有']） */
+  inlineOptions?: string[]
+  /** compound 模板格式（如 '{systolic}/{diastolic}mmHg'） */
+  compoundFormat?: string
+  /** compound 字段映射（如 { systolic: 'bp_systolic', diastolic: 'bp_diastolic' }） */
+  compoundFields?: Record<string, string>
+  /** textarea 最小高度 */
+  minHeight?: string
+  /** checkbox-text 勾选框字段名 */
+  checkboxField?: string
+  /** checkbox-text 文本字段名 */
+  textField?: string
 }
 
 /** 信息网格行 */
@@ -105,14 +134,34 @@ export interface CheckboxOption {
   inputField?: string
 }
 
+/** 勾选框项（items 模式） */
+export interface CheckboxItem {
+  /** 项类型：checkbox 或 text-input */
+  type?: 'checkbox' | 'text-input'
+  /** 选项值（checkbox 类型） */
+  value?: string
+  /** 显示标签 */
+  label: string
+  /** 是否有附加输入框（checkbox 类型） */
+  hasInput?: boolean
+  /** 附加输入框字段名 */
+  inputField?: string
+}
+
 /** 勾选框网格配置 */
 export interface CheckboxGridConfig {
   /** 对应 formData 的字段名 */
   field: string
-  /** 选项列表 */
-  options: CheckboxOption[]
+  /** 选项列表（options 模式） */
+  options?: CheckboxOption[]
+  /** 项列表（items 模式，支持更多类型） */
+  items?: CheckboxItem[]
   /** 列数 */
-  columns: number
+  columns?: number
+  /** 布局方式 */
+  layout?: 'grid' | 'flex'
+  /** 前缀标签 */
+  prefixLabel?: string
 }
 
 /** 签名字段配置 */
@@ -146,6 +195,96 @@ export interface FreeTextConfig {
   minHeight?: string
 }
 
+/** 区块标题配置 */
+export interface SectionTitleConfig {
+  /** 标题文本 */
+  text: string
+  /** 对齐方式 */
+  align?: 'left' | 'center' | 'right'
+  /** 字体大小 */
+  fontSize?: string
+  /** 是否加粗 */
+  bold?: boolean
+}
+
+/** 医疗勾选选项配置 */
+export interface MedicalCheckboxOption {
+  /** 选项值 */
+  value: string
+  /** 显示标签 */
+  label: string
+}
+
+/** 额外输入项配置 */
+export interface ExtraInput {
+  /** 输入框标签 */
+  label?: string
+  /** 对应 formData 的字段名 */
+  field: string
+  /** 后缀文本 */
+  suffix?: string
+}
+
+/** 医疗勾选行配置 */
+export interface MedicalCheckboxRowConfig {
+  /** 前缀标签（如"排便情况："） */
+  prefixLabel?: string
+  /** 对应 formData 的字段名（用于选项勾选） */
+  field?: string
+  /** 选项列表（□有/□无） */
+  options?: MedicalCheckboxOption[]
+  /** 输入框模板格式（如 "{input}次/日"），{input} 会被替换为输入框 */
+  inputFormat?: string
+  /** 输入框对应的字段名（用于 inputFormat） */
+  inputField?: string
+  /** 简单输入框标签（如 "疾病名称"） */
+  inputLabel?: string
+  /** 简单输入框字段名（用于 inputLabel） */
+  inputLabelField?: string
+  /** 额外输入项列表 */
+  extraInputs?: ExtraInput[]
+}
+
+/** 行内分列子元素 */
+export interface InlineRowChild {
+  /** 区块类型 */
+  type: SectionType
+  /** 区块配置 */
+  config: SectionConfig
+}
+
+/** 行内分列配置 */
+export interface InlineRowConfig {
+  /** 子元素列表 */
+  children: InlineRowChild[]
+  /** 列比例配置（如 [1, 2, 1] 表示 1:2:1） */
+  columns?: number[]
+  /** 间距 */
+  gap?: string
+}
+
+/** 容器子元素 */
+export interface ContainerChild {
+  /** 区块类型 */
+  type: SectionType
+  /** 区块配置 */
+  config: SectionConfig
+}
+
+/** 容器配置 */
+export interface ContainerConfig {
+  /** 子区块列表 */
+  children: ContainerChild[]
+  /** 布局方向 */
+  direction?: 'row' | 'column'
+  /** 边框配置 */
+  border?: boolean | string
+  /** 内边距 */
+  padding?: string
+  /** 间距 */
+  gap?: string
+}
+
 /** 区块配置联合类型 */
 export type SectionConfig =
   | InfoGridConfig
@@ -154,6 +293,10 @@ export type SectionConfig =
   | SignatureConfig
   | NotesConfig
   | FreeTextConfig
+  | SectionTitleConfig
+  | MedicalCheckboxRowConfig
+  | InlineRowConfig
+  | ContainerConfig
 
 /** 打印区块 */
 export interface PrintSection {

@@ -4,7 +4,7 @@ import type { PrintSchema, FormData } from '../src/types/print-schema'
 
 // 产妇入院评估单示例数据
 const maternalAdmissionSchema: PrintSchema = {
-  pageSize: 'A4',
+  pageSize: '16K',
   orientation: 'portrait',
   header: {
     hospital: '天津中医药大学第二附属医院',
@@ -92,7 +92,7 @@ const maternalAdmissionData: FormData = {
 
 // 新生儿护理记录单示例数据
 const newbornNursingSchema: PrintSchema = {
-  pageSize: 'A4',
+  pageSize: '16K',
   orientation: 'landscape',
   header: {
     hospital: '天津中医药大学第二附属医院',
@@ -176,9 +176,17 @@ const createRenderer = (schema: PrintSchema, data: FormData) => {
       watermark: args.watermark,
     })
     
-    const container = document.createElement('div')
-    container.innerHTML = html
-    return container.firstElementChild as HTMLElement
+    // 创建 iframe 来显示完整的 HTML 文档
+    const iframe = document.createElement('iframe')
+    iframe.style.width = '100%'
+    iframe.style.height = '800px'
+    iframe.style.border = '1px solid #ccc'
+    iframe.style.background = '#fff'
+    
+    // 使用 srcdoc 设置 iframe 内容
+    iframe.srcdoc = html
+    
+    return iframe
   }
 }
 

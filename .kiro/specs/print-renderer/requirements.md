@@ -12,6 +12,12 @@
 - **Section_Renderer**: 区块渲染器，负责渲染特定类型的区块（info-grid、table、checkbox-grid 等）
 - **PDF_Generator**: PDF 生成器，将 HTML 转换为 PDF 文件（仅 Node.js 环境）
 - **Theme**: 主题配置，定义字体、颜色、边距等样式变量
+- **Pagination_Engine**: 分页引擎，根据内容高度计算分页点，确保表格行不被分割
+- **Content_Measurer**: 内容测量器，测量渲染后元素的实际高度
+- **Paginated_Renderer**: 分页渲染器，将分页结果渲染为多页 HTML
+- **MeasurableItem**: 可测量项，包含 id、type、height、tableId 等属性的内容单元
+- **PageBreakResult**: 分页结果，包含 pages 数组和 totalPages 总页数
+- **16K**: 十六开纸张，尺寸为 185mm × 260mm，医疗表单常用规格
 
 ## Requirements
 
@@ -47,12 +53,12 @@
 
 #### Acceptance Criteria
 
-1. THE Print_Renderer SHALL support A4 and A5 page sizes
+1. THE Print_Renderer SHALL support A4, A5, and 16K (185mm × 260mm) page sizes
 2. THE Print_Renderer SHALL support portrait and landscape orientations
 3. THE Print_Renderer SHALL render page header with hospital name, department, and form title
 4. THE Print_Renderer SHALL render page footer with page numbers and notes
 5. THE Print_Renderer SHALL support configurable margins
-6. WHEN content exceeds one page, THE Print_Renderer SHALL handle page breaks correctly
+6. THE Print_Renderer SHALL use 16K as the default page size
 
 ### Requirement 4: 样式系统
 
@@ -114,3 +120,43 @@
 3. THE Print_Renderer SHALL support template inheritance and composition
 4. THE Print_Renderer SHALL provide hooks for pre/post rendering customization
 5. THE Print_Renderer SHALL maintain backward compatibility when adding new features
+
+### Requirement 9: 智能分页
+
+**User Story:** 作为开发者，我需要智能分页功能，确保内容在多页打印时正确分割，表格行不被截断，续页自动重复表头。
+
+#### Acceptance Criteria
+
+1. THE Pagination_Engine SHALL calculate page breaks based on measured content heights
+2. THE Pagination_Engine SHALL ensure table rows are never split across pages
+3. WHEN a table continues on a new page, THE Pagination_Engine SHALL repeat the table header
+4. THE Pagination_Engine SHALL mark continuation pages with isContinuation flag
+5. THE Pagination_Engine SHALL support configurable page dimensions (width, height, margins)
+6. THE Pagination_Engine SHALL reserve space for repeated headers when calculating page breaks
+7. THE Pagination_Engine SHALL work with pre-measured content heights (MeasurableItem[])
+
+### Requirement 10: 内容测量
+
+**User Story:** 作为开发者，我需要测量渲染后内容的实际高度，以便进行精确分页。
+
+#### Acceptance Criteria
+
+1. THE Content_Measurer SHALL create a hidden container matching print styles for measurement
+2. THE Content_Measurer SHALL measure actual rendered height including line-height, padding, and margin
+3. THE Content_Measurer SHALL support measuring variable-height table rows (text wrapping)
+4. THE Content_Measurer SHALL handle text wrapping estimation when DOM is not available
+5. THE Content_Measurer SHALL support batch measurement of multiple elements
+6. THE Content_Measurer SHALL clean up measurement containers after use
+
+### Requirement 11: 分页渲染
+
+**User Story:** 作为开发者，我需要将分页结果渲染为多页 HTML，每页独立且可打印。
+
+#### Acceptance Criteria
+
+1. THE Paginated_Renderer SHALL render each page as a separate .print-page element
+2. THE Paginated_Renderer SHALL include repeated table headers on continuation pages
+3. THE Paginated_Renderer SHALL display page numbers (e.g., "第 1 页 / 共 3 页")
+4. THE Paginated_Renderer SHALL support continuation markers (e.g., "(续)" in title)
+5. THE Paginated_Renderer SHALL maintain consistent styling across all pages
+6. THE Paginated_Renderer SHALL support CSS page-break rules for browser printing

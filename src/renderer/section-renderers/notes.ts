@@ -4,6 +4,7 @@
  */
 
 import type { NotesConfig } from '../../types/print-schema'
+import { escapeHtml } from '../../utils'
 
 /**
  * 渲染备注区块
@@ -14,16 +15,4 @@ export function renderNotes(config: NotesConfig): string {
   return `<div class="print-section notes-section${borderedClass}">
 ${escapeHtml(config.content)}
 </div>`
-}
-
-/**
- * HTML 转义
- */
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
 }

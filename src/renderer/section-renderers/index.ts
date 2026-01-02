@@ -11,6 +11,10 @@ import { renderCheckboxGrid } from './checkbox-grid'
 import { renderSignatureArea } from './signature-area'
 import { renderNotes } from './notes'
 import { renderFreeText } from './free-text'
+import { renderSectionTitle } from './section-title'
+import { renderMedicalCheckboxRow } from './medical-checkbox-row'
+import { renderInlineRow } from './inline-row'
+import { renderContainer } from './container'
 
 /** 区块渲染函数类型 */
 export type SectionRenderer = (
@@ -27,6 +31,10 @@ const renderers: Record<SectionType, SectionRenderer> = {
   'signature-area': renderSignatureArea as SectionRenderer,
   'notes': renderNotes as SectionRenderer,
   'free-text': renderFreeText as SectionRenderer,
+  'section-title': renderSectionTitle as SectionRenderer,
+  'medical-checkbox-row': renderMedicalCheckboxRow as SectionRenderer,
+  'inline-row': renderInlineRow as SectionRenderer,
+  'container': renderContainer as SectionRenderer,
 }
 
 /** 自定义渲染器存储 */
@@ -73,4 +81,8 @@ export {
   renderSignatureArea,
   renderNotes,
   renderFreeText,
+  renderSectionTitle,
+  renderMedicalCheckboxRow,
+  renderInlineRow,
+  renderContainer,
 }

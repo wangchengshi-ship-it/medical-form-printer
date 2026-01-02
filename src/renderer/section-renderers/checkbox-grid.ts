@@ -1,11 +1,13 @@
 /**
  * @fileoverview 勾选框网格区块渲染器
  * @module renderer/section-renderers/checkbox-grid
+ * @description 支持 options 模式和 items 模式，支持 grid/flex 布局
  */
 
-import type { CheckboxGridConfig, FormData } from '../../types/print-schema'
+import type { CheckboxGridConfig, CheckboxOption, CheckboxItem, FormData } from '../../types/print-schema'
 import type { RenderOptions } from '../../types/options'
 import { formatBoolean, isChecked } from '../../formatters'
+import { escapeHtml } from '../../utils'
 
 /**
  * 渲染勾选框网格区块
@@ -16,40 +18,118 @@ export function renderCheckboxGrid(
   options?: RenderOptions
 ): string {
   const values = data[config.field]
-  const columnWidth = `${100 / config.columns}%`
+  const layout = config.layout || 'grid'
+  const columns = config.columns || 4
   
-  const items = config.options
+  // 前缀标签
+  const prefixHtml = config.prefixLabel 
+    ? `<span class="prefix-label">${escapeHtml(config.prefixLabel)}</span>` 
+    : ''
+  
+  // 渲染项目
+  let itemsHtml: string
+  if (config.items && config.items.length > 0) {
+    itemsHtml = renderItems(config.items, values, data, layout, columns, options)
+  } else if (config.options && config.options.length > 0) {
+    itemsHtml = renderOptions(config.options, values, data, layout, columns, options)
+  } else {
+    itemsHtml = ''
+  }
+  
+  const layoutClass = layout === 'flex' ? 'checkbox-grid-flex' : 'checkbox-grid-grid'
+  
+  return `<div class="print-section checkbox-grid ${layoutClass}">
+${prefixHtml}${itemsHtml}
+</div>`
+}
+
+/**
+ * 渲染 options 模式
+ */
+function renderOptions(
+  optionsList: CheckboxOption[],
+  values: unknown,
+  data: FormData,
+  layout: 'grid' | 'flex',
+  columns: number,
+  options?: RenderOptions
+): string {
+  const columnWidth = layout === 'grid' ? `${100 / columns}%` : 'auto'
+  
+  return optionsList
     .map((opt) => {
       const checked = isChecked(values, opt.value)
       const symbol = formatBoolean(checked)
       
       let inputHtml = ''
       if (opt.hasInput && opt.inputField) {
-        const inputValue = data[opt.inputField] || '________'
-        inputHtml = `<span class="input-line">${escapeHtml(String(inputValue))}</span>`
+        const inputValue = data[opt.inputField]
+        const displayValue = inputValue !== undefined && inputValue !== null && inputValue !== ''
+          ? String(inputValue)
+          : '________'
+        inputHtml = `<span class="input-line">${escapeHtml(displayValue)}</span>`
       }
       
-      return `<div class="checkbox-item" style="width: ${columnWidth}">
+      const styleAttr = layout === 'grid' ? ` style="width: ${columnWidth}"` : ''
+      
+      return `<div class="checkbox-item"${styleAttr}>
 <span class="checkbox-symbol">${symbol}</span>
 <span class="checkbox-label">${escapeHtml(opt.label)}</span>
 ${inputHtml}
 </div>`
     })
     .join('\n')
-  
-  return `<div class="print-section checkbox-grid">
-${items}
-</div>`
 }
 
 /**
- * HTML 转义
+ * 渲染 items 模式
  */
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
+function renderItems(
+  itemsList: CheckboxItem[],
+  values: unknown,
+  data: FormData,
+  layout: 'grid' | 'flex',
+  columns: number,
+  options?: RenderOptions
+): string {
+  const columnWidth = layout === 'grid' ? `${100 / columns}%` : 'auto'
+  
+  return itemsList
+    .map((item) => {
+      const itemType = item.type || 'checkbox'
+      const styleAttr = layout === 'grid' ? ` style="width: ${columnWidth}"` : ''
+      
+      if (itemType === 'text-input') {
+        // 纯文本输入项
+        const inputValue = item.inputField ? data[item.inputField] : undefined
+        const displayValue = inputValue !== undefined && inputValue !== null && inputValue !== ''
+          ? String(inputValue)
+          : '________'
+        
+        return `<div class="checkbox-item text-input-item"${styleAttr}>
+<span class="text-input-label">${escapeHtml(item.label)}</span>
+<span class="input-line">${escapeHtml(displayValue)}</span>
+</div>`
+      } else {
+        // checkbox 类型
+        const checked = item.value ? isChecked(values, item.value) : false
+        const symbol = formatBoolean(checked)
+        
+        let inputHtml = ''
+        if (item.hasInput && item.inputField) {
+          const inputValue = data[item.inputField]
+          const displayValue = inputValue !== undefined && inputValue !== null && inputValue !== ''
+            ? String(inputValue)
+            : '________'
+          inputHtml = `<span class="input-line">${escapeHtml(displayValue)}</span>`
+        }
+        
+        return `<div class="checkbox-item"${styleAttr}>
+<span class="checkbox-symbol">${symbol}</span>
+<span class="checkbox-label">${escapeHtml(item.label)}</span>
+${inputHtml}
+</div>`
+      }
+    })
+    .join('\n')
 }

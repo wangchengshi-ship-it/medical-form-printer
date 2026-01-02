@@ -6,6 +6,7 @@
 import type { SignatureConfig, FormData } from '../../types/print-schema'
 import type { RenderOptions } from '../../types/options'
 import { formatDate } from '../../formatters'
+import { escapeHtml } from '../../utils'
 
 /**
  * 渲染签名区域区块
@@ -40,16 +41,4 @@ ${dateHtml}
   return `<div class="print-section signature-area">
 ${items}
 </div>`
-}
-
-/**
- * HTML 转义
- */
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
 }

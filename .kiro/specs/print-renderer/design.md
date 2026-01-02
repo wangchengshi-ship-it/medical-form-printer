@@ -16,6 +16,8 @@
 │  │  renderToHtml(schema, data, options) → string                ││
 │  │  renderToPdf(schema, data, options) → Buffer                 ││
 │  │  mergePdfs(buffers, options) → Buffer                        ││
+│  │  calculatePageBreaks(items, pageHeight) → PageBreakResult    ││
+│  │  usePrintPagination(dimensions) → PaginationUtils            ││
 │  └─────────────────────────────────────────────────────────────┘│
 │                              │                                   │
 │                              ▼                                   │
@@ -35,6 +37,14 @@
 │  │  └──────────┘ └──────────┘ └──────────┘ └──────────┘        ││
 │  └─────────────────────────────────────────────────────────────┘│
 │                              │                                   │
+│  ┌─────────────────────────────────────────────────────────────┐│
+│  │                  Pagination Engine                           ││
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐          ││
+│  │  │  Page Size  │  │  Page Break │  │  Paginated  │          ││
+│  │  │  Calculator │  │  Calculator │  │  Renderer   │          ││
+│  │  └─────────────┘  └─────────────┘  └─────────────┘          ││
+│  └─────────────────────────────────────────────────────────────┘│
+│                              │                                   │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐           │
 │  │  Formatters  │  │    Styles    │  │    Theme     │           │
 │  │  (date/bool) │  │  (CSS)       │  │  (config)    │           │
@@ -44,6 +54,14 @@
 │  │                  PDF Generator (Node.js only)                ││
 │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐          ││
 │  │  │  Puppeteer  │  │  PDF Merge  │  │  Watermark  │          ││
+│  │  └─────────────┘  └─────────────┘  └─────────────┘          ││
+│  └─────────────────────────────────────────────────────────────┘│
+│                                                                  │
+│  ┌─────────────────────────────────────────────────────────────┐│
+│  │              Content Measurer (Browser only)                 ││
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐          ││
+│  │  │  Hidden     │  │  Element    │  │  Text       │          ││
+│  │  │  Container  │  │  Measurer   │  │  Estimator  │          ││
 │  │  └─────────────┘  └─────────────┘  └─────────────┘          ││
 │  └─────────────────────────────────────────────────────────────┘│
 │                                                                  │
@@ -70,6 +88,12 @@ medical-print-renderer/
 │   │       ├── signature-area.ts
 │   │       ├── notes.ts
 │   │       └── free-text.ts
+│   ├── pagination/
+│   │   ├── index.ts                 # 分页模块入口
+│   │   ├── page-dimensions.ts       # 页面尺寸配置（16K、A4、A5）
+│   │   ├── page-break-calculator.ts # 分页点计算算法
+│   │   ├── paginated-renderer.ts    # 分页渲染器
+│   │   └── content-measurer.ts      # 内容测量器（浏览器环境）
 │   ├── pdf/
 │   │   ├── index.ts                 # PDF 生成入口
 │   │   ├── pdf-generator.ts         # Puppeteer PDF 生成
@@ -83,10 +107,16 @@ medical-print-renderer/
 │   └── types/
 │       ├── index.ts                 # 类型导出
 │       ├── print-schema.ts          # PrintSchema 类型
+│       ├── pagination.ts            # 分页相关类型
 │       ├── options.ts               # 配置选项类型
 │       └── theme.ts                 # 主题类型
 ├── test/
-│   └── renderer.test.ts
+│   ├── renderer.test.ts
+│   ├── formatters.test.ts
+│   ├── section-renderers.test.ts
+│   ├── styles.test.ts
+│   ├── properties.test.ts
+│   └── pagination.test.ts           # 分页算法测试
 ├── package.json
 ├── tsconfig.json
 ├── tsup.config.ts
@@ -99,11 +129,12 @@ medical-print-renderer/
 ```typescript
 // PrintSchema - 打印布局配置
 interface PrintSchema {
-  pageSize: 'A4' | 'A5'
+  pageSize: 'A4' | 'A5' | '16K'
   orientation: 'portrait' | 'landscape'
   header: PrintHeader
   sections: PrintSection[]
   footer?: PrintFooter
+  pagination?: PaginationConfig  // 分页配置
 }
 
 // 区块类型
@@ -123,6 +154,68 @@ interface RenderOptions {
   formatters?: Record<string, (value: unknown) => string>
   watermark?: string
 }
+
+// 分页配置
+interface PaginationConfig {
+  enabled: boolean           // 是否启用智能分页
+  repeatTableHeaders: boolean // 续页是否重复表头
+}
+```
+
+### 分页相关类型
+
+```typescript
+// 页面尺寸配置
+interface PageDimensions {
+  width: number       // 页面宽度 (mm)
+  height: number      // 页面高度 (mm)
+  marginTop: number   // 上边距 (mm)
+  marginBottom: number // 下边距 (mm)
+  marginLeft: number  // 左边距 (mm)
+  marginRight: number // 右边距 (mm)
+}
+
+// 十六开纸张默认配置
+const PAGE_16K: PageDimensions = {
+  width: 185,
+  height: 260,
+  marginTop: 8,
+  marginBottom: 8,
+  marginLeft: 10,
+  marginRight: 10,
+}
+
+// 可测量的内容项类型
+type MeasurableItemType =
+  | 'header'
+  | 'section'
+  | 'table-header'
+  | 'table-row'
+  | 'signature'
+  | 'footer'
+
+// 可测量的内容项
+interface MeasurableItem {
+  id: string                  // 唯一标识
+  type: MeasurableItemType    // 内容类型
+  height: number              // 测量得到的高度 (px)
+  tableId?: string            // 所属表格ID（仅 table-header 和 table-row）
+  dataIndex?: number          // 原始数据索引
+}
+
+// 单页内容
+interface PageContent {
+  pageNumber: number          // 页码（从1开始）
+  isContinuation: boolean     // 是否为续页
+  items: string[]             // 页面包含的内容项ID列表
+  repeatedHeaders: string[]   // 需要重复的表头ID列表
+}
+
+// 分页结果
+interface PageBreakResult {
+  pages: PageContent[]        // 页面列表
+  totalPages: number          // 总页数
+}
 ```
 
 ### 使用方式
@@ -134,6 +227,27 @@ import { renderToHtml } from '@medical/print-renderer'
 const html = renderToHtml(printSchema, formData, {
   theme: 'default',
   locale: 'zh-CN'
+})
+```
+
+**前端分页渲染（Vue）：**
+```typescript
+import { 
+  usePrintPagination, 
+  calculatePageBreaks,
+  PAGE_16K 
+} from '@medical/print-renderer'
+
+// 1. 测量内容高度（需要 DOM 环境）
+const measuredItems = measureContent(contentElement)
+
+// 2. 计算分页
+const { usableHeight } = usePrintPagination(PAGE_16K)
+const pageBreaks = calculatePageBreaks(measuredItems, usableHeight)
+
+// 3. 根据分页结果渲染多页
+pageBreaks.pages.forEach(page => {
+  // 渲染每一页，包含重复的表头
 })
 ```
 
@@ -264,6 +378,36 @@ interface Theme {
 *For any* array of N documents, mergePdfs SHALL produce a PDF with pages in the exact order of the input array.
 
 **Validates: Requirements 7.2**
+
+### Property 8: 分页内容完整性
+
+*For any* list of MeasurableItems, calculatePageBreaks SHALL assign every item to exactly one page, with no items lost or duplicated.
+
+**Validates: Requirements 9.1, 9.7**
+
+### Property 9: 表格行不分割
+
+*For any* table with multiple rows, calculatePageBreaks SHALL never split a single table row across two pages.
+
+**Validates: Requirements 9.2**
+
+### Property 10: 续页表头重复
+
+*For any* table that spans multiple pages, the table header SHALL be repeated at the beginning of each continuation page.
+
+**Validates: Requirements 9.3, 9.6**
+
+### Property 11: 页面高度约束
+
+*For any* page in PageBreakResult, the total height of items (including repeated headers) SHALL not exceed the available page height.
+
+**Validates: Requirements 9.1, 9.6**
+
+### Property 12: 单位转换可逆性
+
+*For any* measurement value, mmToPx(pxToMm(value)) SHALL equal the original value (within floating point precision).
+
+**Validates: Requirements 10.1**
 
 ## Error Handling
 

@@ -5,6 +5,7 @@
 
 import type { FreeTextConfig, FormData } from '../../types/print-schema'
 import type { RenderOptions } from '../../types/options'
+import { escapeHtml } from '../../utils'
 
 /**
  * 渲染自由文本区块
@@ -20,16 +21,4 @@ export function renderFreeText(
   return `<div class="print-section free-text"${minHeight}>
 ${escapeHtml(String(value))}
 </div>`
-}
-
-/**
- * HTML 转义
- */
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
 }

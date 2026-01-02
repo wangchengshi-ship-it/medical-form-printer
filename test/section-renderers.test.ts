@@ -11,6 +11,10 @@ import {
   renderSignatureArea,
   renderNotes,
   renderFreeText,
+  renderSectionTitle,
+  renderMedicalCheckboxRow,
+  renderInlineRow,
+  renderContainer,
   registerSectionRenderer,
   getSectionRenderer,
   renderSection,
@@ -22,6 +26,11 @@ import type {
   SignatureConfig,
   NotesConfig,
   FreeTextConfig,
+  SectionTitleConfig,
+  MedicalCheckboxRowConfig,
+  InlineRowConfig,
+  ContainerConfig,
+  CheckboxItem,
   FormData,
 } from '../src/types/print-schema'
 
@@ -221,7 +230,7 @@ describe('renderCheckboxGrid', () => {
     const data: FormData = { symptoms: ['fever', 'cough'] }
     const html = renderCheckboxGrid(basicConfig, data)
 
-    expect(html).toContain('class="print-section checkbox-grid"')
+    expect(html).toContain('class="print-section checkbox-grid')
     expect(html).toContain('发热')
     expect(html).toContain('咳嗽')
     expect(html).toContain('头痛')
@@ -419,5 +428,664 @@ describe('Section Renderer Registry', () => {
     const html = renderSection('unknown', {} as any, {})
 
     expect(html).toContain('<!-- Unknown section type: unknown -->')
+  })
+})
+
+
+// ============================================
+// 扩展区块渲染器测试
+// ============================================
+
+describe('renderSectionTitle', () => {
+  it('should render section title with default alignment', () => {
+    const config: SectionTitleConfig = { text: '基本信息' }
+    const html = renderSectionTitle(config)
+
+    expect(html).toContain('class="print-section section-title"')
+    expect(html).toContain('基本信息')
+    expect(html).toContain('text-align: left')
+    expect(html).toContain('font-weight: bold')
+  })
+
+  it('should render center aligned title', () => {
+    const config: SectionTitleConfig = { text: '居中标题', align: 'center' }
+    const html = renderSectionTitle(config)
+
+    expect(html).toContain('text-align: center')
+  })
+
+  it('should render right aligned title', () => {
+    const config: SectionTitleConfig = { text: '右对齐标题', align: 'right' }
+    const html = renderSectionTitle(config)
+
+    expect(html).toContain('text-align: right')
+  })
+
+  it('should apply custom font size', () => {
+    const config: SectionTitleConfig = { text: '大标题', fontSize: '18px' }
+    const html = renderSectionTitle(config)
+
+    expect(html).toContain('font-size: 18px')
+  })
+
+  it('should render non-bold title when bold is false', () => {
+    const config: SectionTitleConfig = { text: '普通标题', bold: false }
+    const html = renderSectionTitle(config)
+
+    expect(html).not.toContain('font-weight: bold')
+  })
+
+  it('should escape HTML in title text', () => {
+    const config: SectionTitleConfig = { text: '<script>alert(1)</script>' }
+    const html = renderSectionTitle(config)
+
+    expect(html).toContain('&lt;script&gt;')
+    expect(html).not.toContain('<script>alert')
+  })
+})
+
+describe('renderMedicalCheckboxRow', () => {
+  it('should render prefix label', () => {
+    const config: MedicalCheckboxRowConfig = {
+      prefixLabel: '排便情况：',
+    }
+    const html = renderMedicalCheckboxRow(config, {})
+
+    expect(html).toContain('class="print-section medical-checkbox-row"')
+    expect(html).toContain('class="prefix-label"')
+    expect(html).toContain('排便情况：')
+  })
+
+  it('should render options with checkbox symbols', () => {
+    const config: MedicalCheckboxRowConfig = {
+      field: 'bowelMovement',
+      options: [
+        { value: 'yes', label: '有' },
+        { value: 'no', label: '无' },
+      ],
+    }
+    const data: FormData = { bowelMovement: ['yes'] }
+    const html = renderMedicalCheckboxRow(config, data)
+
+    expect(html).toContain('class="options-group"')
+    expect(html).toContain('☑')
+    expect(html).toContain('☐')
+    expect(html).toContain('有')
+    expect(html).toContain('无')
+  })
+
+  it('should render input format with value', () => {
+    const config: MedicalCheckboxRowConfig = {
+      inputFormat: '{input}次/日',
+      inputField: 'frequency',
+    }
+    const data: FormData = { frequency: 3 }
+    const html = renderMedicalCheckboxRow(config, data)
+
+    expect(html).toContain('class="input-format"')
+    expect(html).toContain('class="input-value"')
+    expect(html).toContain('3')
+    expect(html).toContain('次/日')
+  })
+
+  it('should render input format with placeholder when empty', () => {
+    const config: MedicalCheckboxRowConfig = {
+      inputFormat: '{input}次/日',
+      inputField: 'frequency',
+    }
+    const html = renderMedicalCheckboxRow(config, {})
+
+    expect(html).toContain('____')
+  })
+
+  it('should render input label with value', () => {
+    const config: MedicalCheckboxRowConfig = {
+      inputLabel: '疾病名称',
+      inputLabelField: 'diseaseName',
+    }
+    const data: FormData = { diseaseName: '高血压' }
+    const html = renderMedicalCheckboxRow(config, data)
+
+    expect(html).toContain('class="input-label-group"')
+    expect(html).toContain('疾病名称：')
+    expect(html).toContain('高血压')
+  })
+
+  it('should render extra inputs', () => {
+    const config: MedicalCheckboxRowConfig = {
+      extraInputs: [
+        { label: '体温', field: 'temperature', suffix: '℃' },
+        { field: 'weight', suffix: 'kg' },
+      ],
+    }
+    const data: FormData = { temperature: 36.5, weight: 65 }
+    const html = renderMedicalCheckboxRow(config, data)
+
+    expect(html).toContain('class="extra-inputs"')
+    expect(html).toContain('体温')
+    expect(html).toContain('36.5')
+    expect(html).toContain('℃')
+    expect(html).toContain('65')
+    expect(html).toContain('kg')
+  })
+
+  it('should escape HTML in all text content', () => {
+    const config: MedicalCheckboxRowConfig = {
+      prefixLabel: '<b>标签</b>',
+      options: [{ value: 'test', label: '<script>alert(1)</script>' }],
+      field: 'test',
+    }
+    const html = renderMedicalCheckboxRow(config, {})
+
+    expect(html).toContain('&lt;b&gt;')
+    expect(html).toContain('&lt;script&gt;')
+    expect(html).not.toContain('<script>')
+  })
+})
+
+describe('renderInfoGrid - Extended Types', () => {
+  it('should render checkbox-inline type', () => {
+    const config: InfoGridConfig = {
+      columns: 1,
+      rows: [{
+        cells: [{
+          label: '过敏史',
+          field: 'hasAllergy',
+          type: 'checkbox-inline',
+          inlineOptions: ['无', '有'],
+        }],
+      }],
+    }
+    const data: FormData = { hasAllergy: true }
+    const html = renderInfoGrid(config, data)
+
+    expect(html).toContain('class="checkbox-inline-group"')
+    expect(html).toContain('class="checkbox-inline-item"')
+    expect(html).toContain('无')
+    expect(html).toContain('有')
+    // true 应该选中 '有'（index 1）
+    expect(html).toContain('☑')
+    expect(html).toContain('☐')
+  })
+
+  it('should render checkbox-inline with string value', () => {
+    const config: InfoGridConfig = {
+      columns: 1,
+      rows: [{
+        cells: [{
+          label: '性别',
+          field: 'gender',
+          type: 'checkbox-inline',
+          inlineOptions: ['男', '女'],
+        }],
+      }],
+    }
+    const data: FormData = { gender: '女' }
+    const html = renderInfoGrid(config, data)
+
+    // '女' 应该被选中
+    const checkedCount = (html.match(/☑/g) || []).length
+    expect(checkedCount).toBe(1)
+  })
+
+  it('should render compound type', () => {
+    const config: InfoGridConfig = {
+      columns: 1,
+      rows: [{
+        cells: [{
+          label: '血压',
+          field: 'bloodPressure',
+          type: 'compound',
+          compoundFormat: '{systolic}/{diastolic}mmHg',
+          compoundFields: {
+            systolic: 'bp_systolic',
+            diastolic: 'bp_diastolic',
+          },
+        }],
+      }],
+    }
+    const data: FormData = { bp_systolic: 120, bp_diastolic: 80 }
+    const html = renderInfoGrid(config, data)
+
+    expect(html).toContain('120/80mmHg')
+  })
+
+  it('should render compound type with placeholder for missing values', () => {
+    const config: InfoGridConfig = {
+      columns: 1,
+      rows: [{
+        cells: [{
+          label: '血压',
+          field: 'bloodPressure',
+          type: 'compound',
+          compoundFormat: '{systolic}/{diastolic}mmHg',
+          compoundFields: {
+            systolic: 'bp_systolic',
+            diastolic: 'bp_diastolic',
+          },
+        }],
+      }],
+    }
+    const html = renderInfoGrid(config, {}, { emptyPlaceholder: '—' })
+
+    expect(html).toContain('—/—mmHg')
+  })
+
+  it('should render textarea type', () => {
+    const config: InfoGridConfig = {
+      columns: 1,
+      rows: [{
+        cells: [{
+          label: '病史',
+          field: 'medicalHistory',
+          type: 'textarea',
+          minHeight: '50mm',
+        }],
+      }],
+    }
+    const data: FormData = { medicalHistory: '无特殊病史' }
+    const html = renderInfoGrid(config, data)
+
+    expect(html).toContain('class="textarea-value"')
+    expect(html).toContain('style="min-height: 50mm"')
+    expect(html).toContain('无特殊病史')
+  })
+
+  it('should render checkbox-text type', () => {
+    const config: InfoGridConfig = {
+      columns: 1,
+      rows: [{
+        cells: [{
+          label: '其他',
+          field: 'other',
+          type: 'checkbox-text',
+          checkboxField: 'hasOther',
+          textField: 'otherDetail',
+        }],
+      }],
+    }
+    const data: FormData = { hasOther: true, otherDetail: '自定义内容' }
+    const html = renderInfoGrid(config, data)
+
+    expect(html).toContain('class="checkbox-text-group"')
+    expect(html).toContain('☑')
+    expect(html).toContain('自定义内容')
+  })
+
+  it('should render suffix', () => {
+    const config: InfoGridConfig = {
+      columns: 1,
+      rows: [{
+        cells: [{
+          label: '体温',
+          field: 'temperature',
+          type: 'number',
+          suffix: '℃',
+        }],
+      }],
+    }
+    const data: FormData = { temperature: 36.5 }
+    const html = renderInfoGrid(config, data)
+
+    expect(html).toContain('class="suffix"')
+    expect(html).toContain('℃')
+    expect(html).toContain('36.5')
+  })
+
+  it('should apply custom width', () => {
+    const config: InfoGridConfig = {
+      columns: 2,
+      rows: [{
+        cells: [{
+          label: '姓名',
+          field: 'name',
+          type: 'text',
+          width: '150px',
+        }],
+      }],
+    }
+    const html = renderInfoGrid(config, { name: '张三' })
+
+    expect(html).toContain('style="width: 150px"')
+  })
+})
+
+describe('renderCheckboxGrid - Items Mode', () => {
+  it('should render items mode with checkbox type', () => {
+    const config: CheckboxGridConfig = {
+      field: 'symptoms',
+      items: [
+        { type: 'checkbox', value: 'fever', label: '发热' },
+        { type: 'checkbox', value: 'cough', label: '咳嗽' },
+      ],
+    }
+    const data: FormData = { symptoms: ['fever'] }
+    const html = renderCheckboxGrid(config, data)
+
+    expect(html).toContain('发热')
+    expect(html).toContain('咳嗽')
+    expect(html).toContain('☑')
+    expect(html).toContain('☐')
+  })
+
+  it('should render items mode with text-input type', () => {
+    const config: CheckboxGridConfig = {
+      field: 'symptoms',
+      items: [
+        { type: 'text-input', label: '其他', inputField: 'otherSymptom' },
+      ],
+    }
+    const data: FormData = { otherSymptom: '头晕' }
+    const html = renderCheckboxGrid(config, data)
+
+    expect(html).toContain('class="checkbox-item text-input-item"')
+    expect(html).toContain('其他')
+    expect(html).toContain('头晕')
+  })
+
+  it('should render items with hasInput', () => {
+    const config: CheckboxGridConfig = {
+      field: 'options',
+      items: [
+        { type: 'checkbox', value: 'other', label: '其他', hasInput: true, inputField: 'otherDetail' },
+      ],
+    }
+    const data: FormData = { options: ['other'], otherDetail: '详细说明' }
+    const html = renderCheckboxGrid(config, data)
+
+    expect(html).toContain('☑')
+    expect(html).toContain('其他')
+    expect(html).toContain('详细说明')
+    expect(html).toContain('class="input-line"')
+  })
+
+  it('should render with flex layout', () => {
+    const config: CheckboxGridConfig = {
+      field: 'symptoms',
+      layout: 'flex',
+      items: [
+        { type: 'checkbox', value: 'fever', label: '发热' },
+      ],
+    }
+    const html = renderCheckboxGrid(config, {})
+
+    expect(html).toContain('checkbox-grid-flex')
+  })
+
+  it('should render with grid layout', () => {
+    const config: CheckboxGridConfig = {
+      field: 'symptoms',
+      layout: 'grid',
+      columns: 3,
+      items: [
+        { type: 'checkbox', value: 'fever', label: '发热' },
+      ],
+    }
+    const html = renderCheckboxGrid(config, {})
+
+    expect(html).toContain('checkbox-grid-grid')
+  })
+
+  it('should render prefix label', () => {
+    const config: CheckboxGridConfig = {
+      field: 'symptoms',
+      prefixLabel: '症状：',
+      options: [{ value: 'fever', label: '发热' }],
+    }
+    const html = renderCheckboxGrid(config, {})
+
+    expect(html).toContain('class="prefix-label"')
+    expect(html).toContain('症状：')
+  })
+})
+
+describe('renderInlineRow', () => {
+  it('should render inline row with children', () => {
+    const config: InlineRowConfig = {
+      children: [
+        {
+          type: 'section-title',
+          config: { text: '左侧标题' } as SectionTitleConfig,
+        },
+        {
+          type: 'section-title',
+          config: { text: '右侧标题' } as SectionTitleConfig,
+        },
+      ],
+    }
+    const html = renderInlineRow(config, {})
+
+    expect(html).toContain('class="print-section inline-row"')
+    expect(html).toContain('display: flex')
+    expect(html).toContain('class="inline-row-item"')
+    expect(html).toContain('左侧标题')
+    expect(html).toContain('右侧标题')
+  })
+
+  it('should apply column proportions', () => {
+    const config: InlineRowConfig = {
+      columns: [1, 2, 1],
+      children: [
+        { type: 'section-title', config: { text: '1' } as SectionTitleConfig },
+        { type: 'section-title', config: { text: '2' } as SectionTitleConfig },
+        { type: 'section-title', config: { text: '3' } as SectionTitleConfig },
+      ],
+    }
+    const html = renderInlineRow(config, {})
+
+    // 1:2:1 比例，总权重 4
+    expect(html).toContain('flex: 1 1 25%')
+    expect(html).toContain('flex: 2 1 50%')
+  })
+
+  it('should apply custom gap', () => {
+    const config: InlineRowConfig = {
+      gap: '16px',
+      children: [
+        { type: 'section-title', config: { text: '测试' } as SectionTitleConfig },
+      ],
+    }
+    const html = renderInlineRow(config, {})
+
+    expect(html).toContain('gap: 16px')
+  })
+
+  it('should render nested info-grid', () => {
+    const config: InlineRowConfig = {
+      children: [
+        {
+          type: 'info-grid',
+          config: {
+            columns: 1,
+            rows: [{ cells: [{ label: '姓名', field: 'name', type: 'text' }] }],
+          } as InfoGridConfig,
+        },
+      ],
+    }
+    const data: FormData = { name: '张三' }
+    const html = renderInlineRow(config, data)
+
+    expect(html).toContain('姓名')
+    expect(html).toContain('张三')
+  })
+})
+
+describe('renderContainer', () => {
+  it('should render container with children', () => {
+    const config: ContainerConfig = {
+      children: [
+        { type: 'section-title', config: { text: '标题1' } as SectionTitleConfig },
+        { type: 'section-title', config: { text: '标题2' } as SectionTitleConfig },
+      ],
+    }
+    const html = renderContainer(config, {})
+
+    expect(html).toContain('class="print-section container-section"')
+    expect(html).toContain('class="container-item"')
+    expect(html).toContain('标题1')
+    expect(html).toContain('标题2')
+  })
+
+  it('should render with column direction (default)', () => {
+    const config: ContainerConfig = {
+      children: [
+        { type: 'section-title', config: { text: '测试' } as SectionTitleConfig },
+      ],
+    }
+    const html = renderContainer(config, {})
+
+    expect(html).toContain('flex-direction: column')
+  })
+
+  it('should render with row direction', () => {
+    const config: ContainerConfig = {
+      direction: 'row',
+      children: [
+        { type: 'section-title', config: { text: '测试' } as SectionTitleConfig },
+      ],
+    }
+    const html = renderContainer(config, {})
+
+    expect(html).toContain('flex-direction: row')
+  })
+
+  it('should apply border when true', () => {
+    const config: ContainerConfig = {
+      border: true,
+      children: [
+        { type: 'section-title', config: { text: '测试' } as SectionTitleConfig },
+      ],
+    }
+    const html = renderContainer(config, {})
+
+    expect(html).toContain('border: 1px solid #000')
+  })
+
+  it('should apply custom border string', () => {
+    const config: ContainerConfig = {
+      border: '2px dashed red',
+      children: [
+        { type: 'section-title', config: { text: '测试' } as SectionTitleConfig },
+      ],
+    }
+    const html = renderContainer(config, {})
+
+    expect(html).toContain('border: 2px dashed red')
+  })
+
+  it('should apply padding', () => {
+    const config: ContainerConfig = {
+      padding: '10px',
+      children: [
+        { type: 'section-title', config: { text: '测试' } as SectionTitleConfig },
+      ],
+    }
+    const html = renderContainer(config, {})
+
+    expect(html).toContain('padding: 10px')
+  })
+
+  it('should apply gap', () => {
+    const config: ContainerConfig = {
+      gap: '20px',
+      children: [
+        { type: 'section-title', config: { text: '测试' } as SectionTitleConfig },
+      ],
+    }
+    const html = renderContainer(config, {})
+
+    expect(html).toContain('gap: 20px')
+  })
+
+  it('should render nested containers', () => {
+    const config: ContainerConfig = {
+      children: [
+        {
+          type: 'container',
+          config: {
+            border: true,
+            children: [
+              { type: 'section-title', config: { text: '嵌套标题' } as SectionTitleConfig },
+            ],
+          } as ContainerConfig,
+        },
+      ],
+    }
+    const html = renderContainer(config, {})
+
+    expect(html).toContain('嵌套标题')
+    // 应该有两个 container-section
+    const containerCount = (html.match(/container-section/g) || []).length
+    expect(containerCount).toBe(2)
+  })
+
+  it('should pass data to nested children', () => {
+    const config: ContainerConfig = {
+      children: [
+        {
+          type: 'info-grid',
+          config: {
+            columns: 1,
+            rows: [{ cells: [{ label: '姓名', field: 'name', type: 'text' }] }],
+          } as InfoGridConfig,
+        },
+      ],
+    }
+    const data: FormData = { name: '李四' }
+    const html = renderContainer(config, data)
+
+    expect(html).toContain('李四')
+  })
+})
+
+describe('Extended Section Renderers - Registry', () => {
+  it('should get section-title renderer', () => {
+    expect(getSectionRenderer('section-title')).toBeDefined()
+  })
+
+  it('should get medical-checkbox-row renderer', () => {
+    expect(getSectionRenderer('medical-checkbox-row')).toBeDefined()
+  })
+
+  it('should get inline-row renderer', () => {
+    expect(getSectionRenderer('inline-row')).toBeDefined()
+  })
+
+  it('should get container renderer', () => {
+    expect(getSectionRenderer('container')).toBeDefined()
+  })
+
+  it('should render section-title via renderSection', () => {
+    const html = renderSection('section-title', { text: '测试标题' } as SectionTitleConfig, {})
+    expect(html).toContain('测试标题')
+  })
+
+  it('should render medical-checkbox-row via renderSection', () => {
+    const html = renderSection(
+      'medical-checkbox-row',
+      { prefixLabel: '测试：' } as MedicalCheckboxRowConfig,
+      {}
+    )
+    expect(html).toContain('测试：')
+  })
+
+  it('should render inline-row via renderSection', () => {
+    const config: InlineRowConfig = {
+      children: [
+        { type: 'section-title', config: { text: '子元素' } as SectionTitleConfig },
+      ],
+    }
+    const html = renderSection('inline-row', config, {})
+    expect(html).toContain('子元素')
+  })
+
+  it('should render container via renderSection', () => {
+    const config: ContainerConfig = {
+      children: [
+        { type: 'section-title', config: { text: '容器内容' } as SectionTitleConfig },
+      ],
+    }
+    const html = renderSection('container', config, {})
+    expect(html).toContain('容器内容')
   })
 })

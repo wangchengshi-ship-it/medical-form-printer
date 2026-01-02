@@ -165,8 +165,11 @@ describe('generateCss', () => {
 
     expect(css).toContain('.print-page.landscape')
     expect(css).toContain('.print-page.a5')
+    expect(css).toContain('.print-page.16k')
     expect(css).toContain('210mm') // A4 width
     expect(css).toContain('297mm') // A4 height
+    expect(css).toContain('195mm') // 16K width
+    expect(css).toContain('270mm') // 16K height
   })
 
   it('should use custom theme values', () => {

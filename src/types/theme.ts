@@ -66,3 +66,53 @@ export interface Theme {
   /** 边框宽度 */
   borderWidth: string
 }
+
+/**
+ * 尺寸倍数配置（用于基准单位系统）
+ * 所有数值都是相对于基准单位的倍数
+ */
+export interface SizeMultipliers {
+  /** 字号倍数 */
+  fontSize: {
+    /** 正文字号倍数 */
+    body: number
+    /** 小字号倍数 */
+    small: number
+    /** 区块标题倍数 */
+    sectionTitle: number
+    /** 医院名称倍数 */
+    hospitalName: number
+    /** 表单标题倍数 */
+    formTitle: number
+  }
+  /** 行高倍数（相对于字号） */
+  lineHeight: number
+  /** 间距倍数 */
+  spacing: {
+    /** 页面边距倍数 */
+    pageMargin: number
+    /** 区块间距倍数 */
+    sectionGap: number
+    /** 单元格水平内边距倍数 */
+    cellPaddingX: number
+    /** 单元格垂直内边距倍数 */
+    cellPaddingY: number
+  }
+  /** 边框宽度倍数 */
+  borderWidth: number
+}
+
+/**
+ * 缩放主题配置
+ * 包含基准单位和倍数配置，用于生成最终的 Theme
+ */
+export interface ScaledThemeConfig {
+  /** 基准单位值（毫米） */
+  baseUnit: number
+  /** 尺寸倍数配置 */
+  multipliers: SizeMultipliers
+  /** 字体配置 */
+  fonts: FontConfig
+  /** 颜色配置 */
+  colors: ColorConfig
+}

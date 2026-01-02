@@ -10,6 +10,7 @@
 - 📑 **PDF 生成** - 基于 Puppeteer 的高保真 PDF 输出
 - 🔗 **PDF 合并** - 多文档合并为单个 PDF
 - 🔌 **可扩展** - 支持自定义区块渲染器
+- 📐 **智能分页** - 自动分页、表头重复、溢出字段处理
 
 ## 安装
 
@@ -138,6 +139,234 @@ const html = renderToHtml(schema, data, {
   }
 })
 ```
+
+## 智能分页
+
+支持基于内容高度的智能分页，适用于长表单和多页文档。
+
+### 页面尺寸预设
+
+```typescript
+import { 
+  PAGE_16K, PAGE_A4, PAGE_A5, 
+  mmToPx, pxToMm,
+  getPageDimensions 
+} from '@medical/print-renderer'
+import type { PageSizePreset } from '@medical/print-renderer'
+
+// 预设尺寸
+// PAGE_16K: 185mm × 260mm（医疗表单常用）
+// PAGE_A4: 210mm × 297mm
+// PAGE_A5: 148mm × 210mm
+
+// 单位转换
+const heightPx = mmToPx(260)  // mm → px
+const heightMm = pxToMm(982)  // px → mm
+
+// 根据名称获取预设
+const pageSize: PageSizePreset = '16K'
+const dimensions = getPageDimensions(pageSize)
+```
+
+### 分页配置
+
+```typescript
+import type { PaginationConfig } from '@medical/print-renderer'
+import { PAGINATION_DEFAULTS } from '@medical/print-renderer'
+
+const paginationConfig: PaginationConfig = {
+  enabled: true,
+  mode: 'auto',                    // 'auto' | 'manual'
+  
+  // 溢出配置
+  overflow: {
+    fields: ['notes'],             // 溢出分页字段
+    firstLineChars: 60,            // 第一页最大字符数
+  },
+  
+  // 显示配置
+  display: {
+    headerOnEachPage: true,        // 每页显示页眉
+    footerOnEachPage: true,        // 每页显示页脚
+    signatureOnEachPage: false,    // 每页显示签名区域
+    repeatTableHeaders: true,      // 续页重复表头
+  },
+  
+  // 页眉配置
+  headerConfig: {
+    showOnEachPage: true,
+    continuationSuffix: '(续)',    // 续页标题后缀
+  },
+  
+  // 页脚配置
+  footerConfig: {
+    showOnEachPage: true,
+    pageNumberFormat: '第 {current} 页 / 共 {total} 页',
+  },
+}
+
+// 使用默认配置常量
+console.log(PAGINATION_DEFAULTS.OVERFLOW_FIRST_LINE_CHARS) // 60
+console.log(PAGINATION_DEFAULTS.DPI)                        // 96
+```
+
+> **注意**: 旧版扁平配置（如 `showHeaderOnEachPage`、`overflowFields`）仍然支持但已废弃，建议迁移到新的嵌套结构。
+
+### 溢出字段处理
+
+长文本字段（如备注）可配置为溢出分页：
+
+```typescript
+import { 
+  getOverflowFirstLine, 
+  getOverflowRest, 
+  hasOverflowContent,
+  PAGINATION_DEFAULTS 
+} from '@medical/print-renderer'
+
+const notes = '这是一段很长的备注文本...'
+
+// 第一页显示内容（默认 60 字符）
+const firstLine = getOverflowFirstLine(notes)
+
+// 自定义最大字符数
+const firstLineCustom = getOverflowFirstLine(notes, 100)
+
+// 续页显示内容
+const rest = getOverflowRest(notes)
+
+// 是否有溢出内容
+if (hasOverflowContent(notes)) {
+  // 需要分页处理
+}
+
+// 使用默认配置常量
+console.log(PAGINATION_DEFAULTS.OVERFLOW_FIRST_LINE_CHARS) // 60
+```
+
+### 分页计算
+
+```typescript
+import { 
+  calculatePageBreaks, 
+  calculateUsableHeight,
+  MEASURABLE_ITEM_TYPES 
+} from '@medical/print-renderer'
+import type { MeasurableItem, MeasurableItemType } from '@medical/print-renderer'
+
+// 可测量内容项类型
+// MEASURABLE_ITEM_TYPES.HEADER       - 页眉
+// MEASURABLE_ITEM_TYPES.SECTION      - 区块
+// MEASURABLE_ITEM_TYPES.TABLE_HEADER - 表头
+// MEASURABLE_ITEM_TYPES.TABLE_ROW    - 表格行
+// MEASURABLE_ITEM_TYPES.SIGNATURE    - 签名区域
+// MEASURABLE_ITEM_TYPES.FOOTER       - 页脚
+
+// 测量后的内容项
+const items: MeasurableItem[] = [
+  { id: 'header-1', type: MEASURABLE_ITEM_TYPES.HEADER, height: 80 },
+  { id: 'table-header-1', type: MEASURABLE_ITEM_TYPES.TABLE_HEADER, height: 40, tableId: 'nursing' },
+  { id: 'row-1', type: MEASURABLE_ITEM_TYPES.TABLE_ROW, height: 30, tableId: 'nursing', dataIndex: 0 },
+  // ...
+]
+
+// 计算分页
+const result = calculatePageBreaks(items, {
+  pageHeight: calculateUsableHeight(PAGE_16K),
+  headerHeight: 60,
+  footerHeight: 40,
+  repeatTableHeaders: true,
+})
+
+// result.pages: 分页后的页面列表
+// result.totalPages: 总页数
+```
+
+### 内容测量器（浏览器环境）
+
+在浏览器环境中测量 DOM 元素的实际渲染高度，用于精确分页计算：
+
+```typescript
+import { 
+  createContentMeasurer,
+  createMeasureContainer,
+  destroyMeasureContainer,
+  measureElementHeight,
+  estimateTextHeight,
+  isBrowserEnvironment,
+  DEFAULT_MEASURE_CONFIG,
+  MEASURE_SELECTORS,
+} from '@medical/print-renderer'
+import type { 
+  MeasureConfig, 
+  MeasureResult,
+  MeasureElementOptions,
+  TextEstimateOptions,
+} from '@medical/print-renderer'
+```
+
+#### Composable 风格 API
+
+```typescript
+// 创建测量器实例
+const measurer = createContentMeasurer({ containerWidth: 624 })
+
+// 测量单个元素
+const height = measurer.measureElement(element)
+
+// 批量测量表格行
+const tableItems = measurer.measureTable(tableElement, { tableId: 'nursing' })
+
+// 测量所有内容
+const allItems = measurer.measureAll(contentContainer)
+
+// 清理资源
+measurer.cleanup()
+```
+
+#### 手动管理测量容器
+
+```typescript
+// 创建隐藏的测量容器
+const container = createMeasureContainer({
+  containerWidth: 624,
+  fontSize: '10pt',
+  lineHeight: 1.8,
+})
+
+// 测量元素高度
+const height = measureElementHeight(element, container)
+
+// 清理
+destroyMeasureContainer(container)
+```
+
+#### 文本高度估算（无 DOM 环境）
+
+```typescript
+// 估算文本高度（用于 Node.js 环境降级）
+const height = estimateTextHeight('这是一段测试文本', {
+  containerWidth: 624,
+  fontSize: 13.33,  // 10pt ≈ 13.33px
+  lineHeight: 1.8,
+  isChinese: true,
+})
+```
+
+#### 环境检测
+
+```typescript
+if (isBrowserEnvironment()) {
+  // 使用 DOM 测量
+  const measurer = createContentMeasurer()
+  // ...
+} else {
+  // 使用文本估算降级方案
+  const height = estimateTextHeight(text)
+}
+```
+
+> **注意**: 内容测量器仅在浏览器环境可用。Node.js 环境需要使用 Puppeteer 进行测量，或使用 `estimateTextHeight` 进行估算。
 
 ## License
 

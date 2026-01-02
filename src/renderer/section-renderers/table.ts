@@ -6,6 +6,7 @@
 import type { TableConfig, FormData } from '../../types/print-schema'
 import type { RenderOptions } from '../../types/options'
 import { formatValue } from '../../formatters'
+import { escapeHtml } from '../../utils'
 
 /**
  * 渲染数据表格区块
@@ -63,16 +64,4 @@ ${body}
 </tbody>
 </table>
 </div>`
-}
-
-/**
- * HTML 转义
- */
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
 }

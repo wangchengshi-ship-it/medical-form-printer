@@ -7,6 +7,7 @@ import type { PrintSchema, FormData } from '../types/print-schema'
 import type { RenderOptions } from '../types/options'
 import { generateCss, mergeTheme } from '../styles'
 import { renderSection } from './section-renderers'
+import { escapeHtml } from '../utils'
 
 /**
  * 渲染页眉
@@ -16,7 +17,7 @@ function renderHeader(schema: PrintSchema): string {
   
   let logoHtml = ''
   if (header.showLogo && header.logoUrl) {
-    logoHtml = `<img src="${header.logoUrl}" alt="Logo" class="header-logo" />`
+    logoHtml = `<img src="${escapeHtml(header.logoUrl)}" alt="Logo" class="header-logo" />`
   }
   
   let departmentHtml = ''
@@ -138,14 +139,5 @@ ${footer}
 </html>`
 }
 
-/**
- * HTML 转义
- */
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
-}
+// Re-export escapeHtml for backward compatibility
+export { escapeHtml }

@@ -11,7 +11,7 @@ import type { PrintSchema, FormData, InfoGridConfig, TableConfig } from '../src/
 
 // 生成器：有效的 PrintSchema
 const printSchemaArb = fc.record({
-  pageSize: fc.constantFrom('A4', 'A5') as fc.Arbitrary<'A4' | 'A5'>,
+  pageSize: fc.constantFrom('A4', 'A5', '16K') as fc.Arbitrary<'A4' | 'A5' | '16K'>,
   orientation: fc.constantFrom('portrait', 'landscape') as fc.Arbitrary<'portrait' | 'landscape'>,
   header: fc.record({
     hospital: fc.string({ minLength: 1, maxLength: 50 }),
@@ -349,7 +349,7 @@ describe('Property: 主题一致性', () => {
           sections: [],
         }
         const html = renderToHtml(schema, {}, {
-          theme: { colors: { primary: customColor } },
+          theme: { colors: { primary: customColor } } as Partial<typeof import('../src/styles').defaultTheme>,
         })
 
         // 自定义颜色应该出现在 CSS 中
