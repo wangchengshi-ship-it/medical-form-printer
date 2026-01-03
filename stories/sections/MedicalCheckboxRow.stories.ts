@@ -1,40 +1,44 @@
 import type { Meta, StoryObj } from '@storybook/html'
 import { renderMedicalCheckboxRow } from '../../src/renderer/section-renderers/medical-checkbox-row'
-import { generateCss, mergeTheme } from '../../src/styles'
+import { generateIsolatedCss, ISOLATION_ROOT_CLASS, CSS_NAMESPACE } from '../../src/styles'
 import type { MedicalCheckboxRowConfig } from '../../src/types/print-schema'
 
-// 包装函数：添加样式
+// 命名空间前缀
+const ns = CSS_NAMESPACE
+
+// 包装函数：添加隔离样式（使用内嵌思源宋体）
 const wrapWithStyles = (html: string): HTMLElement => {
-  const theme = mergeTheme()
-  const css = generateCss(theme)
+  const css = generateIsolatedCss()
   
   const container = document.createElement('div')
   container.innerHTML = `
-    <style>
-      ${css}
-      .medical-checkbox-row {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: baseline;
-        gap: 8px;
-        padding: 4px 0;
-      }
-      .prefix-label { font-weight: 500; }
-      .checkbox-option { margin-right: 12px; }
-      .checkbox-symbol { margin-right: 2px; }
-      .input-value { 
-        border-bottom: 1px solid #000; 
-        min-width: 40px; 
-        display: inline-block;
-        text-align: center;
-      }
-      .input-label { margin-right: 4px; }
-      .extra-label { margin-right: 4px; }
-      .extra-suffix { margin-left: 2px; }
-      .extra-input { margin-left: 8px; }
-    </style>
-    <div class="print-page a4 portrait" style="padding: 20px;">
-      ${html}
+    <div class="${ISOLATION_ROOT_CLASS}">
+      <style>
+        ${css}
+        .medical-checkbox-row {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: baseline;
+          gap: 8px;
+          padding: 4px 0;
+        }
+        .prefix-label { font-weight: 500; }
+        .checkbox-option { margin-right: 12px; }
+        .checkbox-symbol { margin-right: 2px; }
+        .input-value { 
+          border-bottom: 1px solid #000; 
+          min-width: 40px; 
+          display: inline-block;
+          text-align: center;
+        }
+        .input-label { margin-right: 4px; }
+        .extra-label { margin-right: 4px; }
+        .extra-suffix { margin-left: 2px; }
+        .extra-input { margin-left: 8px; }
+      </style>
+      <div class="${ns}-print-page ${ns}-a4 ${ns}-portrait" style="padding: 20px;">
+        ${html}
+      </div>
     </div>
   `
   return container

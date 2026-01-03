@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/html'
-import { renderToHtml } from '../src/renderer'
+import { renderToIsolatedHtml } from '../src/renderer'
 import type { PrintSchema, FormData } from '../src/types/print-schema'
 
 // 产妇入院评估单示例数据
@@ -169,24 +169,27 @@ export default meta
 
 type Story = StoryObj
 
-// 创建渲染函数
+// 创建渲染函数（使用隔离模式，强制使用内嵌思源宋体）
 const createRenderer = (schema: PrintSchema, data: FormData) => {
   return (args: { watermark?: string }) => {
-    const html = renderToHtml(schema, data, {
+    // 使用隔离渲染器，确保字体一致性
+    const html = renderToIsolatedHtml(schema, data, {
       watermark: args.watermark,
     })
     
-    // 创建 iframe 来显示完整的 HTML 文档
-    const iframe = document.createElement('iframe')
-    iframe.style.width = '100%'
-    iframe.style.height = '800px'
-    iframe.style.border = '1px solid #ccc'
-    iframe.style.background = '#fff'
+    // 创建容器并直接插入 HTML
+    const container = document.createElement('div')
+    container.style.width = '100%'
+    container.style.minHeight = '800px'
+    container.style.overflow = 'auto'
+    container.style.background = '#f5f5f5'
+    container.style.padding = '20px'
+    container.style.boxSizing = 'border-box'
     
-    // 使用 srcdoc 设置 iframe 内容
-    iframe.srcdoc = html
+    // 直接设置 innerHTML
+    container.innerHTML = html
     
-    return iframe
+    return container
   }
 }
 

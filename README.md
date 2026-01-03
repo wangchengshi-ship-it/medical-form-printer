@@ -140,6 +140,122 @@ const html = renderToHtml(schema, data, {
 })
 ```
 
+## CSS 隔离模式
+
+为确保渲染输出在任何环境下都使用统一的字体和样式，可使用隔离模式渲染器或 CSS：
+
+### 隔离模式渲染器（推荐）
+
+```typescript
+import { renderToIsolatedHtml, renderToIsolatedFragment } from '@medical/print-renderer'
+import type { IsolatedRenderOptions } from '@medical/print-renderer'
+
+// 渲染选项
+const options: IsolatedRenderOptions = {
+  watermark: '仅供内部使用',
+  watermarkOpacity: 0.1,  // 透明度 0-1，超出范围会被自动 clamp
+  theme: { /* 主题配置（字体配置将被忽略） */ }
+}
+
+// 生成完整的隔离 HTML 文档
+const html = renderToIsolatedHtml(printSchema, formData, options)
+
+// 生成隔离 HTML 片段（用于嵌入现有页面）
+const fragment = renderToIsolatedFragment(printSchema, formData, options)
+document.getElementById('preview').innerHTML = fragment
+```
+
+隔离模式渲染器的特点：
+- 所有内容包裹在 `.mpr-root` 隔离容器中
+- CSS 内嵌在隔离容器内的 `<style>` 标签中
+- 所有类名带 `mpr-` 前缀
+- 字体强制使用内嵌的思源宋体 SC（忽略传入的字体配置）
+
+### 手动使用隔离 CSS
+
+```typescript
+import { generateIsolatedCss, ISOLATION_ROOT_CLASS } from '@medical/print-renderer'
+
+// 生成完整的隔离 CSS
+const css = generateIsolatedCss()
+
+// 包含：
+// 1. @font-face 声明（内嵌 Base64 思源宋体）
+// 2. 字体强制覆盖规则
+// 3. CSS 隔离容器样式（all: initial, contain: layout style, isolation: isolate）
+// 4. 所有组件样式（带 mpr- 前缀）
+// 5. 打印媒体查询
+
+// 使用隔离容器包装内容
+const html = `
+  <style>${css}</style>
+  <div class="${ISOLATION_ROOT_CLASS}">
+    <!-- 渲染内容 -->
+  </div>
+`
+```
+
+### 命名空间工具
+
+```typescript
+import { 
+  CSS_NAMESPACE,           // 'mpr'
+  ISOLATION_ROOT_CLASS,    // 'mpr-root'
+  namespaceClass,          // 添加前缀
+  namespaceClasses,        // 批量添加前缀
+  getNamespacedClass,      // 从映射表获取
+  CLASS_NAME_MAP,          // 类名映射表
+} from '@medical/print-renderer'
+
+// 单个类名
+namespaceClass('print-page')  // 'mpr-print-page'
+
+// 批量转换
+namespaceClasses(['header', 'footer'])  // ['mpr-header', 'mpr-footer']
+
+// 从映射表获取（优先使用预定义映射）
+getNamespacedClass('signature-area')  // 'mpr-signature-area'
+```
+
+> **注意**: 隔离模式会忽略传入的字体配置，始终使用内嵌的思源宋体 SC，确保跨环境一致性。
+
+### 水印工具
+
+提供统一的水印渲染功能，支持自定义类名和透明度：
+
+```typescript
+import { 
+  renderWatermarkHtml,
+  extractWatermarkOptions,
+  clamp,
+  normalizeOpacity,
+} from '@medical/print-renderer'
+import type { WatermarkOptions } from '@medical/print-renderer'
+
+// 渲染水印 HTML
+const watermarkHtml = renderWatermarkHtml({
+  text: '仅供内部使用',
+  opacity: 0.1,
+  className: 'custom-watermark',  // 默认 'watermark'
+})
+// => '<div class="custom-watermark" style="opacity: 0.1">仅供内部使用</div>'
+
+// 从渲染选项中提取水印配置
+const options = { watermark: '草稿', watermarkOpacity: 0.5 }
+const watermarkOptions = extractWatermarkOptions(options, 'mpr-watermark')
+// => { text: '草稿', opacity: 0.5, className: 'mpr-watermark' }
+
+// 数值范围限制
+clamp(1.5, 0, 1)  // => 1
+clamp(-0.5, 0, 1) // => 0
+
+// 透明度安全处理（超出 0-1 范围会被 clamp）
+normalizeOpacity(1.5)   // => 1
+normalizeOpacity(-0.5)  // => 0
+normalizeOpacity(0.5)   // => 0.5
+normalizeOpacity(undefined)  // => undefined
+```
+
 ### 页面尺寸 CSS 常量
 
 用于 CSS 样式生成的页面尺寸字符串常量：
@@ -231,6 +347,34 @@ console.log(PAGINATION_DEFAULTS.DPI)                        // 96
 ```
 
 > **注意**: 旧版扁平配置（如 `showHeaderOnEachPage`、`overflowFields`）仍然支持但已废弃，建议迁移到新的嵌套结构。
+
+### 分页渲染隔离模式
+
+分页渲染器支持隔离模式，确保多页输出在任何环境下都使用统一的字体和样式：
+
+```typescript
+import { renderPaginatedHtml } from '@medical/print-renderer'
+
+// 启用隔离模式
+const html = renderPaginatedHtml({
+  schema: printSchema,
+  data: formData,
+  pageBreakResult: calculatePageBreaks(items, options),
+  measuredItems: items,
+  config: {
+    isolated: true,  // 启用隔离模式
+    showHeaderOnEachPage: true,
+    continuationSuffix: '(续)',
+  },
+})
+```
+
+隔离模式特点：
+- 所有页面包裹在单个 `.mpr-root` 隔离容器中
+- CSS 内嵌在隔离容器内的 `<style>` 标签中
+- 所有类名带 `mpr-` 前缀（如 `mpr-print-page`、`mpr-print-header`）
+- 字体强制使用内嵌的思源宋体 SC
+- 多页共享同一隔离容器，确保样式一致性
 
 ### 溢出字段处理
 

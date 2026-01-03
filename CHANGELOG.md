@@ -9,6 +9,41 @@
 
 ### Added
 
+- 隔离模式 HTML 渲染器
+  - `renderToIsolatedHtml` - 渲染完整的隔离 HTML 文档
+  - `renderToIsolatedFragment` - 渲染隔离 HTML 片段（用于嵌入现有页面）
+  - 所有类名自动添加 `mpr-` 前缀
+  - 字体强制使用内嵌的思源宋体 SC（忽略传入的字体配置）
+  - 支持水印和水印透明度配置
+- 分页渲染器隔离模式支持
+  - `renderPaginatedHtml` 新增 `config.isolated` 选项
+  - 多页共享单个 `.mpr-root` 隔离容器
+  - 所有分页类名支持 `mpr-` 前缀（如 `mpr-print-page`、`mpr-continuation-page`）
+  - `generatePaginationCss` 新增 `isolated` 参数，生成命名空间化的分页 CSS
+- 字体隔离功能
+  - `getFontCss` - 获取完整的字体 CSS（@font-face + 强制覆盖规则）
+  - `getFontDataUrl` - 获取 Base64 编码的字体 Data URL
+  - `generateFontFace` - 生成 @font-face 声明
+  - `generateFontOverrideCss` - 生成字体强制覆盖 CSS
+  - `isFontLoaded` - 同步检查字体加载状态
+  - `waitForFonts` - 异步等待字体加载完成
+  - 内嵌思源宋体 SC（子集化 woff2 格式）
+- Storybook 示例
+  - `FontIsolation/字体隔离` - 字体隔离功能交互式示例
+    - 隔离渲染（完整文档）- 使用 iframe 展示完整 HTML 文档
+    - 隔离渲染（HTML 片段）- 嵌入式片段渲染
+    - 样式隔离测试 - 验证外部样式不影响隔离容器
+    - 带水印的隔离渲染 - 水印功能演示
+    - 字体加载 API - API 使用方法演示
+- CSS 隔离模块
+  - `CSS_NAMESPACE` - CSS 命名空间前缀常量 (`mpr`)
+  - `ISOLATION_ROOT_CLASS` - 隔离容器根类名 (`mpr-root`)
+  - `namespaceClass` - 为类名添加命名空间前缀
+  - `namespaceClasses` - 批量转换类名
+  - `generateIsolationCss` - 生成隔离容器样式（all: initial, contain: layout style, isolation: isolate）
+  - `generateIsolatedCss` - 生成完整的隔离 CSS（字体 + 隔离容器 + 带命名空间的组件样式）
+  - `CLASS_NAME_MAP` - 类名映射表
+  - `getNamespacedClass` - 获取命名空间类名
 - 导出 `DeepPartial<T>` 工具类型，用于深层部分类型定义
 - `SpacingConfig` 类型新增 10 个间距属性，与 `base-unit.ts` 中的 `SIZE_MULTIPLIERS.spacing` 保持一致：
   - `headerMarginBottom` - 页眉底部间距
@@ -24,6 +59,28 @@
 
 ### Changed
 
+- 重构 `src/renderer/templates/index.ts` (v1.2.0)：
+  - 增强类型安全，引入 `PaginatedPageContext` 接口消除非空断言
+  - 页码格式化提取为可配置项 `DEFAULT_PAGE_NUMBER_FORMAT`
+  - 提取公共页脚渲染逻辑
+  - 新增 `formatPageNumber` 工具函数
+- 重构 `src/renderer/templates/index.ts` (v1.1.0)：
+  - 提取 CSS 类名常量，避免魔法字符串
+  - 新增 `hasWatermarkOptions` 类型守卫，改进类型安全
+  - 新增 `renderHeaderContent` 和 `renderBodyWrapper` 公共方法到基类，供子类复用
+  - 减少 `SinglePageRenderer` 和 `PaginatedPageRenderer` 中的重复代码
+- 新增 `src/utils/watermark.ts` 水印工具模块，提供统一的水印渲染功能：
+  - `renderWatermarkHtml` - 渲染水印 HTML，支持自定义类名和透明度
+  - `extractWatermarkOptions` - 从渲染选项中提取水印配置
+  - `clamp` - 数值范围限制工具函数
+  - `normalizeOpacity` - 透明度值安全处理
+- `renderWatermark` 函数添加 `watermarkOpacity` 参数范围验证，超出 0-1 范围的值会被自动 clamp
+- 重构 `isolated-html-renderer.ts`：
+  - 新增 `IsolatedRenderOptions` 接口，扩展 `RenderOptions` 添加水印相关选项
+  - 提取 `RenderContext` 内部类型，统一管理渲染上下文
+  - 新增 `createRenderContext` 函数，消除 `renderToIsolatedHtml` 和 `renderToIsolatedFragment` 之间的重复代码
+  - 新增 `renderIsolatedContent` 函数，统一隔离容器内容渲染逻辑
+  - 简化内部函数命名（移除 `Isolated` 前缀）
 - 签名区域 `.signature-label` 添加 `white-space: nowrap` 样式，防止标签文字换行
 - 移除 `createRenderConfigFromPaginationConfig` 中对已废弃扁平配置字段的回退逻辑，简化内部实现
 - 重构 `css-generator.ts`：将单一大函数拆分为多个职责单一的小函数，提升代码可维护性

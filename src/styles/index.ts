@@ -4,7 +4,7 @@
  */
 
 export { defaultTheme, createScaledTheme, createThemeWithBaseUnit, defaultScaledConfig, defaultFonts, defaultColors, defaultMultipliers } from './default-theme'
-export { generateCss, mergeTheme, type DeepPartial } from './css-generator'
+export { generateCss, generateIsolatedCss, mergeTheme, type DeepPartial } from './css-generator'
 export {
   DEFAULT_BASE_UNIT,
   UNIT_CONVERSIONS,
@@ -26,3 +26,12 @@ export {
   type InlineStyleMap,
 } from './inline-styles'
 export { PAGE_SIZES, type PageSizeKey } from './page-sizes'
+export {
+  CSS_NAMESPACE,
+  ISOLATION_ROOT_CLASS,
+  namespaceClass,
+  namespaceClasses,
+  generateIsolationCss,
+  getNamespacedClass,
+  CLASS_NAME_MAP,
+} from './isolation'

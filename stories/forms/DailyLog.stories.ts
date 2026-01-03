@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/html'
-import { renderToHtml } from '../../src/renderer'
+import { renderToIsolatedHtml } from '../../src/renderer'
 import type { PrintSchema, FormData } from '../../src/types/print-schema'
 
 // 每日记录表 Schema
@@ -185,10 +185,10 @@ export default meta
 
 type Story = StoryObj
 
-// 创建渲染函数
+// 创建渲染函数（使用隔离模式，强制使用内嵌思源宋体）
 const createRenderer = (data: FormData, watermark?: string) => {
   return () => {
-    const html = renderToHtml(dailyLogSchema, data, { watermark })
+    const html = renderToIsolatedHtml(dailyLogSchema, data, { watermark })
     
     const iframe = document.createElement('iframe')
     iframe.style.width = '100%'

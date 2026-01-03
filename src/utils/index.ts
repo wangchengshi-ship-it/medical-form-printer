@@ -3,6 +3,15 @@
  * @module utils
  */
 
+// 水印工具
+export {
+  clamp,
+  normalizeOpacity,
+  renderWatermarkHtml,
+  extractWatermarkOptions,
+} from './watermark'
+export type { WatermarkOptions } from './watermark'
+
 export {
   // HTML 构建器
   HtmlBuilder,

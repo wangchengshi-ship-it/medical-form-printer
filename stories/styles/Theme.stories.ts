@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/html'
-import { defaultTheme, mergeTheme, generateCss, type DeepPartial } from '../../src/styles'
-import { renderToHtml } from '../../src/renderer'
+import { defaultTheme, mergeTheme, type DeepPartial } from '../../src/styles'
+import { renderToIsolatedHtml } from '../../src/renderer'
 import type { PrintSchema, FormData, Theme } from '../../src/types'
 
 const sampleSchema: PrintSchema = {
@@ -76,7 +76,7 @@ type Story = StoryObj
 const createRenderer = (customTheme: DeepPartial<Theme>, label: string) => {
   return () => {
     const theme = mergeTheme(customTheme)
-    const html = renderToHtml(sampleSchema, sampleData, { theme })
+    const html = renderToIsolatedHtml(sampleSchema, sampleData, { theme })
     
     const container = document.createElement('div')
     container.innerHTML = `

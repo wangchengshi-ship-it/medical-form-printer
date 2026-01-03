@@ -4,6 +4,8 @@
  */
 
 export { renderToHtml } from './html-renderer'
+export { renderToIsolatedHtml, renderToIsolatedFragment } from './isolated-html-renderer'
+export type { IsolatedRenderOptions } from './isolated-html-renderer'
 export {
   registerSectionRenderer,
   getSectionRenderer,

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/html'
-import { renderToHtml } from '../../src/renderer'
+import { renderToIsolatedHtml } from '../../src/renderer'
 import {
   renderPaginatedHtml,
   MEASURABLE_ITEM_TYPES,
@@ -182,7 +182,7 @@ export default meta
 
 type Story = StoryObj
 
-// 创建传统渲染函数（使用 renderToHtml）
+// 创建传统渲染函数（使用隔离模式，强制使用内嵌思源宋体）
 const createLegacyRenderer = (recordCount: number) => {
   return () => {
     const data: FormData = {
@@ -194,7 +194,7 @@ const createLegacyRenderer = (recordCount: number) => {
       nurseSignature: '李护士',
     }
     
-    const html = renderToHtml(paginatedSchema, data)
+    const html = renderToIsolatedHtml(paginatedSchema, data)
     
     const iframe = document.createElement('iframe')
     iframe.style.width = '100%'
@@ -398,7 +398,7 @@ export const LandscapeLayout: Story = {
       nurseSignature: '李护士',
     }
     
-    const html = renderToHtml(schema, data)
+    const html = renderToIsolatedHtml(schema, data)
     
     const iframe = document.createElement('iframe')
     iframe.style.width = '100%'

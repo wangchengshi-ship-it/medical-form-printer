@@ -10,7 +10,7 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/html'
-import { renderToHtml } from '../../src/renderer'
+import { renderToIsolatedHtml } from '../../src/renderer'
 import type { PrintSchema, FormData, SignatureConfig } from '../../src/types'
 
 const meta: Meta = {
@@ -23,7 +23,7 @@ export default meta
 type Story = StoryObj
 
 /**
- * 创建签名区域渲染函数
+ * 创建签名区域渲染函数（使用隔离模式，强制使用内嵌思源宋体）
  */
 const createSignatureRenderer = (
   config: SignatureConfig,
@@ -47,7 +47,7 @@ const createSignatureRenderer = (
       ],
     }
 
-    const html = renderToHtml(schema, data)
+    const html = renderToIsolatedHtml(schema, data)
 
     const container = document.createElement('div')
     container.innerHTML = `
@@ -208,7 +208,7 @@ export const InForm: Story = {
       recordDate: '2026-01-03',
     }
 
-    const html = renderToHtml(schema, data)
+    const html = renderToIsolatedHtml(schema, data)
 
     const container = document.createElement('div')
     container.innerHTML = `

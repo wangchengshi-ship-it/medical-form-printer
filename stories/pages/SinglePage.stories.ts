@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/html'
-import { renderToHtml } from '../../src/renderer'
+import { renderToIsolatedHtml } from '../../src/renderer'
 import type { PrintSchema, FormData } from '../../src/types/print-schema'
 
 // 单页表单示例
@@ -87,10 +87,10 @@ export default meta
 
 type Story = StoryObj
 
-// 创建渲染函数
+// 创建渲染函数（使用隔离模式，强制使用内嵌思源宋体）
 const createRenderer = (schema: PrintSchema, data: FormData) => {
   return () => {
-    const html = renderToHtml(schema, data)
+    const html = renderToIsolatedHtml(schema, data)
     
     const iframe = document.createElement('iframe')
     iframe.style.width = '100%'
@@ -123,7 +123,7 @@ export const A4Paper: Story = {
       ...singlePageSchema,
       pageSize: 'A4',
     }
-    const html = renderToHtml(schema, singlePageData)
+    const html = renderToIsolatedHtml(schema, singlePageData)
     
     const iframe = document.createElement('iframe')
     iframe.style.width = '100%'
@@ -144,7 +144,7 @@ export const Landscape: Story = {
       ...singlePageSchema,
       orientation: 'landscape',
     }
-    const html = renderToHtml(schema, singlePageData)
+    const html = renderToIsolatedHtml(schema, singlePageData)
     
     const iframe = document.createElement('iframe')
     iframe.style.width = '100%'

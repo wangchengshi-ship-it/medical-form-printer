@@ -424,6 +424,180 @@ describe('DEFAULT_PAGINATED_RENDER_CONFIG', () => {
     expect(DEFAULT_PAGINATED_RENDER_CONFIG.showSignatureOnEachPage).toBe(false)
     expect(DEFAULT_PAGINATED_RENDER_CONFIG.continuationSuffix).toBe('(续)')
     expect(DEFAULT_PAGINATED_RENDER_CONFIG.pageNumberFormat).toBe('第 {current} 页 / 共 {total} 页')
+    expect(DEFAULT_PAGINATED_RENDER_CONFIG.isolated).toBe(false)
+  })
+})
+
+// ==================== 隔离模式测试 ====================
+
+describe('Isolated Mode', () => {
+  describe('CSS 隔离', () => {
+    it('should wrap content in mpr-root container when isolated', () => {
+      const html = renderPaginatedHtml({
+        schema: createTestSchema(),
+        data: createTestData(),
+        pageBreakResult: createSinglePageResult(),
+        measuredItems: createTestMeasuredItems(),
+        config: { isolated: true },
+      })
+
+      expect(html).toContain('class="mpr-root"')
+    })
+
+    it('should use namespaced class names when isolated', () => {
+      const html = renderPaginatedHtml({
+        schema: createTestSchema(),
+        data: createTestData(),
+        pageBreakResult: createSinglePageResult(),
+        measuredItems: createTestMeasuredItems(),
+        config: { isolated: true },
+      })
+
+      // 检查命名空间类名
+      expect(html).toContain('mpr-print-page')
+      expect(html).toContain('mpr-print-header')
+      expect(html).toContain('mpr-print-footer')
+      expect(html).toContain('mpr-print-content')
+      expect(html).toContain('mpr-hospital-name')
+      expect(html).toContain('mpr-form-title')
+      expect(html).toContain('mpr-page-number')
+    })
+
+    it('should NOT use namespaced class names when not isolated', () => {
+      const html = renderPaginatedHtml({
+        schema: createTestSchema(),
+        data: createTestData(),
+        pageBreakResult: createSinglePageResult(),
+        measuredItems: createTestMeasuredItems(),
+        config: { isolated: false },
+      })
+
+      // 检查普通类名
+      expect(html).toContain('class="print-page')
+      expect(html).toContain('class="print-header"')
+      expect(html).toContain('class="print-footer"')
+      expect(html).not.toContain('mpr-root')
+    })
+
+    it('should embed CSS inside isolation container when isolated', () => {
+      const html = renderPaginatedHtml({
+        schema: createTestSchema(),
+        data: createTestData(),
+        pageBreakResult: createSinglePageResult(),
+        measuredItems: createTestMeasuredItems(),
+        config: { isolated: true },
+      })
+
+      // CSS 应该在 mpr-root 容器内
+      const mprRootIndex = html.indexOf('class="mpr-root"')
+      const styleIndex = html.indexOf('<style>', mprRootIndex)
+      const closingDivIndex = html.lastIndexOf('</div>')
+      
+      expect(styleIndex).toBeGreaterThan(mprRootIndex)
+      expect(styleIndex).toBeLessThan(closingDivIndex)
+    })
+
+    it('should include isolation CSS rules when isolated', () => {
+      const html = renderPaginatedHtml({
+        schema: createTestSchema(),
+        data: createTestData(),
+        pageBreakResult: createSinglePageResult(),
+        measuredItems: createTestMeasuredItems(),
+        config: { isolated: true },
+      })
+
+      // 检查隔离 CSS 规则
+      expect(html).toContain('all: initial')
+      expect(html).toContain('isolation: isolate')
+      expect(html).toContain('contain: strict')
+    })
+  })
+
+  describe('字体嵌入', () => {
+    it('should include embedded font CSS when isolated', () => {
+      const html = renderPaginatedHtml({
+        schema: createTestSchema(),
+        data: createTestData(),
+        pageBreakResult: createSinglePageResult(),
+        measuredItems: createTestMeasuredItems(),
+        config: { isolated: true },
+      })
+
+      // 检查字体 CSS
+      expect(html).toContain('@font-face')
+      expect(html).toContain('Source Han Serif SC')
+      expect(html).toContain('data:font/woff2;base64')
+    })
+
+    it('should NOT include embedded font CSS when not isolated', () => {
+      const html = renderPaginatedHtml({
+        schema: createTestSchema(),
+        data: createTestData(),
+        pageBreakResult: createSinglePageResult(),
+        measuredItems: createTestMeasuredItems(),
+        config: { isolated: false },
+      })
+
+      // 普通模式不应该有 base64 字体
+      expect(html).not.toContain('data:font/woff2;base64')
+    })
+  })
+
+  describe('多页隔离', () => {
+    it('should share same isolation container for multiple pages', () => {
+      const html = renderPaginatedHtml({
+        schema: createTestSchema(),
+        data: createTestData(),
+        pageBreakResult: createMultiPageResult(),
+        measuredItems: createTestMeasuredItems(),
+        config: { isolated: true },
+      })
+
+      // 只应该有一个 mpr-root 容器
+      const mprRootCount = (html.match(/class="mpr-root"/g) || []).length
+      expect(mprRootCount).toBe(1)
+
+      // 但应该有多个页面
+      expect(html).toContain('data-page="1"')
+      expect(html).toContain('data-page="2"')
+    })
+
+    it('should use namespaced continuation-page class when isolated', () => {
+      const html = renderPaginatedHtml({
+        schema: createTestSchema(),
+        data: createTestData(),
+        pageBreakResult: createMultiPageResult(),
+        measuredItems: createTestMeasuredItems(),
+        config: { isolated: true },
+      })
+
+      expect(html).toContain('mpr-continuation-page')
+    })
+  })
+})
+
+// ==================== generatePaginationCss 隔离模式测试 ====================
+
+describe('generatePaginationCss with isolation', () => {
+  it('should generate namespaced CSS when isolated', () => {
+    const css = generatePaginationCss(true)
+
+    expect(css).toContain('.mpr-root')
+    expect(css).toContain('.mpr-print-page')
+    expect(css).toContain('.mpr-continuation-page')
+    expect(css).toContain('.mpr-page-number')
+    expect(css).toContain('.mpr-page-break-before')
+    expect(css).toContain('.mpr-page-break-after')
+    expect(css).toContain('.mpr-no-page-break')
+  })
+
+  it('should NOT generate namespaced CSS when not isolated', () => {
+    const css = generatePaginationCss(false)
+
+    expect(css).toContain('.paginated-document')
+    expect(css).toContain('.print-page')
+    expect(css).not.toContain('.mpr-root')
+    expect(css).not.toContain('.mpr-print-page')
   })
 })
 

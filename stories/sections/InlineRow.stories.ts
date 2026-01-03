@@ -1,25 +1,29 @@
 import type { Meta, StoryObj } from '@storybook/html'
 import { renderInlineRow } from '../../src/renderer/section-renderers/inline-row'
-import { generateCss, mergeTheme } from '../../src/styles'
+import { generateIsolatedCss, ISOLATION_ROOT_CLASS, CSS_NAMESPACE } from '../../src/styles'
 import type { InlineRowConfig, NotesConfig, SectionTitleConfig, CheckboxGridConfig } from '../../src/types/print-schema'
 
-// 包装函数：添加样式
+// 命名空间前缀
+const ns = CSS_NAMESPACE
+
+// 包装函数：添加隔离样式（使用内嵌思源宋体）
 const wrapWithStyles = (html: string): HTMLElement => {
-  const theme = mergeTheme()
-  const css = generateCss(theme)
+  const css = generateIsolatedCss()
   
   const container = document.createElement('div')
   container.innerHTML = `
-    <style>
-      ${css}
-      .inline-row-item { overflow: hidden; }
-      .checkbox-grid-flex { display: flex; flex-wrap: wrap; gap: 8px; }
-      .checkbox-item { display: inline-flex; align-items: center; }
-      .checkbox-symbol { margin-right: 2px; }
-      .prefix-label { font-weight: 500; margin-right: 8px; }
-    </style>
-    <div class="print-page a4 portrait" style="padding: 20px;">
-      ${html}
+    <div class="${ISOLATION_ROOT_CLASS}">
+      <style>
+        ${css}
+        .inline-row-item { overflow: hidden; }
+        .checkbox-grid-flex { display: flex; flex-wrap: wrap; gap: 8px; }
+        .checkbox-item { display: inline-flex; align-items: center; }
+        .checkbox-symbol { margin-right: 2px; }
+        .prefix-label { font-weight: 500; margin-right: 8px; }
+      </style>
+      <div class="${ns}-print-page ${ns}-a4 ${ns}-portrait" style="padding: 20px;">
+        ${html}
+      </div>
     </div>
   `
   return container

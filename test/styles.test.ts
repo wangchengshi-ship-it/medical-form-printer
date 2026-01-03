@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from 'vitest'
 import * as fc from 'fast-check'
-import { defaultTheme, generateCss, mergeTheme } from '../src/styles'
+import { defaultTheme, generateCss, mergeTheme, type DeepPartial } from '../src/styles'
 import type { Theme } from '../src/types/theme'
 
 describe('defaultTheme', () => {
@@ -56,7 +56,7 @@ describe('mergeTheme', () => {
   })
 
   it('should merge custom colors', () => {
-    const customTheme: Partial<Theme> = {
+    const customTheme: DeepPartial<Theme> = {
       colors: { primary: '#ff0000' },
     }
     const result = mergeTheme(customTheme)
@@ -66,7 +66,7 @@ describe('mergeTheme', () => {
   })
 
   it('should merge custom fonts', () => {
-    const customTheme: Partial<Theme> = {
+    const customTheme: DeepPartial<Theme> = {
       fonts: { body: 'Arial, sans-serif' },
     }
     const result = mergeTheme(customTheme)
@@ -76,7 +76,7 @@ describe('mergeTheme', () => {
   })
 
   it('should merge custom spacing', () => {
-    const customTheme: Partial<Theme> = {
+    const customTheme: DeepPartial<Theme> = {
       spacing: { pageMargin: '15mm' },
     }
     const result = mergeTheme(customTheme)
@@ -86,7 +86,7 @@ describe('mergeTheme', () => {
   })
 
   it('should merge custom fontSize', () => {
-    const customTheme: Partial<Theme> = {
+    const customTheme: DeepPartial<Theme> = {
       fontSize: { body: '12pt' },
     }
     const result = mergeTheme(customTheme)
@@ -96,7 +96,7 @@ describe('mergeTheme', () => {
   })
 
   it('should merge custom borderWidth', () => {
-    const customTheme: Partial<Theme> = {
+    const customTheme: DeepPartial<Theme> = {
       borderWidth: '2px',
     }
     const result = mergeTheme(customTheme)

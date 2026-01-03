@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/html'
-import { renderToHtml } from '../../src/renderer'
+import { renderToIsolatedHtml } from '../../src/renderer'
 import type { PrintSchema, FormData } from '../../src/types/print-schema'
 
 // 出院评估单 Schema
@@ -178,10 +178,10 @@ export default meta
 
 type Story = StoryObj
 
-// 创建渲染函数
+// 创建渲染函数（使用隔离模式，强制使用内嵌思源宋体）
 const createRenderer = (data: FormData, watermark?: string) => {
   return () => {
-    const html = renderToHtml(dischargeAssessmentSchema, data, { watermark })
+    const html = renderToIsolatedHtml(dischargeAssessmentSchema, data, { watermark })
     
     const iframe = document.createElement('iframe')
     iframe.style.width = '100%'

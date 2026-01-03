@@ -19,9 +19,23 @@
  */
 
 // 核心渲染
-export { renderToHtml } from './renderer'
+export { renderToHtml, renderToIsolatedHtml, renderToIsolatedFragment } from './renderer'
+export type { IsolatedRenderOptions } from './renderer/isolated-html-renderer'
 export { registerSectionRenderer, getSectionRenderer } from './renderer'
 export type { SectionRenderer } from './renderer'
+
+// 字体模块
+export {
+  FONT_FAMILY,
+  FONT_WEIGHT,
+  FONT_STYLE,
+  getFontDataUrl,
+  getFontCss,
+  isFontLoaded,
+  waitForFonts,
+  FontLoadError,
+} from './fonts'
+export type { FontLoadOptions } from './fonts'
 
 // Strategy 模式
 export {
@@ -103,7 +117,14 @@ export type {
 export {
   defaultTheme,
   generateCss,
+  generateIsolatedCss,
   mergeTheme,
+  // CSS 隔离
+  CSS_NAMESPACE,
+  ISOLATION_ROOT_CLASS,
+  namespaceClass,
+  namespaceClasses,
+  getNamespacedClass,
   // 基准单位系统
   createScaledTheme,
   createThemeWithBaseUnit,
@@ -146,7 +167,13 @@ export {
   each,
   escapeHtml,
   escapeAttr,
+  // 水印工具
+  clamp,
+  normalizeOpacity,
+  renderWatermarkHtml,
+  extractWatermarkOptions,
 } from './utils'
+export type { WatermarkOptions } from './utils'
 
 // 类型
 export type {

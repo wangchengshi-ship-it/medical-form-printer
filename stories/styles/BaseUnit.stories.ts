@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/html'
 import { createThemeWithBaseUnit } from '../../src/styles'
 import { DEFAULT_BASE_UNIT } from '../../src/styles/base-unit'
-import { renderToHtml } from '../../src/renderer'
+import { renderToIsolatedHtml } from '../../src/renderer'
 import type { PrintSchema, FormData } from '../../src/types/print-schema'
 
 const sampleSchema: PrintSchema = {
@@ -58,11 +58,11 @@ export default meta
 
 type Story = StoryObj
 
-// 创建渲染函数
+// 创建渲染函数（使用隔离模式，强制使用内嵌思源宋体）
 const createRenderer = (baseUnit: number, label: string) => {
   return () => {
     const theme = createThemeWithBaseUnit(baseUnit)
-    const html = renderToHtml(sampleSchema, sampleData, { theme })
+    const html = renderToIsolatedHtml(sampleSchema, sampleData, { theme })
     
     const container = document.createElement('div')
     container.innerHTML = `
@@ -125,7 +125,7 @@ export const Comparison: Story = {
     
     sizes.forEach((size, index) => {
       const theme = createThemeWithBaseUnit(size)
-      const html = renderToHtml(sampleSchema, sampleData, { theme })
+      const html = renderToIsolatedHtml(sampleSchema, sampleData, { theme })
       
       const wrapper = document.createElement('div')
       wrapper.style.flex = '1'

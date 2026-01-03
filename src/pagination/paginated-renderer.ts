@@ -40,8 +40,8 @@ import type { RenderOptions } from '../types/options'
 import type { Theme } from '../types/theme'
 import type { PageBreakResult, PageContent, MeasurableItem, PaginationConfig, PageDimensions } from './types'
 import { renderSection } from '../renderer/section-renderers'
-import { generateCss, mergeTheme } from '../styles'
-import { escapeHtml, h, div, header, footer, main } from '../utils/html-builder'
+import { generateCss, generateIsolatedCss, mergeTheme, namespaceClass, ISOLATION_ROOT_CLASS } from '../styles'
+import { escapeHtml, h, div, header, footer, main, renderWatermarkHtml, extractWatermarkOptions } from '../utils'
 import { PAGE_16K } from './page-dimensions'
 
 // ==================== 类型定义 ====================
@@ -62,6 +62,15 @@ export interface PaginatedRenderConfig {
   pageNumberFormat?: string
   /** 页面尺寸配置 */
   pageDimensions?: PageDimensions
+  /**
+   * 是否启用隔离模式
+   * 启用后：
+   * - 所有类名带 mpr- 前缀
+   * - 样式完全隔离，不受外部影响
+   * - 字体强制使用内嵌的思源宋体 SC
+   * @default false
+   */
+  isolated?: boolean
 }
 
 /**
@@ -110,6 +119,53 @@ interface SinglePageContext {
   theme: Theme
 }
 
+// ==================== CSS 类名常量 ====================
+
+/** CSS 类名常量，避免魔法字符串 */
+const CSS_CLASSES = {
+  // 页面结构
+  PRINT_PAGE: 'print-page',
+  CONTINUATION_PAGE: 'continuation-page',
+  PRINT_HEADER: 'print-header',
+  PRINT_FOOTER: 'print-footer',
+  PRINT_CONTENT: 'print-content',
+  
+  // 页眉元素
+  HEADER_LOGO: 'header-logo',
+  HOSPITAL_NAME: 'hospital-name',
+  DEPARTMENT_NAME: 'department-name',
+  FORM_TITLE: 'form-title',
+  
+  // 页脚元素
+  FOOTER_NOTES: 'footer-notes',
+  PAGE_NUMBER: 'page-number',
+  
+  // 表格
+  DATA_TABLE: 'data-table',
+  REPEATED_HEADER: 'repeated-header',
+  SECTION_TITLE: 'section-title',
+  SIGNATURE_AREA: 'signature-area',
+  
+  // 分页控制
+  PAGE_BREAK_BEFORE: 'page-break-before',
+  PAGE_BREAK_AFTER: 'page-break-after',
+  NO_PAGE_BREAK: 'no-page-break',
+  
+  // 水印
+  WATERMARK: 'watermark',
+} as const
+
+/** 非隔离模式的文档根类名 */
+const PAGINATED_DOCUMENT_CLASS = 'paginated-document'
+
+// ==================== 类型定义 ====================
+
+/** 类名生成函数类型 */
+type ClassNameFn = (name: string) => string
+
+/** 水印渲染选项类型 */
+type WatermarkRenderOptions = RenderOptions & { watermark?: string; watermarkOpacity?: number }
+
 // ==================== 默认配置 ====================
 
 /**
@@ -122,6 +178,7 @@ export const DEFAULT_PAGINATED_RENDER_CONFIG: Required<PaginatedRenderConfig> = 
   continuationSuffix: '(续)',
   pageNumberFormat: '第 {current} 页 / 共 {total} 页',
   pageDimensions: PAGE_16K,
+  isolated: false,
 }
 
 // ==================== 辅助函数 ====================
@@ -134,6 +191,18 @@ function mergeConfig(config?: PaginatedRenderConfig): Required<PaginatedRenderCo
     ...DEFAULT_PAGINATED_RENDER_CONFIG,
     ...config,
   }
+}
+
+/** 恒等函数，用于非隔离模式 */
+const identity = (name: string): string => name
+
+/**
+ * 创建类名生成函数
+ * @param isolated - 是否启用隔离模式
+ * @returns 类名生成函数
+ */
+function createClassNameFn(isolated: boolean): ClassNameFn {
+  return isolated ? namespaceClass : identity
 }
 
 /**
@@ -151,14 +220,14 @@ function formatPageNumber(format: string, current: number, total: number): strin
 /**
  * 获取页面 CSS 类名
  */
-function getPageClasses(schema: PrintSchema, pageNumber: number): string {
+function getPageClasses(schema: PrintSchema, pageNumber: number, cls: ClassNameFn): string {
   const classes = [
-    'print-page',
-    schema.pageSize.toLowerCase(),
-    schema.orientation,
+    cls(CSS_CLASSES.PRINT_PAGE),
+    cls(schema.pageSize.toLowerCase()),
+    cls(schema.orientation),
   ]
   if (pageNumber > 1) {
-    classes.push('continuation-page')
+    classes.push(cls(CSS_CLASSES.CONTINUATION_PAGE))
   }
   return classes.join(' ')
 }
@@ -169,7 +238,7 @@ function getPageClasses(schema: PrintSchema, pageNumber: number): string {
  * 渲染页眉
  * @requirements 3.3, 11.4 - 每页页眉渲染，续页添加 "(续)" 标记
  */
-function renderPageHeader(ctx: SinglePageContext): string {
+function renderPageHeader(ctx: SinglePageContext, cls: ClassNameFn): string {
   const { schema, isFirstPage, config } = ctx
   const { header: headerConfig } = schema
 
@@ -184,7 +253,7 @@ function renderPageHeader(ctx: SinglePageContext): string {
   if (headerConfig.showLogo && headerConfig.logoUrl) {
     parts.push(
       h('img')
-        .class('header-logo')
+        .class(cls(CSS_CLASSES.HEADER_LOGO))
         .attr('src', headerConfig.logoUrl)
         .attr('alt', 'Logo')
         .build()
@@ -194,14 +263,14 @@ function renderPageHeader(ctx: SinglePageContext): string {
   // 医院名称
   if (headerConfig.hospital) {
     parts.push(
-      div().class('hospital-name').text(headerConfig.hospital).build()
+      div().class(cls(CSS_CLASSES.HOSPITAL_NAME)).text(headerConfig.hospital).build()
     )
   }
 
   // 科室名称
   if (headerConfig.department) {
     parts.push(
-      div().class('department-name').text(headerConfig.department).build()
+      div().class(cls(CSS_CLASSES.DEPARTMENT_NAME)).text(headerConfig.department).build()
     )
   }
 
@@ -211,11 +280,11 @@ function renderPageHeader(ctx: SinglePageContext): string {
       ? headerConfig.title
       : `${headerConfig.title} ${config.continuationSuffix}`
     parts.push(
-      h('h1').class('form-title').text(titleText).build()
+      h('h1').class(cls(CSS_CLASSES.FORM_TITLE)).text(titleText).build()
     )
   }
 
-  return header().class('print-header').raw(parts.join('\n')).build()
+  return header().class(cls(CSS_CLASSES.PRINT_HEADER)).raw(parts.join('\n')).build()
 }
 
 // ==================== 页脚渲染 ====================
@@ -246,7 +315,7 @@ function renderSignatureArea(ctx: SinglePageContext): string {
  * 渲染页脚
  * @requirements 3.4, 11.3 - 每页页脚渲染，页码显示
  */
-function renderPageFooter(ctx: SinglePageContext): string {
+function renderPageFooter(ctx: SinglePageContext, cls: ClassNameFn): string {
   const { schema, pageNumber, totalPages, isLastPage, config } = ctx
   const { footer: footerConfig } = schema
 
@@ -258,7 +327,7 @@ function renderPageFooter(ctx: SinglePageContext): string {
   // 备注（仅在显示页脚内容时）
   if (showFooterContent && footerConfig?.notes) {
     parts.push(
-      h('span').class('footer-notes').text(footerConfig.notes).build()
+      h('span').class(cls(CSS_CLASSES.FOOTER_NOTES)).text(footerConfig.notes).build()
     )
   }
 
@@ -270,7 +339,7 @@ function renderPageFooter(ctx: SinglePageContext): string {
       totalPages
     )
     parts.push(
-      h('span').class('page-number').text(pageNumberText).build()
+      h('span').class(cls(CSS_CLASSES.PAGE_NUMBER)).text(pageNumberText).build()
     )
   }
 
@@ -278,7 +347,7 @@ function renderPageFooter(ctx: SinglePageContext): string {
     return ''
   }
 
-  return footer().class('print-footer').raw(parts.join('\n')).build()
+  return footer().class(cls(CSS_CLASSES.PRINT_FOOTER)).raw(parts.join('\n')).build()
 }
 
 // ==================== 表头重复渲染 ====================
@@ -289,7 +358,8 @@ function renderPageFooter(ctx: SinglePageContext): string {
  */
 function renderRepeatedHeaders(
   ctx: SinglePageContext,
-  sectionMap: Map<string, PrintSection>
+  sectionMap: Map<string, PrintSection>,
+  cls: ClassNameFn
 ): string {
   const { page, measuredItems } = ctx
 
@@ -311,12 +381,12 @@ function renderRepeatedHeaders(
     // 渲染表格表头（只渲染 thead 部分）
     const tableConfig = tableSection.config as { columns: Array<{ header: string; width?: string }> }
     const headerCells = tableConfig.columns
-      .map(col => h('th').style('width', col.width || null).text(col.header).build())
+      .map((col: { header: string; width?: string }) => h('th').style('width', col.width || null).text(col.header).build())
       .join('')
     
     parts.push(
       h('table')
-        .class('data-table', 'repeated-header')
+        .class(cls(CSS_CLASSES.DATA_TABLE), cls(CSS_CLASSES.REPEATED_HEADER))
         .child(h('thead').child(h('tr').raw(headerCells)))
         .build()
     )
@@ -332,15 +402,17 @@ function renderRepeatedHeaders(
  * @param section - PrintSection 配置
  * @param data - 表单数据
  * @param options - 渲染选项
+ * @param cls - 类名生成函数
  * @returns 渲染后的 HTML 字符串
  */
 function renderSectionWithTitle(
   section: PrintSection,
   data: FormData,
-  options?: RenderOptions
+  options: RenderOptions | undefined,
+  cls: ClassNameFn
 ): string {
   const titleHtml = section.title
-    ? div().class('section-title').text(section.title).build()
+    ? div().class(cls(CSS_CLASSES.SECTION_TITLE)).text(section.title).build()
     : ''
   const content = renderSection(section.type, section.config, data, options)
   return `${titleHtml}${content}`
@@ -354,14 +426,15 @@ type ContentRenderer = (
   item: MeasurableItem,
   sectionMap: Map<string, PrintSection>,
   data: FormData,
-  options?: RenderOptions
+  options: RenderOptions | undefined,
+  cls: ClassNameFn
 ) => string
 
 const contentRenderers: Record<MeasurableItem['type'], ContentRenderer> = {
-  section: (item, sectionMap, data, options) => {
+  section: (item, sectionMap, data, options, cls) => {
     const section = sectionMap.get(item.id)
     if (!section) return ''
-    return renderSectionWithTitle(section, data, options)
+    return renderSectionWithTitle(section, data, options, cls)
   },
   // 表格行渲染需要包裹在表格中，建议使用 renderAllSections 降级处理
   'table-row': () => '',
@@ -383,6 +456,7 @@ const contentRenderers: Record<MeasurableItem['type'], ContentRenderer> = {
  * @param sectionMap - section ID 到 PrintSection 的映射
  * @param data - 表单数据
  * @param options - 渲染选项
+ * @param cls - 类名生成函数
  * @returns 渲染后的 HTML 字符串
  */
 function renderContentItem(
@@ -390,13 +464,14 @@ function renderContentItem(
   itemMap: Map<string, MeasurableItem>,
   sectionMap: Map<string, PrintSection>,
   data: FormData,
-  options?: RenderOptions
+  options: RenderOptions | undefined,
+  cls: ClassNameFn
 ): string {
   const item = itemMap.get(itemId)
   if (!item) return ''
 
   const renderer = contentRenderers[item.type]
-  return renderer ? renderer(item, sectionMap, data, options) : ''
+  return renderer ? renderer(item, sectionMap, data, options, cls) : ''
 }
 
 /**
@@ -404,16 +479,17 @@ function renderContentItem(
  * 当精细分页不可用时，渲染所有 sections（除签名区域外）
  *
  * @param ctx - 单页渲染上下文
+ * @param cls - 类名生成函数
  * @returns 渲染后的 HTML 字符串
  */
-function renderAllSections(ctx: SinglePageContext): string {
+function renderAllSections(ctx: SinglePageContext, cls: ClassNameFn): string {
   const { schema, data, options } = ctx
   const parts: string[] = []
 
   for (const section of schema.sections) {
     // 跳过签名区域（在页脚处理）
     if (section.type === 'signature-area') continue
-    parts.push(renderSectionWithTitle(section, data, options))
+    parts.push(renderSectionWithTitle(section, data, options, cls))
   }
 
   return parts.join('\n')
@@ -425,18 +501,20 @@ function renderAllSections(ctx: SinglePageContext): string {
  *
  * @param ctx - 单页渲染上下文
  * @param sectionMap - section ID 到 PrintSection 的映射
+ * @param cls - 类名生成函数
  * @returns 渲染后的 HTML 字符串
  */
 function renderPageBody(
   ctx: SinglePageContext,
-  sectionMap: Map<string, PrintSection>
+  sectionMap: Map<string, PrintSection>,
+  cls: ClassNameFn
 ): string {
   const { page, data, options, measuredItems } = ctx
 
   const parts: string[] = []
 
   // 渲染重复的表头
-  const repeatedHeaders = renderRepeatedHeaders(ctx, sectionMap)
+  const repeatedHeaders = renderRepeatedHeaders(ctx, sectionMap, cls)
   if (repeatedHeaders) {
     parts.push(repeatedHeaders)
   }
@@ -453,35 +531,30 @@ function renderPageBody(
   if (hasValidItems) {
     // 使用测量项精细渲染
     for (const itemId of page.items) {
-      const content = renderContentItem(itemId, itemMap, sectionMap, data, options)
+      const content = renderContentItem(itemId, itemMap, sectionMap, data, options, cls)
       if (content) {
         parts.push(content)
       }
     }
   } else {
     // 降级：渲染所有 sections
-    parts.push(renderAllSections(ctx))
+    parts.push(renderAllSections(ctx, cls))
   }
 
-  return main().class('print-content').raw(parts.join('\n')).build()
+  return main().class(cls(CSS_CLASSES.PRINT_CONTENT)).raw(parts.join('\n')).build()
 }
 
-// ==================== 水印渲染 ====================
+// ==================== 单页渲染 ====================
 
 /**
  * 渲染水印
  */
-function renderWatermark(options?: RenderOptions & { watermark?: string; watermarkOpacity?: number }): string {
-  if (!options?.watermark) return ''
-  
-  return div()
-    .class('watermark')
-    .style('opacity', options.watermarkOpacity?.toString() || null)
-    .text(options.watermark)
-    .build()
+function renderWatermark(options: WatermarkRenderOptions | undefined, cls: ClassNameFn): string {
+  return renderWatermarkHtml({
+    ...extractWatermarkOptions(options),
+    className: cls(CSS_CLASSES.WATERMARK),
+  })
 }
-
-// ==================== 单页渲染 ====================
 
 /**
  * 渲染单个页面
@@ -489,39 +562,28 @@ function renderWatermark(options?: RenderOptions & { watermark?: string; waterma
  */
 function renderSinglePage(
   ctx: SinglePageContext,
-  sectionMap: Map<string, PrintSection>
+  sectionMap: Map<string, PrintSection>,
+  cls: ClassNameFn
 ): string {
   const { schema, pageNumber, options } = ctx
 
-  const pageClasses = getPageClasses(schema, pageNumber)
+  const pageClasses = getPageClasses(schema, pageNumber, cls)
 
-  const parts: string[] = []
+  // 组装页面各部分
+  const watermark = renderWatermark(options as WatermarkRenderOptions, cls)
+  const headerHtml = renderPageHeader(ctx, cls)
+  const bodyHtml = renderPageBody(ctx, sectionMap, cls)
+  const signatureHtml = renderSignatureArea(ctx)
+  const footerHtml = renderPageFooter(ctx, cls)
 
-  // 水印
-  const watermark = renderWatermark(options as RenderOptions & { watermark?: string; watermarkOpacity?: number })
-  if (watermark) {
-    parts.push(watermark)
-  }
-
-  // 页眉
-  parts.push(renderPageHeader(ctx))
-
-  // 主体内容
-  parts.push(renderPageBody(ctx, sectionMap))
-
-  // 签名区域（在页脚之前）
-  const signature = renderSignatureArea(ctx)
-  if (signature) {
-    parts.push(signature)
-  }
-
-  // 页脚
-  parts.push(renderPageFooter(ctx))
+  const parts = [watermark, headerHtml, bodyHtml, signatureHtml, footerHtml]
+    .filter(Boolean)
+    .join('\n')
 
   return div()
     .class(pageClasses)
     .attr('data-page', pageNumber)
-    .raw(parts.filter(Boolean).join('\n'))
+    .raw(parts)
     .build()
 }
 
@@ -567,13 +629,56 @@ function buildSectionMap(
 }
 
 /**
+ * 生成 HTML 文档结构
+ * @param title - 文档标题
+ * @param css - CSS 样式
+ * @param bodyContent - body 内容
+ * @param isolated - 是否隔离模式
+ */
+function generateHtmlDocument(
+  title: string,
+  css: string,
+  bodyContent: string,
+  isolated: boolean
+): string {
+  const headStyle = isolated ? '' : `\n<style>\n${css}\n</style>`
+  const bodyClass = isolated ? '' : PAGINATED_DOCUMENT_CLASS
+
+  return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${escapeHtml(title)}</title>${headStyle}
+</head>
+<body class="${bodyClass}">
+${bodyContent}
+</body>
+</html>`
+}
+
+/**
+ * 生成隔离模式的 body 内容
+ */
+function generateIsolatedBodyContent(css: string, pagesHtml: string): string {
+  return `<div class="${ISOLATION_ROOT_CLASS}">
+<style>
+${css}
+</style>
+${pagesHtml}
+</div>`
+}
+
+/**
  * 渲染分页 HTML
  * @requirements 11.1, 11.2, 11.3, 11.4, 11.5, 11.6
+ * @requirements 3.1, 4.2 - CSS 隔离和字体嵌入（隔离模式）
  *
  * @param context - 分页渲染上下文
  * @returns 完整的分页 HTML 字符串
  *
  * @example
+ * // 普通模式
  * const html = renderPaginatedHtml({
  *   schema: printSchema,
  *   data: formData,
@@ -581,32 +686,38 @@ function buildSectionMap(
  *   measuredItems: items,
  *   config: { showHeaderOnEachPage: true }
  * })
+ *
+ * @example
+ * // 隔离模式 - 所有类名带 mpr- 前缀，样式完全隔离
+ * const html = renderPaginatedHtml({
+ *   schema: printSchema,
+ *   data: formData,
+ *   pageBreakResult: calculatePageBreaks(items, options),
+ *   measuredItems: items,
+ *   config: { isolated: true }
+ * })
  */
 export function renderPaginatedHtml(context: PaginatedRenderContext): string {
-  const {
-    schema,
-    data,
-    options,
-    pageBreakResult,
-    measuredItems,
-    config,
-  } = context
+  const { schema, data, options, pageBreakResult, measuredItems, config } = context
 
   const mergedConfig = mergeConfig(config)
   const theme = mergeTheme(options?.theme)
-  const css = generateCss(theme)
+  const cls = createClassNameFn(mergedConfig.isolated)
+  
+  // 根据隔离模式选择 CSS 生成方式
+  const baseCss = mergedConfig.isolated
+    ? generateIsolatedCss(options?.theme)
+    : generateCss(theme)
+  const paginationCss = generatePaginationCss(mergedConfig.isolated)
+  const fullCss = `${baseCss}\n${paginationCss}`
 
   // 构建 section 映射
   const sectionMap = buildSectionMap(schema, measuredItems)
 
   // 渲染每一页
-  const pages: string[] = []
   const { totalPages } = pageBreakResult
-
-  for (let i = 0; i < pageBreakResult.pages.length; i++) {
-    const page = pageBreakResult.pages[i]
+  const pages = pageBreakResult.pages.map((page, i) => {
     const pageNumber = i + 1
-
     const pageCtx: SinglePageContext = {
       page,
       pageNumber,
@@ -620,26 +731,17 @@ export function renderPaginatedHtml(context: PaginatedRenderContext): string {
       config: mergedConfig,
       theme,
     }
+    return renderSinglePage(pageCtx, sectionMap, cls)
+  })
 
-    pages.push(renderSinglePage(pageCtx, sectionMap))
-  }
+  const pagesHtml = pages.join('\n')
+  
+  // 根据隔离模式生成不同的 body 内容
+  const bodyContent = mergedConfig.isolated
+    ? generateIsolatedBodyContent(fullCss, pagesHtml)
+    : pagesHtml
 
-  // 生成完整 HTML
-  return `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${escapeHtml(schema.header.title)}</title>
-<style>
-${css}
-${generatePaginationCss()}
-</style>
-</head>
-<body class="paginated-document">
-${pages.join('\n')}
-</body>
-</html>`
+  return generateHtmlDocument(schema.header.title, fullCss, bodyContent, mergedConfig.isolated)
 }
 
 // ==================== CSS 分页规则 ====================
@@ -647,16 +749,32 @@ ${pages.join('\n')}
 /**
  * 生成分页相关的 CSS 规则
  * @requirements 11.5, 11.6 - CSS page-break 规则
+ * @param isolated - 是否启用隔离模式（类名带 mpr- 前缀）
  */
-export function generatePaginationCss(): string {
+export function generatePaginationCss(isolated: boolean = false): string {
+  const cls = createClassNameFn(isolated)
+  const rootSelector = isolated ? `.${ISOLATION_ROOT_CLASS}` : `.${PAGINATED_DOCUMENT_CLASS}`
+  
+  const printPage = cls(CSS_CLASSES.PRINT_PAGE)
+  const continuationPage = cls(CSS_CLASSES.CONTINUATION_PAGE)
+  const formTitle = cls(CSS_CLASSES.FORM_TITLE)
+  const repeatedHeader = cls(CSS_CLASSES.REPEATED_HEADER)
+  const dataTable = cls(CSS_CLASSES.DATA_TABLE)
+  const pageNumber = cls(CSS_CLASSES.PAGE_NUMBER)
+  const sectionTitle = cls(CSS_CLASSES.SECTION_TITLE)
+  const signatureArea = cls(CSS_CLASSES.SIGNATURE_AREA)
+  const pageBreakBefore = cls(CSS_CLASSES.PAGE_BREAK_BEFORE)
+  const pageBreakAfter = cls(CSS_CLASSES.PAGE_BREAK_AFTER)
+  const noPageBreak = cls(CSS_CLASSES.NO_PAGE_BREAK)
+  
   return `
 /* 分页文档样式 */
-.paginated-document {
+${rootSelector} {
   background: #f0f0f0;
 }
 
 /* 每页样式 */
-.paginated-document .print-page {
+${rootSelector} .${printPage} {
   background: white;
   margin: 10mm auto;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -664,73 +782,73 @@ export function generatePaginationCss(): string {
 }
 
 /* 续页标记 */
-.continuation-page .form-title::after {
+.${continuationPage} .${formTitle}::after {
   content: '';
 }
 
 /* 重复的表头样式 */
-.repeated-header {
+.${repeatedHeader} {
   margin-bottom: 0;
   border-bottom: none;
 }
 
-.repeated-header + .data-table {
+.${repeatedHeader} + .${dataTable} {
   border-top: none;
 }
 
-.repeated-header thead {
+.${repeatedHeader} thead {
   background: #f5f5f5;
 }
 
 /* 页码样式 */
-.page-number {
+.${pageNumber} {
   text-align: right;
   flex: 1;
 }
 
 /* 打印样式 */
 @media print {
-  .paginated-document {
+  ${rootSelector} {
     background: white;
   }
 
-  .paginated-document .print-page {
+  ${rootSelector} .${printPage} {
     margin: 0;
     box-shadow: none;
     page-break-after: always;
     page-break-inside: avoid;
   }
 
-  .paginated-document .print-page:last-child {
+  ${rootSelector} .${printPage}:last-child {
     page-break-after: auto;
   }
 
   /* 避免在表格行中间分页 */
-  .data-table tr {
+  .${dataTable} tr {
     page-break-inside: avoid;
   }
 
   /* 避免在区块标题后分页 */
-  .section-title {
+  .${sectionTitle} {
     page-break-after: avoid;
   }
 
   /* 签名区域避免分页 */
-  .signature-area {
+  .${signatureArea} {
     page-break-inside: avoid;
   }
 }
 
 /* 分页控制类 */
-.page-break-before {
+.${pageBreakBefore} {
   page-break-before: always;
 }
 
-.page-break-after {
+.${pageBreakAfter} {
   page-break-after: always;
 }
 
-.no-page-break {
+.${noPageBreak} {
   page-break-inside: avoid;
 }
 `

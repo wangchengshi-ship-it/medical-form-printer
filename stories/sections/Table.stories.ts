@@ -1,18 +1,22 @@
 import type { Meta, StoryObj } from '@storybook/html'
 import { renderTable } from '../../src/renderer/section-renderers/table'
-import { generateCss, mergeTheme } from '../../src/styles'
+import { generateIsolatedCss, ISOLATION_ROOT_CLASS, CSS_NAMESPACE } from '../../src/styles'
 import type { TableConfig } from '../../src/types/print-schema'
 
-// 包装函数：添加样式
+// 命名空间前缀
+const ns = CSS_NAMESPACE
+
+// 包装函数：添加隔离样式（使用内嵌思源宋体）
 const wrapWithStyles = (html: string): HTMLElement => {
-  const theme = mergeTheme()
-  const css = generateCss(theme)
+  const css = generateIsolatedCss()
   
   const container = document.createElement('div')
   container.innerHTML = `
-    <style>${css}</style>
-    <div class="print-page a4 portrait" style="padding: 20px;">
-      ${html}
+    <div class="${ISOLATION_ROOT_CLASS}">
+      <style>${css}</style>
+      <div class="${ns}-print-page ${ns}-a4 ${ns}-portrait" style="padding: 20px;">
+        ${html}
+      </div>
     </div>
   `
   return container

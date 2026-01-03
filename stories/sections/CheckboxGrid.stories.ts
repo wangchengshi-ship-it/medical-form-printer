@@ -1,29 +1,33 @@
 import type { Meta, StoryObj } from '@storybook/html'
 import { renderCheckboxGrid } from '../../src/renderer/section-renderers/checkbox-grid'
-import { generateCss, mergeTheme } from '../../src/styles'
+import { generateIsolatedCss, ISOLATION_ROOT_CLASS, CSS_NAMESPACE } from '../../src/styles'
 import type { CheckboxGridConfig } from '../../src/types/print-schema'
 
-// 包装函数：添加样式
+// 命名空间前缀
+const ns = CSS_NAMESPACE
+
+// 包装函数：添加隔离样式（使用内嵌思源宋体）
 const wrapWithStyles = (html: string): HTMLElement => {
-  const theme = mergeTheme()
-  const css = generateCss(theme)
+  const css = generateIsolatedCss()
   
   const container = document.createElement('div')
   container.innerHTML = `
-    <style>
-      ${css}
-      .checkbox-grid-grid { display: flex; flex-wrap: wrap; }
-      .checkbox-grid-flex { display: flex; flex-wrap: wrap; gap: 12px; }
-      .checkbox-item { display: inline-flex; align-items: center; padding: 4px 0; }
-      .checkbox-symbol { margin-right: 2px; }
-      .checkbox-label { margin-right: 4px; }
-      .input-line { border-bottom: 1px solid #000; min-width: 60px; display: inline-block; text-align: center; }
-      .prefix-label { font-weight: 500; margin-right: 8px; }
-      .text-input-item { display: inline-flex; align-items: center; }
-      .text-input-label { margin-right: 4px; }
-    </style>
-    <div class="print-page a4 portrait" style="padding: 20px;">
-      ${html}
+    <div class="${ISOLATION_ROOT_CLASS}">
+      <style>
+        ${css}
+        .checkbox-grid-grid { display: flex; flex-wrap: wrap; }
+        .checkbox-grid-flex { display: flex; flex-wrap: wrap; gap: 12px; }
+        .checkbox-item { display: inline-flex; align-items: center; padding: 4px 0; }
+        .checkbox-symbol { margin-right: 2px; }
+        .checkbox-label { margin-right: 4px; }
+        .input-line { border-bottom: 1px solid #000; min-width: 60px; display: inline-block; text-align: center; }
+        .prefix-label { font-weight: 500; margin-right: 8px; }
+        .text-input-item { display: inline-flex; align-items: center; }
+        .text-input-label { margin-right: 4px; }
+      </style>
+      <div class="${ns}-print-page ${ns}-a4 ${ns}-portrait" style="padding: 20px;">
+        ${html}
+      </div>
     </div>
   `
   return container
