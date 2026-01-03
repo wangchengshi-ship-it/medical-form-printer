@@ -14,7 +14,7 @@ import { renderSectionTitle, SectionTitleConfig } from '../section-renderers/sec
 export class SectionTitleStrategy implements SectionRenderStrategy {
   readonly type = 'section-title'
 
-  render(config: SectionTitleConfig, _data: FormData, _options?: RenderOptions): string {
-    return renderSectionTitle(config)
+  render(config: SectionTitleConfig, data: FormData, options?: RenderOptions): string {
+    return renderSectionTitle(config, data, options)
   }
 }

@@ -105,9 +105,9 @@ describe('createInlineStyles', () => {
     expect(styles.printPageA5.width).toBe('148mm')
     expect(styles.printPageA5.minHeight).toBe('210mm')
     
-    // 16K
-    expect(styles.printPage16K.width).toBe('195mm')
-    expect(styles.printPage16K.minHeight).toBe('270mm')
+    // 16K (与前端 Vue 组件一致)
+    expect(styles.printPage16K.width).toBe('185mm')
+    expect(styles.printPage16K.minHeight).toBe('260mm')
   })
 
   it('should create correct border styles', () => {
@@ -154,15 +154,15 @@ describe('getPageStyles', () => {
   it('should return 16K portrait styles', () => {
     const pageStyles = getPageStyles('16K', 'portrait', styles)
     
-    expect(pageStyles.width).toBe('195mm')
-    expect(pageStyles.minHeight).toBe('270mm')
+    expect(pageStyles.width).toBe('185mm')
+    expect(pageStyles.minHeight).toBe('260mm')
   })
 
   it('should return 16K landscape styles', () => {
     const pageStyles = getPageStyles('16K', 'landscape', styles)
     
-    expect(pageStyles.width).toBe('270mm')
-    expect(pageStyles.minHeight).toBe('195mm')
+    expect(pageStyles.width).toBe('260mm')
+    expect(pageStyles.minHeight).toBe('185mm')
   })
 
   it('should be case insensitive for page size', () => {

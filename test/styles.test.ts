@@ -4,7 +4,7 @@
 
 import { describe, it, expect } from 'vitest'
 import * as fc from 'fast-check'
-import { defaultTheme, generateCss, mergeTheme, type DeepPartial } from '../src/styles'
+import { defaultTheme, generateCss, generateIsolatedCss, mergeTheme, type DeepPartial } from '../src/styles'
 import type { Theme } from '../src/types/theme'
 
 describe('defaultTheme', () => {
@@ -168,8 +168,31 @@ describe('generateCss', () => {
     expect(css).toContain('.print-page.16k')
     expect(css).toContain('210mm') // A4 width
     expect(css).toContain('297mm') // A4 height
-    expect(css).toContain('195mm') // 16K width
-    expect(css).toContain('270mm') // 16K height
+    expect(css).toContain('185mm') // 16K width (与前端 Vue 组件一致)
+    expect(css).toContain('260mm') // 16K height (与前端 Vue 组件一致)
+  })
+
+  it('should set fixed height for 16K page size to prevent overflow', () => {
+    const css = generateCss(defaultTheme)
+    
+    // 16K 纸张应该使用固定 height 而不是 min-height，防止内容溢出
+    // 正则匹配 .print-page.16k 规则块
+    const rule16k = css.match(/\.print-page\.16k\s*\{[^}]+\}/)?.[0] || ''
+    
+    expect(rule16k).toContain('height: 260mm')
+    expect(rule16k).toContain('min-height: 260mm')
+    expect(rule16k).toContain('overflow: hidden')
+  })
+
+  it('should set fixed height for 16K landscape', () => {
+    const css = generateCss(defaultTheme)
+    
+    // 16K 横向应该宽高互换
+    const rule16kLandscape = css.match(/\.print-page\.16k\.landscape\s*\{[^}]+\}/)?.[0] || ''
+    
+    expect(rule16kLandscape).toContain('width: 260mm')
+    expect(rule16kLandscape).toContain('height: 185mm')
+    expect(rule16kLandscape).toContain('min-height: 185mm')
   })
 
   it('should use custom theme values', () => {
@@ -222,5 +245,41 @@ describe('generateCss', () => {
     requiredClasses.forEach((className) => {
       expect(css).toContain(className)
     })
+  })
+})
+
+
+describe('generateIsolatedCss', () => {
+  it('should generate CSS with mpr- namespace prefix', () => {
+    const css = generateIsolatedCss()
+
+    expect(css).toContain('.mpr-print-page')
+    expect(css).toContain('.mpr-print-header')
+    expect(css).toContain('.mpr-info-grid')
+    expect(css).toContain('.mpr-16k')
+  })
+
+  it('should set fixed height for 16K page size in isolated mode', () => {
+    const css = generateIsolatedCss()
+    
+    // 16K 纸张应该使用固定 height，与前端 Vue 组件保持一致
+    const rule16k = css.match(/\.mpr-print-page\.mpr-16k\s*\{[^}]+\}/)?.[0] || ''
+    
+    expect(rule16k).toContain('height: 260mm')
+    expect(rule16k).toContain('min-height: 260mm')
+    expect(rule16k).toContain('overflow: hidden')
+  })
+
+  it('should override base min-height with 16K specific height', () => {
+    const css = generateIsolatedCss()
+    
+    // 基础 .mpr-print-page 使用 min-height: 297mm (A4)
+    // .mpr-print-page.mpr-16k 必须覆盖为 min-height: 260mm
+    // 否则 16K 页面会被撑到 A4 高度
+    const baseRule = css.match(/\.mpr-print-page\s*\{[^}]+\}/)?.[0] || ''
+    const rule16k = css.match(/\.mpr-print-page\.mpr-16k\s*\{[^}]+\}/)?.[0] || ''
+    
+    expect(baseRule).toContain('min-height: 297mm')
+    expect(rule16k).toContain('min-height: 260mm')
   })
 })

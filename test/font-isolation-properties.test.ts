@@ -641,8 +641,9 @@ describe('Property 5: All Class Names Namespaced', () => {
 
   it('should namespace all section renderer class names', () => {
     // 测试每种区块类型的类名都正确命名空间化
+    // 注意：info-grid 现在使用下划线填空样式，不再使用 label-cell/value-cell
     const sectionTypes = [
-      { type: 'info-grid', expectedClasses: ['mpr-info-grid', 'mpr-label-cell', 'mpr-value-cell'] },
+      { type: 'info-grid', expectedClasses: ['mpr-info-grid', 'mpr-info-row', 'mpr-info-item'] },
       { type: 'table', expectedClasses: ['mpr-data-table'] },
       { type: 'checkbox-grid', expectedClasses: ['mpr-checkbox-grid', 'mpr-checkbox-item'] },
       { type: 'signature-area', expectedClasses: ['mpr-signature-area', 'mpr-signature-item'] },

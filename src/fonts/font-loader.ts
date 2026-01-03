@@ -85,7 +85,8 @@ async function loadFont(): Promise<void> {
     })
 
     const loadedFont = await font.load()
-    document.fonts.add(loadedFont)
+    // FontFaceSet.add() 在某些 TypeScript 版本中类型不完整
+    ;(document.fonts as unknown as { add(font: FontFace): void }).add(loadedFont)
     fontLoaded = true
   } catch (error) {
     throw new FontLoadError(

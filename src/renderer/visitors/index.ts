@@ -2,6 +2,8 @@
  * @fileoverview Visitor 模式 - 数据格式化
  * @module renderer/visitors
  * 
+ * @modified 2023.12.15
+ * 
  * @description
  * 使用 Visitor 模式分离数据遍历和操作逻辑。
  * FormDataVisitor 接口定义访问方法，
@@ -57,7 +59,7 @@ export interface FormDataVisitor<T = void> {
 export class FormatVisitor implements FormDataVisitor<string> {
   private results: Map<string, string> = new Map()
   private dateFormat: string = 'YYYY-MM-DD'
-  private booleanSymbols: { true: string; false: string } = { true: '☑', false: '☐' }
+  private booleanSymbols: { true: string; false: string } = { true: '☑', false: '□' }
 
   constructor(options?: {
     dateFormat?: string

@@ -121,6 +121,7 @@ export const CLASS_NAME_MAP: Record<string, string> = {
   'print-section': namespaceClass('print-section'),
   
   // 页眉元素
+  'header-row': namespaceClass('header-row'),
   'hospital-name': namespaceClass('hospital-name'),
   'department-name': namespaceClass('department-name'),
   'form-title': namespaceClass('form-title'),
@@ -134,7 +135,23 @@ export const CLASS_NAME_MAP: Record<string, string> = {
   'checkbox-item': namespaceClass('checkbox-item'),
   'checkbox-symbol': namespaceClass('checkbox-symbol'),
   
-  // 单元格
+  // 信息网格 - 下划线填空样式
+  'info-row': namespaceClass('info-row'),
+  'info-item': namespaceClass('info-item'),
+  'label': namespaceClass('label'),
+  'field-value': namespaceClass('field-value'),
+  'text': namespaceClass('text'),
+  'line': namespaceClass('line'),
+  'full-width': namespaceClass('full-width'),
+  'custom-width': namespaceClass('custom-width'),
+  'span-2': namespaceClass('span-2'),
+  'checkbox-inline': namespaceClass('checkbox-inline'),
+  'checkbox-text-item': namespaceClass('checkbox-text-item'),
+  'checkbox-text': namespaceClass('checkbox-text'),
+  'textarea-item': namespaceClass('textarea-item'),
+  'textarea-content': namespaceClass('textarea-content'),
+  
+  // 单元格（旧表格样式，保留兼容）
   'label-cell': namespaceClass('label-cell'),
   'value-cell': namespaceClass('value-cell'),
   

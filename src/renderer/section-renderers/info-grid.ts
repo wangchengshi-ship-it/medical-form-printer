@@ -1,15 +1,21 @@
 /**
  * @fileoverview 信息网格区块渲染器
  * @module renderer/section-renderers/info-grid
- * @description 支持多种单元格类型：text, checkbox, date, number, signature,
+ * @version 2.0.0
+ * @author Kiro
+ * @created 2025-11-28
+ * @modified 2026-01-03
+ * 
+ * @description
+ * 渲染纸质表单的下划线填空样式。
+ * 格式：标签：______值______
+ * 支持多种单元格类型：text, checkbox, date, number, signature,
  *              checkbox-inline, compound, textarea, checkbox-text
- * @createtime 2023-11-28
  */
 
 import type { InfoGridConfig, InfoGridCell, FormData } from '../../types/print-schema'
 import type { RenderOptions } from '../../types/options'
 import { cls } from '../../types/options'
-import { formatValue, formatBoolean } from '../../formatters'
 import { escapeHtml } from '../../utils'
 
 /**
@@ -23,161 +29,177 @@ export function renderInfoGrid(
   const rows = config.rows
     .map((row) => {
       const cells = row.cells
-        .map((cell) => {
-          const formattedValue = renderCellValue(cell, data, options)
-          const colspan = cell.span ? ` colspan="${cell.span}"` : ''
-          const widthStyle = cell.width ? ` style="width: ${cell.width}"` : ''
-          
-          return `<td class="${cls('label-cell', options)}"${widthStyle}>${escapeHtml(cell.label)}</td>
-<td class="${cls('value-cell', options)}"${colspan}>${formattedValue}</td>`
-        })
+        .map((cell) => renderCell(cell, data, options))
         .join('\n')
       
-      return `<tr>\n${cells}\n</tr>`
+      return `<div class="${cls('info-row', options)}">\n${cells}\n</div>`
     })
     .join('\n')
   
-  return `<div class="${cls('print-section', options)} ${cls('info-grid', options)}">
-<table>
-${rows}
-</table>
-</div>`
+  return `<div class="${cls('print-section', options)} ${cls('info-grid', options)}">\n${rows}\n</div>`
 }
 
 /**
- * 渲染单元格值
+ * 渲染单个单元格
  */
-function renderCellValue(
+function renderCell(
   cell: InfoGridCell,
   data: FormData,
   options?: RenderOptions
 ): string {
   const type = cell.type || 'text'
   
-  switch (type) {
-    case 'checkbox-inline':
-      return renderCheckboxInline(cell, data, options)
-    case 'compound':
-      return renderCompound(cell, data, options)
-    case 'textarea':
-      return renderTextarea(cell, data, options)
-    case 'checkbox-text':
-      return renderCheckboxText(cell, data, options)
-    default:
-      return renderBasicValue(cell, data, options)
+  // 空标签行：只显示下划线
+  if (cell.label === '') {
+    const value = getCellValue(cell, data)
+    return `<span class="${cls('field-value', options)} ${cls('full-width', options)}">
+<span class="${cls('text', options)}">${escapeHtml(value)}</span>
+<span class="${cls('line', options)}"></span>
+</span>`
   }
-}
-
-/**
- * 渲染基础值（text, checkbox, date, number, signature）
- */
-function renderBasicValue(
-  cell: InfoGridCell,
-  data: FormData,
-  options?: RenderOptions
-): string {
-  const value = data[cell.field]
-  const formattedValue = formatValue(value, cell.type, {
-    emptyPlaceholder: options?.emptyPlaceholder,
-    customFormatters: options?.formatters,
-  })
   
-  const suffix = cell.suffix ? `<span class="${cls('suffix', options)}">${escapeHtml(cell.suffix)}</span>` : ''
-  return escapeHtml(formattedValue) + suffix
+  // checkbox-text 类型：☑/□ + 文本
+  if (type === 'checkbox-text') {
+    return renderCheckboxTextCell(cell, data, options)
+  }
+  
+  // textarea 类型：标签+内容自然换行
+  if (type === 'textarea') {
+    return renderTextareaCell(cell, data, options)
+  }
+  
+  // 普通单元格
+  const spanClass = cell.span === 2 ? ` ${cls('span-2', options)}` : ''
+  const label = `<span class="${cls('label', options)}">${escapeHtml(cell.label)}：</span>`
+  
+  // checkbox-inline 类型
+  if (type === 'checkbox-inline') {
+    const checkboxContent = renderCheckboxInline(cell, data, options)
+    return `<span class="${cls('info-item', options)}${spanClass}">
+${label}
+<span class="${cls('checkbox-inline', options)}">${checkboxContent}</span>
+</span>`
+  }
+  
+  // 其他类型：下划线填空样式
+  const value = getCellValue(cell, data)
+  const widthStyle = cell.width ? ` style="width: ${cell.width}"` : ''
+  const customWidthClass = cell.width ? ` ${cls('custom-width', options)}` : ''
+  
+  return `<span class="${cls('info-item', options)}${spanClass}">
+${label}
+<span class="${cls('field-value', options)}${customWidthClass}"${widthStyle}>
+<span class="${cls('text', options)}">${escapeHtml(value)}</span>
+<span class="${cls('line', options)}"></span>
+</span>
+</span>`
 }
 
 /**
- * 渲染内联勾选框（如 ['无', '有']）
+ * 获取单元格的值
+ */
+function getCellValue(cell: InfoGridCell, data: FormData): string {
+  // 复合字段处理 - 支持两种格式
+  if (cell.type === 'compound' && cell.compoundFormat) {
+    let result = cell.compoundFormat
+    const matches = cell.compoundFormat.match(/\{(\w+)\}/g)
+    if (matches) {
+      matches.forEach((match: string) => {
+        const key = match.slice(1, -1)
+        // 优先使用 compoundFields 映射，否则直接用 key 作为字段名
+        const fieldName = cell.compoundFields?.[key] || key
+        const value = data[fieldName]
+        result = result.replace(match, value !== undefined && value !== null ? String(value) : '')
+      })
+    }
+    return result
+  }
+  
+  const value = data[cell.field]
+  
+  if (value === undefined || value === null || value === '') {
+    return ''
+  }
+  
+  // 日期格式化
+  if (cell.type === 'date' && value) {
+    try {
+      const date = new Date(value as string)
+      return date.toISOString().split('T')[0]
+    } catch {
+      return String(value)
+    }
+  }
+  
+  // 添加后缀
+  if (cell.suffix) {
+    return `${value}${cell.suffix}`
+  }
+  
+  return String(value)
+}
+
+/**
+ * 渲染复选框内联选项
  */
 function renderCheckboxInline(
   cell: InfoGridCell,
   data: FormData,
-  options?: RenderOptions
+  _options?: RenderOptions
 ): string {
   const value = data[cell.field]
-  const inlineOptions = cell.inlineOptions || ['无', '有']
+  const cellOptions = cell.inlineOptions || ['无', '有']
   
-  const items = inlineOptions.map((opt, index) => {
-    // 对于布尔值，index 0 表示 false，index 1 表示 true
-    // 对于字符串值，直接比较
-    let checked = false
+  return cellOptions.map((opt: string, index: number) => {
+    let isChecked = false
+    
+    // 布尔值：index 0 表示 false（无），index 1 表示 true（有）
     if (typeof value === 'boolean') {
-      checked = (index === 1 && value) || (index === 0 && !value)
-    } else if (typeof value === 'string') {
-      checked = value === opt
-    } else if (typeof value === 'number') {
-      checked = value === index
+      isChecked = (index === 1 && value) || (index === 0 && !value)
+    } 
+    // 字符串值：直接比较
+    else if (typeof value === 'string') {
+      isChecked = value === opt
+    }
+    // 数字值：比较索引
+    else if (typeof value === 'number') {
+      isChecked = value === index
     }
     
-    const symbol = formatBoolean(checked)
-    return `<span class="${cls('checkbox-inline-item', options)}"><span class="${cls('checkbox-symbol', options)}">${symbol}</span>${escapeHtml(opt)}</span>`
-  })
-  
-  return `<span class="${cls('checkbox-inline-group', options)}">${items.join('')}</span>`
+    return `${isChecked ? '☑' : '□'}${escapeHtml(opt)}`
+  }).join(' ')
 }
 
 /**
- * 渲染复合字段（如 '{systolic}/{diastolic}mmHg'）
+ * 渲染 checkbox-text 类型（☑/□ + 文本）
  */
-function renderCompound(
-  cell: InfoGridCell,
-  data: FormData,
-  options?: RenderOptions
-): string {
-  if (!cell.compoundFormat || !cell.compoundFields) {
-    return renderBasicValue(cell, data, options)
-  }
-  
-  let result = cell.compoundFormat
-  const placeholder = options?.emptyPlaceholder || '____'
-  
-  for (const [key, fieldName] of Object.entries(cell.compoundFields)) {
-    const value = data[fieldName]
-    const displayValue = value !== undefined && value !== null && value !== ''
-      ? String(value)
-      : placeholder
-    result = result.replace(`{${key}}`, escapeHtml(displayValue))
-  }
-  
-  return result
-}
-
-/**
- * 渲染多行文本
- */
-function renderTextarea(
+function renderCheckboxTextCell(
   cell: InfoGridCell,
   data: FormData,
   options?: RenderOptions
 ): string {
   const value = data[cell.field]
-  const formattedValue = formatValue(value, 'text', {
-    emptyPlaceholder: options?.emptyPlaceholder,
-    customFormatters: options?.formatters,
-  })
+  const isChecked = value === true
+  const symbol = isChecked ? '☑' : '□'
+  const text = cell.text || ''
   
-  const minHeightStyle = cell.minHeight ? ` style="min-height: ${cell.minHeight}"` : ''
-  return `<div class="${cls('textarea-value', options)}"${minHeightStyle}>${escapeHtml(formattedValue)}</div>`
+  return `<div class="${cls('info-item', options)} ${cls('checkbox-text-item', options)}">
+<span class="${cls('checkbox-text', options)}">${symbol}${escapeHtml(text)}</span>
+</div>`
 }
 
 /**
- * 渲染勾选框+文本
+ * 渲染 textarea 类型：标签+内容自然换行
  */
-function renderCheckboxText(
+function renderTextareaCell(
   cell: InfoGridCell,
   data: FormData,
   options?: RenderOptions
 ): string {
-  const checkboxField = cell.checkboxField || cell.field
-  const textField = cell.textField || cell.field + 'Text'
+  const value = getCellValue(cell, data)
   
-  const checked = Boolean(data[checkboxField])
-  const textValue = data[textField]
-  const symbol = formatBoolean(checked)
-  
-  const displayText = textValue !== undefined && textValue !== null && textValue !== ''
-    ? String(textValue)
-    : (options?.emptyPlaceholder || '________')
-  
-  return `<span class="${cls('checkbox-text-group', options)}"><span class="${cls('checkbox-symbol', options)}">${symbol}</span><span class="${cls('text-value', options)}">${escapeHtml(displayText)}</span></span>`
+  return `<div class="${cls('info-item', options)} ${cls('textarea-item', options)}">
+<span class="${cls('label', options)}">${escapeHtml(cell.label)}：</span>
+<span class="${cls('textarea-content', options)}">${escapeHtml(value)}</span>
+</div>`
 }

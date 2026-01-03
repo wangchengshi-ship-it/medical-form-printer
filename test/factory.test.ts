@@ -213,7 +213,7 @@ describe('FormatterFactory', () => {
 
     it('should format boolean value', () => {
       expect(factory.format(true, 'boolean')).toBe('☑')
-      expect(factory.format(false, 'boolean')).toBe('☐')
+      expect(factory.format(false, 'boolean')).toBe('□')
     })
 
     it('should format number value', () => {

@@ -202,7 +202,7 @@ describe('FormatVisitor', () => {
     /**
      * Requirements: 1.3
      * WHEN a FormatVisitor visits a boolean field, THE Test_Suite SHALL verify
-     * the correct symbol (☑/☐) is returned
+     * the correct symbol (☑/□) is returned
      */
     it('should return ☑ for true', () => {
       const field: FieldInfo = { name: 'checked', value: true }
@@ -210,10 +210,10 @@ describe('FormatVisitor', () => {
       expect(result).toBe('☑')
     })
 
-    it('should return ☐ for false', () => {
+    it('should return □ for false', () => {
       const field: FieldInfo = { name: 'checked', value: false }
       const result = visitor.visitBoolean(field)
-      expect(result).toBe('☐')
+      expect(result).toBe('□')
     })
 
     it('should use custom boolean symbols', () => {
@@ -396,7 +396,7 @@ describe('FormatVisitor Property Tests', () => {
         fc.property(booleanFieldInfoArb, (field) => {
           const visitor = new FormatVisitor()
           const result = visitor.visitBoolean(field as FieldInfo)
-          return result === '☑' || result === '☐'
+          return result === '☑' || result === '□'
         }),
         { numRuns: 100 }
       )
@@ -408,7 +408,7 @@ describe('FormatVisitor Property Tests', () => {
           const visitor = new FormatVisitor()
           const field: FieldInfo = { name, value }
           const result = visitor.visitBoolean(field)
-          return value ? result === '☑' : result === '☐'
+          return value ? result === '☑' : result === '□'
         }),
         { numRuns: 100 }
       )

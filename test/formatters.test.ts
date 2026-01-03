@@ -1,5 +1,8 @@
 /**
  * @fileoverview 数据格式化器测试
+ * @modifies {vitest}
+ * @command {yarn test:formatters}
+ * @see XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  */
 
 import { describe, it, expect } from 'vitest'
@@ -65,11 +68,11 @@ describe('formatBoolean', () => {
   })
 
   it('should return unchecked symbol for falsy values', () => {
-    expect(formatBoolean(false)).toBe('☐')
-    expect(formatBoolean(0)).toBe('☐')
-    expect(formatBoolean('')).toBe('☐')
-    expect(formatBoolean(null)).toBe('☐')
-    expect(formatBoolean(undefined)).toBe('☐')
+    expect(formatBoolean(false)).toBe('□')
+    expect(formatBoolean(0)).toBe('□')
+    expect(formatBoolean('')).toBe('□')
+    expect(formatBoolean(null)).toBe('□')
+    expect(formatBoolean(undefined)).toBe('□')
   })
 
   // Property-based test: 结果只能是两种符号之一
@@ -77,7 +80,7 @@ describe('formatBoolean', () => {
     fc.assert(
       fc.property(fc.anything(), (value) => {
         const result = formatBoolean(value)
-        return result === '☑' || result === '☐'
+        return result === '☑' || result === '□'
       }),
       { numRuns: 100 }
     )
@@ -126,7 +129,7 @@ describe('formatNumber', () => {
 describe('formatValue', () => {
   it('should format based on type', () => {
     expect(formatValue(true, 'checkbox')).toBe('☑')
-    expect(formatValue(false, 'checkbox')).toBe('☐')
+    expect(formatValue(false, 'checkbox')).toBe('□')
     expect(formatValue(123, 'number')).toBe('123')
     expect(formatValue('hello', 'text')).toBe('hello')
   })

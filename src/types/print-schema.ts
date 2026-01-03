@@ -84,6 +84,8 @@ export interface InfoGridCell {
   checkboxField?: string
   /** checkbox-text 文本字段名 */
   textField?: string
+  /** checkbox-text 显示文本 */
+  text?: string
 }
 
 /** 信息网格行 */

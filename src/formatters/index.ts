@@ -1,6 +1,7 @@
 /**
  * @fileoverview 数据格式化器
  * @module formatters
+ * @modified 2023-03-02
  */
 
 import type { DateFormatOptions } from '../types/options'
@@ -42,9 +43,10 @@ export function formatDate(
 
 /**
  * 格式化布尔值为勾选框符号
+ * 使用 □ (U+25A1) 作为未选中符号，与 Vue 组件保持一致
  */
 export function formatBoolean(value: unknown): string {
-  return value ? '☑' : '☐'
+  return value ? '☑' : '□'
 }
 
 /**

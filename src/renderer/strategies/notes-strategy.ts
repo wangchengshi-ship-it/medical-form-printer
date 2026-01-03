@@ -14,7 +14,7 @@ import { renderNotes } from '../section-renderers/notes'
 export class NotesStrategy implements SectionRenderStrategy {
   readonly type = 'notes'
 
-  render(config: NotesConfig, _data: FormData, _options?: RenderOptions): string {
-    return renderNotes(config)
+  render(config: NotesConfig, data: FormData, options?: RenderOptions): string {
+    return renderNotes(config, data, options)
   }
 }

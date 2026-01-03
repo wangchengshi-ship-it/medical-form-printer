@@ -22,7 +22,8 @@ export async function renderToPdf(
   options?: PdfOptions
 ): Promise<Buffer> {
   // 动态导入 Puppeteer（可选依赖）
-  let puppeteer: typeof import('puppeteer')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let puppeteer: any
   try {
     puppeteer = await import('puppeteer')
   } catch {

@@ -7,6 +7,30 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **16K 纸张样式重构**：
+  - 同时设置 `height` 和 `min-height` 为相同值，确保页面高度与物理打印尺寸完全匹配
+  - 添加 `overflow: hidden` 防止内容溢出导致分页问题
+  - 添加专用内边距 `padding: 8mm 10mm`，与前端 Vue 组件保持一致
+  - 横向模式同步更新：`padding: 10mm 8mm`，`overflow: hidden`
+- 默认页面边距从 20mm 改为 10mm，与前端 Vue 组件保持一致（Vue 组件使用 `8mm 10mm`，这里使用 10mm 作为基准）
+- `formatBoolean` 函数的未选中符号从 `☐` (U+2610 BALLOT BOX) 改为 `□` (U+25A1 WHITE SQUARE)，与前端 Vue 组件保持一致
+- 改进 `checkbox-inline` 类型的值匹配逻辑：
+  - 布尔值：`index 0` 对应 `false`（如"无"），`index 1` 对应 `true`（如"有"）
+  - 字符串值：直接与选项文本比较
+  - 数字值：与选项索引比较
+  - 移除对特定选项文本（"有"/"是"）的硬编码依赖，改为基于索引的通用逻辑
+- 重构 `info-grid` 区块渲染器 (v2.0.0)：
+  - 从表格布局（`<table>/<tr>/<td>`）改为 flex 布局（`<div>/<span>`）
+  - 新增下划线填空样式，格式：`标签：______值______`
+  - 移除 `formatValue` 依赖，改用内部 `getCellValue` 函数处理值格式化
+  - 新增 `checkbox-text` 类型渲染：`☑/□ + 文本`
+  - 新增 `textarea` 类型渲染：标签+内容自然换行
+  - 新增空标签行支持：只显示下划线
+  - 优化 `checkbox-inline` 渲染逻辑
+  - 优化 `compound` 复合字段处理
+
 ### Added
 
 - 隔离模式 HTML 渲染器

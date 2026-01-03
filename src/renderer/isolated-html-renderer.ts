@@ -70,14 +70,12 @@ function renderHeader(schema: PrintSchema): string {
     ? `<img src="${escapeHtml(header.logoUrl)}" alt="Logo" class="${ns}-header-logo" />`
     : ''
 
-  const department = header.department
-    ? `<div class="${ns}-department-name">${escapeHtml(header.department)}</div>`
-    : ''
-
   return `<header class="${ns}-print-header">
 ${logo}
-<div class="${ns}-hospital-name">${escapeHtml(header.hospital)}</div>
-${department}
+<div class="${ns}-header-row">
+<span class="${ns}-hospital-name">${escapeHtml(header.hospital)}</span>
+<span class="${ns}-department-name">${escapeHtml(header.department || '')}</span>
+</div>
 <h1 class="${ns}-form-title">${escapeHtml(header.title)}</h1>
 </header>`
 }

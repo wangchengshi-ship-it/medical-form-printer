@@ -267,7 +267,7 @@ import type { PageSizeKey } from '@medical/print-renderer'
 // 预设尺寸（CSS 字符串）
 // PAGE_SIZES.A4: { width: '210mm', height: '297mm' }
 // PAGE_SIZES.A5: { width: '148mm', height: '210mm' }
-// PAGE_SIZES['16K']: { width: '195mm', height: '270mm' }
+// PAGE_SIZES['16K']: { width: '185mm', height: '260mm' }
 
 const pageSize: PageSizeKey = 'A4'
 const { width, height } = PAGE_SIZES[pageSize]

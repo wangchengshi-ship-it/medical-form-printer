@@ -28,10 +28,10 @@ export const PAGE_SIZES = {
     width: '148mm',
     height: '210mm',
   },
-  /** 十六开纸张: 195mm × 270mm */
+  /** 十六开纸张: 185mm × 260mm (与前端 Vue 组件一致) */
   '16K': {
-    width: '195mm',
-    height: '270mm',
+    width: '185mm',
+    height: '260mm',
   },
 } as const
 

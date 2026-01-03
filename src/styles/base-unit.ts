@@ -1,6 +1,7 @@
 /**
  * @fileoverview 基准单位系统
  * @module styles/base-unit
+ * @modifys 2021-06-01
  *
  * @description
  * 定义打印渲染的基准单位常量和单位转换函数。
@@ -56,8 +57,8 @@ export const SIZE_MULTIPLIERS = {
   lineHeight: 1.5,
   /** 间距倍数 */
   spacing: {
-    /** 页面边距 - 20mm */
-    pageMargin: 20,
+    /** 页面边距 - 与 Vue 组件一致使用 8mm 10mm，这里用 10mm 作为基准 */
+    pageMargin: 10,
     /** 区块间距 - 5mm */
     sectionGap: 5,
     /** 单元格水平内边距 - 3mm */

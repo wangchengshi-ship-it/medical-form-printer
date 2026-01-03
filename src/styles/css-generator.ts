@@ -170,14 +170,21 @@ function generatePageStyles(theme: Theme, cls: (name: string) => string, config:
   min-height: ${PAGE_SIZES.A5.width};
 }
 
+/* 16K 纸张：固定高度以匹配物理打印尺寸，防止内容溢出导致分页问题 */
 .${cls('print-page')}.${cls('16k')} {
   width: ${PAGE_SIZES['16K'].width};
+  height: ${PAGE_SIZES['16K'].height};
   min-height: ${PAGE_SIZES['16K'].height};
+  padding: 8mm 10mm;
+  overflow: hidden;
 }
 
 .${cls('print-page')}.${cls('16k')}.${cls('landscape')} {
   width: ${PAGE_SIZES['16K'].height};
+  height: ${PAGE_SIZES['16K'].width};
   min-height: ${PAGE_SIZES['16K'].width};
+  padding: 10mm 8mm;
+  overflow: hidden;
 }`
 }
 
@@ -191,25 +198,35 @@ function generateHeaderStyles(theme: Theme, cls: (name: string) => string, confi
 /* 页眉 */
 .${cls('print-header')} {
   text-align: center;
-  margin-bottom: ${theme.spacing.headerMarginBottom};
+  margin-bottom: 3mm;
+  padding-bottom: 2mm;
+}
+
+.${cls('header-row')} {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10.5pt;
+  font-weight: 600;
+  margin-bottom: 1mm;
 }
 
 .${cls('hospital-name')} {
   font-family: ${headingFont};
-  font-size: ${theme.fontSize.hospitalName};
-  font-weight: bold;
+  font-size: 10.5pt;
+  font-weight: 600;
 }
 
 .${cls('department-name')} {
-  font-size: ${theme.fontSize.sectionTitle};
-  margin-top: ${theme.spacing.departmentMarginTop};
+  font-size: 10.5pt;
+  font-weight: 600;
 }
 
 .${cls('form-title')} {
   font-family: ${headingFont};
-  font-size: ${theme.fontSize.formTitle};
+  font-size: 14pt;
   font-weight: bold;
-  margin-top: ${theme.spacing.titleMarginTop};
+  margin: 2mm 0 1mm 0;
+  letter-spacing: 2pt;
 }`
 }
 
@@ -234,34 +251,116 @@ function generateSectionStyles(theme: Theme, cls: (name: string) => string, conf
 }
 
 /**
- * 生成信息网格样式
+ * 生成信息网格样式（下划线填空样式）
+ * @param _theme - 主题配置（预留扩展，当前未使用）
+ * @param cls - 类名生成函数
  */
-function generateInfoGridStyles(theme: Theme, cls: (name: string) => string): string {
+function generateInfoGridStyles(_theme: Theme, cls: (name: string) => string): string {
   return `
-/* 信息网格 */
-.${cls('info-grid')} table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
+/* 信息网格 - 下划线填空样式 */
+.${cls('info-grid')} {
+  margin-bottom: 0.5mm;
 }
 
-.${cls('info-grid')} td {
-  border: ${theme.borderWidth} solid ${theme.colors.border};
-  padding: ${theme.spacing.cellPadding};
-  vertical-align: middle;
+/* 每个 row 是一行，使用 flex 布局 */
+.${cls('info-row')} {
+  display: flex;
+  flex-wrap: nowrap;
+  margin-bottom: 0.5mm;
+  line-height: 1.8;
 }
 
-.${cls('info-grid')} .${cls('label-cell')} {
-  background: ${theme.colors.labelBackground};
+.${cls('info-item')} {
+  display: inline-flex;
+  align-items: baseline;
+  margin-right: 2mm;
   white-space: nowrap;
-  font-weight: normal;
-  width: 15%;
+  flex-shrink: 0;
 }
 
-.${cls('info-grid')} .${cls('value-cell')} {
-  min-width: ${theme.spacing.signatureLineWidth};
+/* 最后一个 item 自动填满剩余空间 */
+.${cls('info-item')}:last-child {
+  flex: 1;
+  margin-right: 0;
+}
+
+.${cls('info-item')}.${cls('span-2')} {
+  margin-right: 3mm;
+}
+
+.${cls('label')} {
+  letter-spacing: 0;
+}
+
+/* 字段值容器：文字 + 下划线 */
+.${cls('field-value')} {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 12mm;
+  vertical-align: bottom;
+  flex: 1;
+}
+
+.${cls('field-value')}.${cls('custom-width')} {
+  min-width: unset;
+  flex: none;
+}
+
+.${cls('field-value')} .${cls('text')} {
+  min-height: 1.1em;
+  display: block;
+  padding: 0 0.5mm;
+}
+
+.${cls('field-value')} .${cls('text')}:empty::before {
+  content: '\\00a0';
+}
+
+.${cls('field-value')} .${cls('line')} {
+  width: 100%;
+  border-bottom: 0.5pt solid #000;
+}
+
+/* 全宽下划线（用于空标签行） */
+.${cls('field-value')}.${cls('full-width')} {
+  width: 100%;
+  flex: 1;
+}
+
+.${cls('checkbox-inline')} {
+  margin-left: 1mm;
+}
+
+/* checkbox-text 类型：☑/□ + 文本 */
+.${cls('checkbox-text-item')} {
+  display: block;
+  width: 100%;
+  white-space: normal;
+  line-height: 1.6;
+}
+
+.${cls('checkbox-text')} {
+  white-space: pre-wrap;
   word-wrap: break-word;
-  overflow-wrap: break-word;
+}
+
+/* textarea 类型：标签+内容自然换行 */
+.${cls('textarea-item')} {
+  display: block;
+  width: 100%;
+  white-space: normal;
+  line-height: 1.6;
+}
+
+.${cls('textarea-item')} .${cls('label')} {
+  white-space: nowrap;
+}
+
+.${cls('textarea-content')} {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  word-break: break-all;
 }`
 }
 
@@ -291,24 +390,65 @@ function generateTableStyles(theme: Theme, cls: (name: string) => string): strin
 
 /**
  * 生成勾选框网格样式
+ * @param _theme - 主题配置（预留扩展，当前未使用）
+ * @param cls - 类名生成函数
  */
-function generateCheckboxStyles(theme: Theme, cls: (name: string) => string): string {
+function generateCheckboxStyles(_theme: Theme, cls: (name: string) => string): string {
   return `
 /* 勾选框网格 */
 .${cls('checkbox-grid')} {
+  margin: 0.5mm 0;
+  line-height: 1.8;
+}
+
+/* 网格布局 */
+.${cls('checkbox-grid')}.${cls('checkbox-grid-grid')} {
+  display: grid;
+  gap: 0.5mm 2mm;
+}
+
+/* 流式布局 */
+.${cls('checkbox-grid')}.${cls('checkbox-grid-flex')} {
   display: flex;
   flex-wrap: wrap;
+  gap: 0.5mm 1.5mm;
 }
 
 .${cls('checkbox-item')} {
   display: flex;
-  align-items: center;
-  gap: ${theme.spacing.xs};
-  padding: 1mm ${theme.spacing.sm};
+  align-items: baseline;
+  gap: 0.3mm;
+  white-space: nowrap;
+}
+
+.${cls('prefix-label')} {
+  flex-shrink: 0;
 }
 
 .${cls('checkbox-symbol')} {
-  font-family: "Segoe UI Symbol", "Apple Symbols", sans-serif;
+  font-family: "SimSun", "宋体", serif;
+  font-size: 10pt;
+}
+
+.${cls('checkbox-label')} {
+  flex-shrink: 0;
+}
+
+.${cls('text-input-item')} {
+  display: flex;
+  align-items: baseline;
+}
+
+.${cls('text-input-label')} {
+  flex-shrink: 0;
+}
+
+.${cls('input-line')} {
+  min-width: 15mm;
+  border-bottom: 0.5pt solid #000;
+  padding: 0 1mm;
+  margin-left: 1mm;
+  text-align: center;
 }`
 }
 

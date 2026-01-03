@@ -47,37 +47,33 @@ describe('renderInfoGrid', () => {
     ],
   }
 
-  it('should render info grid with data', () => {
+  it('should render info grid with underline style', () => {
     const data: FormData = { name: '张三', age: 30 }
     const html = renderInfoGrid(basicConfig, data)
 
+    // 新的下划线填空样式
     expect(html).toContain('class="print-section info-grid"')
+    expect(html).toContain('class="info-row"')
+    expect(html).toContain('class="info-item"')
+    expect(html).toContain('class="label"')
+    expect(html).toContain('class="field-value"')
+    expect(html).toContain('class="text"')
+    expect(html).toContain('class="line"')
     expect(html).toContain('姓名')
     expect(html).toContain('张三')
     expect(html).toContain('年龄')
     expect(html).toContain('30')
   })
 
-  it('should render checkbox type as symbol', () => {
-    const config: InfoGridConfig = {
-      columns: 1,
-      rows: [{ cells: [{ label: '已确认', field: 'confirmed', type: 'checkbox' }] }],
-    }
-    const data = { confirmed: true }
-    const html = renderInfoGrid(config, data)
-
-    expect(html).toContain('☑')
-  })
-
-  it('should handle colspan', () => {
+  it('should render span-2 class for colspan', () => {
     const config: InfoGridConfig = {
       columns: 2,
-      rows: [{ cells: [{ label: '备注', field: 'notes', type: 'text', span: 3 }] }],
+      rows: [{ cells: [{ label: '备注', field: 'notes', type: 'text', span: 2 }] }],
     }
     const data = { notes: '测试备注' }
     const html = renderInfoGrid(config, data)
 
-    expect(html).toContain('colspan="3"')
+    expect(html).toContain('span-2')
   })
 
   it('should escape HTML in labels and values', () => {
@@ -93,11 +89,15 @@ describe('renderInfoGrid', () => {
     expect(html).not.toContain('<script>')
   })
 
-  it('should use empty placeholder', () => {
-    const data: FormData = { name: '张三' } // age is missing
-    const html = renderInfoGrid(basicConfig, data, { emptyPlaceholder: '—' })
+  it('should render empty label as full-width underline', () => {
+    const config: InfoGridConfig = {
+      columns: 1,
+      rows: [{ cells: [{ label: '', field: 'content', type: 'text' }] }],
+    }
+    const data = { content: '内容' }
+    const html = renderInfoGrid(config, data)
 
-    expect(html).toContain('—')
+    expect(html).toContain('full-width')
   })
 
   // Property-based test: 所有标签都应出现在输出中
@@ -242,7 +242,7 @@ describe('renderCheckboxGrid', () => {
 
     // 应该有一个选中和两个未选中
     const checkedCount = (html.match(/☑/g) || []).length
-    const uncheckedCount = (html.match(/☐/g) || []).length
+    const uncheckedCount = (html.match(/□/g) || []).length
 
     expect(checkedCount).toBe(1)
     expect(uncheckedCount).toBe(2)
@@ -333,7 +333,7 @@ describe('renderSignatureArea', () => {
 describe('renderNotes', () => {
   it('should render notes content', () => {
     const config: NotesConfig = { content: '注意事项：请按时服药' }
-    const html = renderNotes(config)
+    const html = renderNotes(config, {})
 
     expect(html).toContain('class="print-section notes-section"')
     expect(html).toContain('注意事项：请按时服药')
@@ -341,14 +341,14 @@ describe('renderNotes', () => {
 
   it('should add bordered class when showBorder is true', () => {
     const config: NotesConfig = { content: '备注', showBorder: true }
-    const html = renderNotes(config)
+    const html = renderNotes(config, {})
 
     expect(html).toContain('bordered')
   })
 
   it('should escape HTML in content', () => {
     const config: NotesConfig = { content: '<script>alert(1)</script>' }
-    const html = renderNotes(config)
+    const html = renderNotes(config, {})
 
     expect(html).toContain('&lt;script&gt;')
     expect(html).not.toContain('<script>alert')
@@ -439,7 +439,7 @@ describe('Section Renderer Registry', () => {
 describe('renderSectionTitle', () => {
   it('should render section title with default alignment', () => {
     const config: SectionTitleConfig = { text: '基本信息' }
-    const html = renderSectionTitle(config)
+    const html = renderSectionTitle(config, {})
 
     expect(html).toContain('class="print-section section-title"')
     expect(html).toContain('基本信息')
@@ -449,35 +449,35 @@ describe('renderSectionTitle', () => {
 
   it('should render center aligned title', () => {
     const config: SectionTitleConfig = { text: '居中标题', align: 'center' }
-    const html = renderSectionTitle(config)
+    const html = renderSectionTitle(config, {})
 
     expect(html).toContain('text-align: center')
   })
 
   it('should render right aligned title', () => {
     const config: SectionTitleConfig = { text: '右对齐标题', align: 'right' }
-    const html = renderSectionTitle(config)
+    const html = renderSectionTitle(config, {})
 
     expect(html).toContain('text-align: right')
   })
 
   it('should apply custom font size', () => {
     const config: SectionTitleConfig = { text: '大标题', fontSize: '18px' }
-    const html = renderSectionTitle(config)
+    const html = renderSectionTitle(config, {})
 
     expect(html).toContain('font-size: 18px')
   })
 
   it('should render non-bold title when bold is false', () => {
     const config: SectionTitleConfig = { text: '普通标题', bold: false }
-    const html = renderSectionTitle(config)
+    const html = renderSectionTitle(config, {})
 
     expect(html).not.toContain('font-weight: bold')
   })
 
   it('should escape HTML in title text', () => {
     const config: SectionTitleConfig = { text: '<script>alert(1)</script>' }
-    const html = renderSectionTitle(config)
+    const html = renderSectionTitle(config, {})
 
     expect(html).toContain('&lt;script&gt;')
     expect(html).not.toContain('<script>alert')
@@ -509,7 +509,7 @@ describe('renderMedicalCheckboxRow', () => {
 
     expect(html).toContain('class="options-group"')
     expect(html).toContain('☑')
-    expect(html).toContain('☐')
+    expect(html).toContain('□')
     expect(html).toContain('有')
     expect(html).toContain('无')
   })
@@ -599,13 +599,12 @@ describe('renderInfoGrid - Extended Types', () => {
     const data: FormData = { hasAllergy: true }
     const html = renderInfoGrid(config, data)
 
-    expect(html).toContain('class="checkbox-inline-group"')
-    expect(html).toContain('class="checkbox-inline-item"')
+    expect(html).toContain('class="checkbox-inline"')
     expect(html).toContain('无')
     expect(html).toContain('有')
     // true 应该选中 '有'（index 1）
     expect(html).toContain('☑')
-    expect(html).toContain('☐')
+    expect(html).toContain('□')
   })
 
   it('should render checkbox-inline with string value', () => {
@@ -650,27 +649,6 @@ describe('renderInfoGrid - Extended Types', () => {
     expect(html).toContain('120/80mmHg')
   })
 
-  it('should render compound type with placeholder for missing values', () => {
-    const config: InfoGridConfig = {
-      columns: 1,
-      rows: [{
-        cells: [{
-          label: '血压',
-          field: 'bloodPressure',
-          type: 'compound',
-          compoundFormat: '{systolic}/{diastolic}mmHg',
-          compoundFields: {
-            systolic: 'bp_systolic',
-            diastolic: 'bp_diastolic',
-          },
-        }],
-      }],
-    }
-    const html = renderInfoGrid(config, {}, { emptyPlaceholder: '—' })
-
-    expect(html).toContain('—/—mmHg')
-  })
-
   it('should render textarea type', () => {
     const config: InfoGridConfig = {
       columns: 1,
@@ -679,15 +657,14 @@ describe('renderInfoGrid - Extended Types', () => {
           label: '病史',
           field: 'medicalHistory',
           type: 'textarea',
-          minHeight: '50mm',
         }],
       }],
     }
     const data: FormData = { medicalHistory: '无特殊病史' }
     const html = renderInfoGrid(config, data)
 
-    expect(html).toContain('class="textarea-value"')
-    expect(html).toContain('style="min-height: 50mm"')
+    expect(html).toContain('textarea-item')
+    expect(html).toContain('textarea-content')
     expect(html).toContain('无特殊病史')
   })
 
@@ -699,17 +676,17 @@ describe('renderInfoGrid - Extended Types', () => {
           label: '其他',
           field: 'other',
           type: 'checkbox-text',
-          checkboxField: 'hasOther',
-          textField: 'otherDetail',
+          text: '其他说明',
         }],
       }],
     }
-    const data: FormData = { hasOther: true, otherDetail: '自定义内容' }
+    const data: FormData = { other: true }
     const html = renderInfoGrid(config, data)
 
-    expect(html).toContain('class="checkbox-text-group"')
+    expect(html).toContain('checkbox-text-item')
+    expect(html).toContain('checkbox-text')
     expect(html).toContain('☑')
-    expect(html).toContain('自定义内容')
+    expect(html).toContain('其他说明')
   })
 
   it('should render suffix', () => {
@@ -727,7 +704,6 @@ describe('renderInfoGrid - Extended Types', () => {
     const data: FormData = { temperature: 36.5 }
     const html = renderInfoGrid(config, data)
 
-    expect(html).toContain('class="suffix"')
     expect(html).toContain('℃')
     expect(html).toContain('36.5')
   })
@@ -747,6 +723,7 @@ describe('renderInfoGrid - Extended Types', () => {
     const html = renderInfoGrid(config, { name: '张三' })
 
     expect(html).toContain('style="width: 150px"')
+    expect(html).toContain('custom-width')
   })
 })
 
@@ -765,7 +742,7 @@ describe('renderCheckboxGrid - Items Mode', () => {
     expect(html).toContain('发热')
     expect(html).toContain('咳嗽')
     expect(html).toContain('☑')
-    expect(html).toContain('☐')
+    expect(html).toContain('□')
   })
 
   it('should render items mode with text-input type', () => {

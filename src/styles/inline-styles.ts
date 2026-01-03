@@ -131,12 +131,12 @@ export function createInlineStyles(theme: Theme = defaultTheme): InlineStyleMap 
       minHeight: '148mm',
     },
     printPage16K: {
-      width: '195mm',
-      minHeight: '270mm',
+      width: '185mm',
+      minHeight: '260mm',
     },
     printPage16KLandscape: {
-      width: '270mm',
-      minHeight: '195mm',
+      width: '260mm',
+      minHeight: '185mm',
     },
     
     // 页眉
