@@ -1,5 +1,5 @@
 /**
- * @fileoverview 区块渲染器注册表
+ * @fileoverview Section renderer registry
  * @module renderer/section-renderers
  * @modified 2024-04-06
  */
@@ -17,14 +17,14 @@ import { renderMedicalCheckboxRow } from './medical-checkbox-row'
 import { renderInlineRow } from './inline-row'
 import { renderContainer } from './container'
 
-/** 区块渲染函数类型 */
+/** Section renderer function type */
 export type SectionRenderer = (
   config: SectionConfig,
   data: FormData,
   options?: RenderOptions
 ) => string
 
-/** 区块渲染器注册表 */
+/** Section renderer registry */
 const renderers: Record<SectionType, SectionRenderer> = {
   'info-grid': renderInfoGrid as SectionRenderer,
   'table': renderTable as SectionRenderer,
@@ -38,11 +38,11 @@ const renderers: Record<SectionType, SectionRenderer> = {
   'container': renderContainer as SectionRenderer,
 }
 
-/** 自定义渲染器存储 */
+/** Custom renderer storage */
 const customRenderers: Record<string, SectionRenderer> = {}
 
 /**
- * 注册自定义区块渲染器
+ * Register custom section renderer
  */
 export function registerSectionRenderer(
   type: string,
@@ -52,14 +52,14 @@ export function registerSectionRenderer(
 }
 
 /**
- * 获取区块渲染器
+ * Get section renderer
  */
 export function getSectionRenderer(type: string): SectionRenderer | undefined {
   return customRenderers[type] || renderers[type as SectionType]
 }
 
 /**
- * 渲染区块
+ * Render section
  */
 export function renderSection(
   type: string,

@@ -1,10 +1,10 @@
 /**
- * @fileoverview 渲染器工厂模块
+ * @fileoverview Renderer factory module
  * @module renderer/factory
  * 
  * @description
- * 使用 Factory 模式创建渲染器和格式化器实例。
- * 支持注册自定义渲染器和格式化器。
+ * Uses Factory pattern to create renderer and formatter instances.
+ * Supports registering custom renderers and formatters.
  */
 
 export { SectionRendererFactory, getDefaultSectionRendererFactory } from './section-renderer-factory'

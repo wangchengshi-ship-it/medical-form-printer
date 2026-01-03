@@ -1,84 +1,84 @@
 /**
- * @fileoverview 水印渲染工具函数
+ * @fileoverview Watermark rendering utility functions
  * @module utils/watermark
  * @version 1.0.0
  * @author Kiro
  * @created 2026-01-03
  *
  * @description
- * 提供统一的水印渲染功能，确保所有渲染器使用一致的水印实现。
- * 支持透明度设置和边界检查。
+ * Provides unified watermark rendering functionality, ensuring all renderers use consistent watermark implementation.
+ * Supports opacity settings and boundary checking.
  *
  * @usedBy
- * - ../renderer/isolated-html-renderer.ts - 隔离模式渲染器
- * - ../pagination/paginated-renderer.ts - 分页渲染器
- * - ../renderer/templates/index.ts - 模板渲染器基类
+ * - ../renderer/isolated-html-renderer.ts - Isolated mode renderer
+ * - ../pagination/paginated-renderer.ts - Paginated renderer
+ * - ../renderer/templates/index.ts - Template renderer base class
  */
 
 import { escapeHtml } from './html-builder'
 
-// ==================== 类型定义 ====================
+// ==================== Type Definitions ====================
 
 /**
- * 水印配置选项
+ * Watermark configuration options
  */
 export interface WatermarkOptions {
-  /** 水印文本 */
+  /** Watermark text */
   text?: string
-  /** 透明度 (0-1)，超出范围会被 clamp */
+  /** Opacity (0-1), values outside range will be clamped */
   opacity?: number
-  /** CSS 类名，默认 'watermark' */
+  /** CSS class name, defaults to 'watermark' */
   className?: string
 }
 
-// ==================== 工具函数 ====================
+// ==================== Utility Functions ====================
 
 /**
- * 将数值限制在指定范围内
- * @param value - 输入值
- * @param min - 最小值
- * @param max - 最大值
- * @returns 限制后的值
+ * Clamp a value within specified range
+ * @param value - Input value
+ * @param min - Minimum value
+ * @param max - Maximum value
+ * @returns Clamped value
  */
 export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value))
 }
 
 /**
- * 安全处理透明度值
- * @param opacity - 原始透明度值
- * @returns 处理后的透明度值（0-1 范围内），undefined 表示不设置
+ * Safely handle opacity value
+ * @param opacity - Original opacity value
+ * @returns Processed opacity value (0-1 range), undefined means no setting
  */
 export function normalizeOpacity(opacity?: number): number | undefined {
   if (opacity === undefined) return undefined
   return clamp(opacity, 0, 1)
 }
 
-// ==================== 核心渲染函数 ====================
+// ==================== Core Rendering Functions ====================
 
 /**
- * 渲染水印 HTML
+ * Render watermark HTML
  *
- * @param options - 水印配置选项
- * @returns 水印 HTML 字符串，无水印时返回空字符串
+ * @param options - Watermark configuration options
+ * @returns Watermark HTML string, returns empty string when no watermark
  *
  * @example
  * ```typescript
- * // 基础用法
- * renderWatermarkHtml({ text: '仅供内部使用' })
- * // => '<div class="watermark">仅供内部使用</div>'
+ * // Basic usage
+ * renderWatermarkHtml({ text: 'Internal Use Only' })
+ * // => '<div class="watermark">Internal Use Only</div>'
  *
- * // 带透明度
- * renderWatermarkHtml({ text: '草稿', opacity: 0.5 })
- * // => '<div class="watermark" style="opacity: 0.5">草稿</div>'
+ * // With opacity
+ * renderWatermarkHtml({ text: 'Draft', opacity: 0.5 })
+ * // => '<div class="watermark" style="opacity: 0.5">Draft</div>'
  *
- * // 自定义类名（用于命名空间）
- * renderWatermarkHtml({ text: '草稿', className: 'mpr-watermark' })
- * // => '<div class="mpr-watermark">草稿</div>'
+ * // Custom class name (for namespacing)
+ * renderWatermarkHtml({ text: 'Draft', className: 'mpr-watermark' })
+ * // => '<div class="mpr-watermark">Draft</div>'
  *
- * // 透明度边界处理
- * renderWatermarkHtml({ text: '测试', opacity: 1.5 })
- * // => '<div class="watermark" style="opacity: 1">测试</div>'
+ * // Opacity boundary handling
+ * renderWatermarkHtml({ text: 'Test', opacity: 1.5 })
+ * // => '<div class="watermark" style="opacity: 1">Test</div>'
  * ```
  */
 export function renderWatermarkHtml(options: WatermarkOptions): string {
@@ -93,11 +93,11 @@ export function renderWatermarkHtml(options: WatermarkOptions): string {
 }
 
 /**
- * 从渲染选项中提取水印配置
- * 用于兼容现有的 RenderOptions 接口
+ * Extract watermark configuration from render options
+ * Used for compatibility with existing RenderOptions interface
  *
- * @param options - 包含水印配置的选项对象
- * @returns 水印配置选项
+ * @param options - Options object containing watermark configuration
+ * @returns Watermark configuration options
  */
 export function extractWatermarkOptions(
   options?: { watermark?: string; watermarkOpacity?: number },
