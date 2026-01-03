@@ -37,6 +37,26 @@ export interface SpacingConfig {
   sectionGap: string
   /** 单元格内边距 */
   cellPadding: string
+  /** 页眉底部间距 */
+  headerMarginBottom: string
+  /** 科室名称顶部间距 */
+  departmentMarginTop: string
+  /** 表单标题顶部间距 */
+  titleMarginTop: string
+  /** 签名区域间距 */
+  signatureGap: string
+  /** 签名区域顶部间距 */
+  signatureMarginTop: string
+  /** 签名线最小宽度 */
+  signatureLineWidth: string
+  /** 自由文本最小高度 */
+  freeTextMinHeight: string
+  /** 页脚顶部间距 */
+  footerMarginTop: string
+  /** 小间距 (2mm) */
+  xs: string
+  /** 中间距 (3mm) */
+  sm: string
 }
 
 /** 字号配置 */
@@ -97,6 +117,26 @@ export interface SizeMultipliers {
     cellPaddingX: number
     /** 单元格垂直内边距倍数 */
     cellPaddingY: number
+    /** 页眉底部间距倍数 */
+    headerMarginBottom: number
+    /** 科室名称顶部间距倍数 */
+    departmentMarginTop: number
+    /** 表单标题顶部间距倍数 */
+    titleMarginTop: number
+    /** 签名区域间距倍数 */
+    signatureGap: number
+    /** 签名区域顶部间距倍数 */
+    signatureMarginTop: number
+    /** 签名线最小宽度倍数 */
+    signatureLineWidth: number
+    /** 自由文本最小高度倍数 */
+    freeTextMinHeight: number
+    /** 页脚顶部间距倍数 */
+    footerMarginTop: number
+    /** 小间距倍数 */
+    xs: number
+    /** 中间距倍数 */
+    sm: number
   }
   /** 边框宽度倍数 */
   borderWidth: number

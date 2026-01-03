@@ -401,11 +401,13 @@ describe('createRenderConfigFromPaginationConfig', () => {
     expect(config.pageNumberFormat).toBe('第{current}页/共{total}页')
   })
 
-  it('should support deprecated fields for backward compatibility', () => {
+  it('should use display config for header/footer settings', () => {
     const paginationConfig: PaginationConfig = {
       enabled: true,
-      showHeaderOnEachPage: false,
-      showFooterOnEachPage: true,
+      display: {
+        headerOnEachPage: false,
+        footerOnEachPage: true,
+      },
     }
 
     const config = createRenderConfigFromPaginationConfig(paginationConfig)

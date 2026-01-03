@@ -2,13 +2,10 @@ import type { Meta, StoryObj } from '@storybook/html'
 import { renderToHtml } from '../../src/renderer'
 import {
   renderPaginatedHtml,
-  calculatePageBreaks,
-  PAGE_16K,
-  calculateUsableHeight,
   MEASURABLE_ITEM_TYPES,
 } from '../../src/pagination'
 import type { PrintSchema, FormData } from '../../src/types/print-schema'
-import type { MeasurableItem } from '../../src/pagination'
+import type { MeasurableItem, PageBreakResult } from '../../src/pagination'
 
 // 多行数据表单（模拟分页场景）
 const paginatedSchema: PrintSchema = {
@@ -82,7 +79,7 @@ const generateDailyRecords = (count: number) => {
       date: date.toISOString().split('T')[0],
       daysOld: i + 5,
       weight: 3200 + i * 30,
-      temperature: 36.5 + (Math.random() * 0.5 - 0.25),
+      temperature: (36.5 + (Math.random() * 0.5 - 0.25)).toFixed(1),
       umbilicalCare: true,
       bath: i % 2 === 0,
       swimming: i % 3 === 0,
@@ -94,58 +91,52 @@ const generateDailyRecords = (count: number) => {
   return records
 }
 
-// 模拟测量内容项（实际应用中由 content-measurer 测量）
-const createMeasuredItems = (recordCount: number): MeasurableItem[] => {
+// 创建基于 section 的测量项（用于分页渲染）
+const createSectionBasedItems = (schema: PrintSchema): MeasurableItem[] => {
   const items: MeasurableItem[] = []
   
-  // 页眉
-  items.push({
-    id: 'header',
-    type: MEASURABLE_ITEM_TYPES.HEADER,
-    height: 80,
-  })
-  
-  // 基本信息区块
-  items.push({
-    id: 'section-0',
-    type: MEASURABLE_ITEM_TYPES.SECTION,
-    height: 60,
-  })
-  
-  // 表格标题
-  items.push({
-    id: 'table-title',
-    type: MEASURABLE_ITEM_TYPES.SECTION,
-    height: 30,
-  })
-  
-  // 表格表头
-  items.push({
-    id: 'table-dailyRecords-header',
-    type: MEASURABLE_ITEM_TYPES.TABLE_HEADER,
-    height: 35,
-    tableId: 'table-dailyRecords',
-  })
-  
-  // 表格行
-  for (let i = 0; i < recordCount; i++) {
+  schema.sections.forEach((_, index) => {
     items.push({
-      id: `table-dailyRecords-row-${i}`,
-      type: MEASURABLE_ITEM_TYPES.TABLE_ROW,
-      height: 30,
-      tableId: 'table-dailyRecords',
-      dataIndex: i,
+      id: `section-${index}`,
+      type: MEASURABLE_ITEM_TYPES.SECTION,
+      height: 100, // 估算高度
     })
-  }
-  
-  // 签名区域
-  items.push({
-    id: 'section-signature',
-    type: MEASURABLE_ITEM_TYPES.SIGNATURE,
-    height: 50,
   })
   
   return items
+}
+
+// 创建单页分页结果
+const createSinglePageResult = (schema: PrintSchema): PageBreakResult => {
+  const items = createSectionBasedItems(schema)
+  return {
+    pages: [
+      {
+        pageNumber: 1,
+        isContinuation: false,
+        items: items.map(item => item.id),
+        repeatedHeaders: [],
+      },
+    ],
+    totalPages: 1,
+  }
+}
+
+// 创建多页分页结果（模拟）
+const createMultiPageResult = (totalPages: number): PageBreakResult => {
+  const pages: PageBreakResult['pages'] = []
+  for (let i = 0; i < totalPages; i++) {
+    pages.push({
+      pageNumber: i + 1,
+      isContinuation: i > 0,
+      items: [`section-0`, `section-1`], // 每页都渲染所有 sections
+      repeatedHeaders: [],
+    })
+  }
+  return {
+    pages,
+    totalPages,
+  }
 }
 
 const meta: Meta = {
@@ -168,19 +159,8 @@ const meta: Meta = {
 
 ### 使用方式
 \`\`\`typescript
-import { renderPaginatedHtml, calculatePageBreaks } from '@medical/print-renderer'
+import { renderPaginatedHtml } from '@medical/print-renderer'
 
-// 1. 测量内容高度（实际应用中使用 content-measurer）
-const measuredItems = measureContent(contentElement)
-
-// 2. 计算分页
-const pageBreakResult = calculatePageBreaks(measuredItems, {
-  pageHeight: usableHeight,
-  headerHeight: 80,
-  footerHeight: 50,
-})
-
-// 3. 渲染分页 HTML
 const html = renderPaginatedHtml({
   schema,
   data,
@@ -230,9 +210,11 @@ const createLegacyRenderer = (recordCount: number) => {
 // 创建分页渲染函数（使用 renderPaginatedHtml）
 const createPaginatedRenderer = (
   recordCount: number,
+  totalPages: number = 1,
   config?: {
     showHeaderOnEachPage?: boolean
     showFooterOnEachPage?: boolean
+    showSignatureOnEachPage?: boolean
     continuationSuffix?: string
     pageNumberFormat?: string
   }
@@ -248,16 +230,12 @@ const createPaginatedRenderer = (
     }
     
     // 创建测量项
-    const measuredItems = createMeasuredItems(recordCount)
+    const measuredItems = createSectionBasedItems(paginatedSchema)
     
-    // 计算分页
-    const usableHeight = calculateUsableHeight(PAGE_16K)
-    const pageBreakResult = calculatePageBreaks(measuredItems, {
-      pageHeight: usableHeight,
-      headerHeight: 80,
-      footerHeight: 50,
-      repeatTableHeaders: true,
-    })
+    // 创建分页结果
+    const pageBreakResult = totalPages > 1 
+      ? createMultiPageResult(totalPages)
+      : createSinglePageResult(paginatedSchema)
     
     // 渲染分页 HTML
     const html = renderPaginatedHtml({
@@ -270,7 +248,7 @@ const createPaginatedRenderer = (
     
     const iframe = document.createElement('iframe')
     iframe.style.width = '100%'
-    iframe.style.height = '900px'
+    iframe.style.height = totalPages > 1 ? `${totalPages * 450}px` : '800px'
     iframe.style.border = '1px solid #ccc'
     iframe.style.background = '#f5f5f5'
     iframe.srcdoc = html
@@ -293,31 +271,57 @@ export const MediumRecords: Story = {
   render: createLegacyRenderer(7),
 }
 
+// 大量数据
+export const ManyRecords: Story = {
+  name: '大量数据（14条）- 传统渲染',
+  render: createLegacyRenderer(14),
+}
+
 // ==================== 分页渲染 ====================
 
-// 分页渲染 - 基础
-export const PaginatedBasic: Story = {
-  name: '分页渲染 - 基础（14条）',
-  render: createPaginatedRenderer(14),
+// 分页渲染 - 单页
+export const PaginatedSinglePage: Story = {
+  name: '分页渲染 - 单页',
+  render: createPaginatedRenderer(7, 1),
   parameters: {
     docs: {
       description: {
-        story: '使用 `renderPaginatedHtml` 渲染多页表单，每页独立显示。',
+        story: '使用 `renderPaginatedHtml` 渲染单页表单。',
       },
     },
   },
 }
 
-// 分页渲染 - 大量数据
-export const PaginatedManyRecords: Story = {
-  name: '分页渲染 - 大量数据（28条）',
-  render: createPaginatedRenderer(28),
+// 分页渲染 - 两页
+export const PaginatedTwoPages: Story = {
+  name: '分页渲染 - 两页',
+  render: createPaginatedRenderer(14, 2),
+  parameters: {
+    docs: {
+      description: {
+        story: '使用 `renderPaginatedHtml` 渲染两页表单，第二页显示 "(续)" 标记。',
+      },
+    },
+  },
+}
+
+// 分页渲染 - 三页
+export const PaginatedThreePages: Story = {
+  name: '分页渲染 - 三页',
+  render: createPaginatedRenderer(21, 3),
+  parameters: {
+    docs: {
+      description: {
+        story: '使用 `renderPaginatedHtml` 渲染三页表单。',
+      },
+    },
+  },
 }
 
 // 分页渲染 - 自定义续页标记
 export const PaginatedCustomSuffix: Story = {
   name: '分页渲染 - 自定义续页标记',
-  render: createPaginatedRenderer(14, {
+  render: createPaginatedRenderer(14, 2, {
     continuationSuffix: '（续表）',
   }),
   parameters: {
@@ -332,7 +336,7 @@ export const PaginatedCustomSuffix: Story = {
 // 分页渲染 - 自定义页码格式
 export const PaginatedCustomPageNumber: Story = {
   name: '分页渲染 - 自定义页码格式',
-  render: createPaginatedRenderer(14, {
+  render: createPaginatedRenderer(14, 2, {
     pageNumberFormat: 'Page {current} of {total}',
   }),
   parameters: {
@@ -347,7 +351,7 @@ export const PaginatedCustomPageNumber: Story = {
 // 分页渲染 - 仅首页显示页眉
 export const PaginatedHeaderFirstOnly: Story = {
   name: '分页渲染 - 仅首页显示页眉',
-  render: createPaginatedRenderer(14, {
+  render: createPaginatedRenderer(14, 2, {
     showHeaderOnEachPage: false,
   }),
   parameters: {
@@ -359,16 +363,16 @@ export const PaginatedHeaderFirstOnly: Story = {
   },
 }
 
-// 分页渲染 - 仅末页显示页脚
-export const PaginatedFooterLastOnly: Story = {
-  name: '分页渲染 - 仅末页显示页脚',
-  render: createPaginatedRenderer(14, {
-    showFooterOnEachPage: false,
+// 分页渲染 - 每页显示签名
+export const PaginatedSignatureOnEachPage: Story = {
+  name: '分页渲染 - 每页显示签名',
+  render: createPaginatedRenderer(14, 2, {
+    showSignatureOnEachPage: true,
   }),
   parameters: {
     docs: {
       description: {
-        story: '设置 `showFooterOnEachPage: false` 后，非末页不显示页脚备注（但仍显示页码）。',
+        story: '设置 `showSignatureOnEachPage: true` 后，每页底部都显示签名区域。',
       },
     },
   },

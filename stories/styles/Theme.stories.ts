@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/html'
-import { defaultTheme, mergeTheme, generateCss } from '../../src/styles'
+import { defaultTheme, mergeTheme, generateCss, type DeepPartial } from '../../src/styles'
 import { renderToHtml } from '../../src/renderer'
 import type { PrintSchema, FormData, Theme } from '../../src/types'
 
@@ -73,7 +73,7 @@ export default meta
 type Story = StoryObj
 
 // 创建渲染函数
-const createRenderer = (customTheme: Partial<Theme>, label: string) => {
+const createRenderer = (customTheme: DeepPartial<Theme>, label: string) => {
   return () => {
     const theme = mergeTheme(customTheme)
     const html = renderToHtml(sampleSchema, sampleData, { theme })

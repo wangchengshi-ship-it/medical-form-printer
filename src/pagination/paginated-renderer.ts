@@ -1,9 +1,9 @@
 /**
  * @fileoverview 分页渲染器
  * @module pagination/paginated-renderer
- * @version 1.0.0
+ * @version 1.1.0
  * @author Kiro
- * @created 2026-01-03
+ * @created 2026-01-02
  * @modified 2026-01-03
  *
  * @description
@@ -35,7 +35,7 @@
  * - international-postpartum-frontend - 前端打印模块
  */
 
-import type { PrintSchema, FormData, PrintSection, PrintHeader, PrintFooter } from '../types/print-schema'
+import type { PrintSchema, FormData, PrintSection } from '../types/print-schema'
 import type { RenderOptions } from '../types/options'
 import type { Theme } from '../types/theme'
 import type { PageBreakResult, PageContent, MeasurableItem, PaginationConfig, PageDimensions } from './types'
@@ -224,10 +224,7 @@ function renderPageHeader(ctx: SinglePageContext): string {
  * 渲染签名区域
  * @requirements 11.3 - 支持 showSignatureOnEachPage 配置
  */
-function renderSignatureArea(
-  ctx: SinglePageContext,
-  sectionMap: Map<string, PrintSection>
-): string {
+function renderSignatureArea(ctx: SinglePageContext): string {
   const { schema, data, options, isLastPage, config } = ctx
 
   // 只在末页显示签名，除非配置了每页显示
@@ -294,7 +291,7 @@ function renderRepeatedHeaders(
   ctx: SinglePageContext,
   sectionMap: Map<string, PrintSection>
 ): string {
-  const { page, measuredItems, data, options } = ctx
+  const { page, measuredItems } = ctx
 
   if (page.repeatedHeaders.length === 0) {
     return ''
@@ -331,77 +328,104 @@ function renderRepeatedHeaders(
 // ==================== 内容渲染 ====================
 
 /**
+ * 渲染带标题的 section
+ * @param section - PrintSection 配置
+ * @param data - 表单数据
+ * @param options - 渲染选项
+ * @returns 渲染后的 HTML 字符串
+ */
+function renderSectionWithTitle(
+  section: PrintSection,
+  data: FormData,
+  options?: RenderOptions
+): string {
+  const titleHtml = section.title
+    ? div().class('section-title').text(section.title).build()
+    : ''
+  const content = renderSection(section.type, section.config, data, options)
+  return `${titleHtml}${content}`
+}
+
+/**
+ * 内容项渲染策略映射
+ * 使用策略模式便于扩展新的内容类型
+ */
+type ContentRenderer = (
+  item: MeasurableItem,
+  sectionMap: Map<string, PrintSection>,
+  data: FormData,
+  options?: RenderOptions
+) => string
+
+const contentRenderers: Record<MeasurableItem['type'], ContentRenderer> = {
+  section: (item, sectionMap, data, options) => {
+    const section = sectionMap.get(item.id)
+    if (!section) return ''
+    return renderSectionWithTitle(section, data, options)
+  },
+  // 表格行渲染需要包裹在表格中，建议使用 renderAllSections 降级处理
+  'table-row': () => '',
+  // 表格表头通常在 repeatedHeaders 中处理
+  'table-header': () => '',
+  // 以下类型在其他专用函数中处理
+  header: () => '',
+  footer: () => '',
+  signature: () => '',
+}
+
+/**
  * 根据内容项 ID 渲染对应的区块
+ * 注意：此函数用于基于测量项的精细分页渲染
+ * 对于简单场景，会自动降级到 renderAllSections
+ *
+ * @param itemId - 内容项 ID
+ * @param itemMap - 预构建的测量项映射（避免重复查找）
+ * @param sectionMap - section ID 到 PrintSection 的映射
+ * @param data - 表单数据
+ * @param options - 渲染选项
+ * @returns 渲染后的 HTML 字符串
  */
 function renderContentItem(
   itemId: string,
-  measuredItems: MeasurableItem[],
+  itemMap: Map<string, MeasurableItem>,
   sectionMap: Map<string, PrintSection>,
   data: FormData,
   options?: RenderOptions
 ): string {
-  const measuredItem = measuredItems.find(item => item.id === itemId)
-  if (!measuredItem) return ''
+  const item = itemMap.get(itemId)
+  if (!item) return ''
 
-  // 根据类型渲染
-  switch (measuredItem.type) {
-    case 'section': {
-      // 查找对应的 section
-      const section = sectionMap.get(itemId)
-      if (!section) return ''
-      
-      let titleHtml = ''
-      if (section.title) {
-        titleHtml = div().class('section-title').text(section.title).build()
-      }
-      const content = renderSection(section.type, section.config, data, options)
-      return `${titleHtml}${content}`
-    }
-    
-    case 'table-row': {
-      // 表格行渲染（需要特殊处理）
-      if (!measuredItem.tableId) return ''
-      const tableSection = sectionMap.get(measuredItem.tableId)
-      if (!tableSection || tableSection.type !== 'table') return ''
-      
-      // 渲染单行（这里简化处理，实际可能需要更复杂的逻辑）
-      const tableConfig = tableSection.config as {
-        columns: Array<{ field: string; type?: string; width?: string }>
-        dataField: string
-        showRowNumber?: boolean
-      }
-      const tableData = data[tableConfig.dataField] as Array<Record<string, unknown>> | undefined
-      if (!tableData || measuredItem.dataIndex === undefined) return ''
-      
-      const rowData = tableData[measuredItem.dataIndex]
-      if (!rowData) return ''
-      
-      const cells = tableConfig.columns.map(col => {
-        const value = rowData[col.field]
-        return h('td').text(value != null ? String(value) : '').build()
-      }).join('')
-      
-      return h('tr').class('table-row').attr('data-row-id', itemId).raw(cells).build()
-    }
-    
-    case 'table-header': {
-      // 表格表头（通常在 repeatedHeaders 中处理）
-      return ''
-    }
-    
-    case 'header':
-    case 'footer':
-    case 'signature':
-      // 这些类型在其他地方处理
-      return ''
-    
-    default:
-      return ''
+  const renderer = contentRenderers[item.type]
+  return renderer ? renderer(item, sectionMap, data, options) : ''
+}
+
+/**
+ * 渲染所有 sections（降级模式）
+ * 当精细分页不可用时，渲染所有 sections（除签名区域外）
+ *
+ * @param ctx - 单页渲染上下文
+ * @returns 渲染后的 HTML 字符串
+ */
+function renderAllSections(ctx: SinglePageContext): string {
+  const { schema, data, options } = ctx
+  const parts: string[] = []
+
+  for (const section of schema.sections) {
+    // 跳过签名区域（在页脚处理）
+    if (section.type === 'signature-area') continue
+    parts.push(renderSectionWithTitle(section, data, options))
   }
+
+  return parts.join('\n')
 }
 
 /**
  * 渲染页面主体内容
+ * 优先使用精细分页渲染，无有效测量项时降级到全量渲染
+ *
+ * @param ctx - 单页渲染上下文
+ * @param sectionMap - section ID 到 PrintSection 的映射
+ * @returns 渲染后的 HTML 字符串
  */
 function renderPageBody(
   ctx: SinglePageContext,
@@ -417,12 +441,26 @@ function renderPageBody(
     parts.push(repeatedHeaders)
   }
 
-  // 渲染内容项
-  for (const itemId of page.items) {
-    const content = renderContentItem(itemId, measuredItems, sectionMap, data, options)
-    if (content) {
-      parts.push(content)
+  // 预构建测量项映射，避免重复 O(n) 查找
+  const itemMap = new Map(measuredItems.map(m => [m.id, m]))
+
+  // 检查是否有有效的内容项映射
+  const hasValidItems = page.items.length > 0 && page.items.some(itemId => {
+    const item = itemMap.get(itemId)
+    return item?.type === 'section'
+  })
+
+  if (hasValidItems) {
+    // 使用测量项精细渲染
+    for (const itemId of page.items) {
+      const content = renderContentItem(itemId, itemMap, sectionMap, data, options)
+      if (content) {
+        parts.push(content)
+      }
     }
+  } else {
+    // 降级：渲染所有 sections
+    parts.push(renderAllSections(ctx))
   }
 
   return main().class('print-content').raw(parts.join('\n')).build()
@@ -435,10 +473,6 @@ function renderPageBody(
  */
 function renderWatermark(options?: RenderOptions & { watermark?: string; watermarkOpacity?: number }): string {
   if (!options?.watermark) return ''
-  
-  const style = options.watermarkOpacity !== undefined
-    ? `opacity: ${options.watermarkOpacity}`
-    : undefined
   
   return div()
     .class('watermark')
@@ -476,7 +510,7 @@ function renderSinglePage(
   parts.push(renderPageBody(ctx, sectionMap))
 
   // 签名区域（在页脚之前）
-  const signature = renderSignatureArea(ctx, sectionMap)
+  const signature = renderSignatureArea(ctx)
   if (signature) {
     parts.push(signature)
   }
@@ -737,12 +771,9 @@ export function createRenderConfigFromPaginationConfig(
   }
 
   return {
-    showHeaderOnEachPage: paginationConfig.display?.headerOnEachPage ??
-      paginationConfig.showHeaderOnEachPage,
-    showFooterOnEachPage: paginationConfig.display?.footerOnEachPage ??
-      paginationConfig.showFooterOnEachPage,
-    showSignatureOnEachPage: paginationConfig.display?.signatureOnEachPage ??
-      paginationConfig.showSignatureOnEachPage,
+    showHeaderOnEachPage: paginationConfig.display?.headerOnEachPage,
+    showFooterOnEachPage: paginationConfig.display?.footerOnEachPage,
+    showSignatureOnEachPage: paginationConfig.display?.signatureOnEachPage,
     continuationSuffix: paginationConfig.headerConfig?.continuationSuffix,
     pageNumberFormat: paginationConfig.footerConfig?.pageNumberFormat,
   }

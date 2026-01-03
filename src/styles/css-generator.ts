@@ -1,56 +1,93 @@
 /**
  * @fileoverview CSS 样式生成器
  * @module styles/css-generator
+ * @version 1.1.0
+ * @author Kiro
+ * @created 2026-01-02
+ * @modified 2026-01-03
  *
  * @description
  * 根据主题配置生成完整的 CSS 样式字符串。
  * 支持基准单位系统，所有尺寸值从主题配置中获取。
+ *
+ * @dependencies
+ * - ../types/theme - 主题类型定义
+ * - ./default-theme - 默认主题配置
+ * - ./page-sizes - 页面尺寸常量
+ *
+ * @usedBy
+ * - ../renderer/index.ts - 渲染器主入口
+ * - ../pagination/paginated-renderer.ts - 分页渲染器
  */
 
 import type { Theme } from '../types/theme'
 import { defaultTheme } from './default-theme'
+import { PAGE_SIZES } from './page-sizes'
 
-/**
- * 合并主题配置
- * @param customTheme - 自定义主题配置（部分）
- * @returns 合并后的完整主题
- */
-export function mergeTheme(customTheme?: Partial<Theme>): Theme {
-  if (!customTheme) return defaultTheme
+// ==================== 主题合并 ====================
 
-  return {
-    fonts: { ...defaultTheme.fonts, ...customTheme.fonts },
-    colors: { ...defaultTheme.colors, ...customTheme.colors },
-    spacing: { ...defaultTheme.spacing, ...customTheme.spacing },
-    fontSize: { ...defaultTheme.fontSize, ...customTheme.fontSize },
-    borderWidth: customTheme.borderWidth ?? defaultTheme.borderWidth,
-  }
+/** 深层部分类型 */
+export type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
 }
 
 /**
- * 生成 CSS 样式字符串
- * @param theme - 主题配置
- * @returns 完整的 CSS 样式字符串
- *
- * @description
- * 生成的 CSS 包含：
- * - 基础样式（重置、页面布局）
- * - 页眉页脚样式
- * - 各区块类型样式（info-grid、table、checkbox-grid 等）
- * - 打印媒体查询
- * - 水印样式
- *
- * 所有尺寸值从主题配置中获取，支持通过基准单位系统实现整体缩放。
+ * 深度合并两个对象
  */
-export function generateCss(theme: Theme): string {
+function deepMerge<T extends object>(target: T, source: DeepPartial<T>): T {
+  const result = { ...target } as T
+  for (const key of Object.keys(source) as Array<keyof T>) {
+    const sourceValue = source[key]
+    const targetValue = target[key]
+    if (
+      sourceValue !== null &&
+      sourceValue !== undefined &&
+      typeof sourceValue === 'object' &&
+      !Array.isArray(sourceValue) &&
+      targetValue !== null &&
+      typeof targetValue === 'object' &&
+      !Array.isArray(targetValue)
+    ) {
+      result[key] = deepMerge(targetValue as object, sourceValue as object) as T[keyof T]
+    } else if (sourceValue !== undefined) {
+      result[key] = sourceValue as T[keyof T]
+    }
+  }
+  return result
+}
+
+/**
+ * 深度合并主题配置
+ * @param customTheme - 自定义主题配置（深层部分）
+ * @returns 合并后的完整主题
+ */
+export function mergeTheme(customTheme?: DeepPartial<Theme>): Theme {
+  if (!customTheme) return defaultTheme
+  return deepMerge(defaultTheme, customTheme)
+}
+
+// ==================== CSS 生成函数 ====================
+
+/**
+ * 生成基础重置样式
+ */
+function generateResetStyles(): string {
   return `
 /* 基础样式 */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}`
 }
 
+/**
+ * 生成页面布局样式
+ * @param theme - 主题配置
+ */
+function generatePageStyles(theme: Theme): string {
+  return `
+/* 页面布局 */
 .print-page {
   font-family: ${theme.fonts.body};
   font-size: ${theme.fontSize.body};
@@ -58,39 +95,46 @@ export function generateCss(theme: Theme): string {
   color: ${theme.colors.text};
   background: ${theme.colors.background};
   padding: ${theme.spacing.pageMargin};
-  width: 210mm;
-  min-height: 297mm;
+  width: ${PAGE_SIZES.A4.width};
+  min-height: ${PAGE_SIZES.A4.height};
 }
 
 .print-page.landscape {
-  width: 297mm;
-  min-height: 210mm;
+  width: ${PAGE_SIZES.A4.height};
+  min-height: ${PAGE_SIZES.A4.width};
 }
 
 .print-page.a5 {
-  width: 148mm;
-  min-height: 210mm;
+  width: ${PAGE_SIZES.A5.width};
+  min-height: ${PAGE_SIZES.A5.height};
 }
 
 .print-page.a5.landscape {
-  width: 210mm;
-  min-height: 148mm;
+  width: ${PAGE_SIZES.A5.height};
+  min-height: ${PAGE_SIZES.A5.width};
 }
 
 .print-page.16k {
-  width: 195mm;
-  min-height: 270mm;
+  width: ${PAGE_SIZES['16K'].width};
+  min-height: ${PAGE_SIZES['16K'].height};
 }
 
 .print-page.16k.landscape {
-  width: 270mm;
-  min-height: 195mm;
+  width: ${PAGE_SIZES['16K'].height};
+  min-height: ${PAGE_SIZES['16K'].width};
+}`
 }
 
+/**
+ * 生成页眉样式
+ * @param theme - 主题配置
+ */
+function generateHeaderStyles(theme: Theme): string {
+  return `
 /* 页眉 */
 .print-header {
   text-align: center;
-  margin-bottom: 10mm;
+  margin-bottom: ${theme.spacing.headerMarginBottom};
 }
 
 .hospital-name {
@@ -101,16 +145,23 @@ export function generateCss(theme: Theme): string {
 
 .department-name {
   font-size: ${theme.fontSize.sectionTitle};
-  margin-top: 2mm;
+  margin-top: ${theme.spacing.departmentMarginTop};
 }
 
 .form-title {
   font-family: ${theme.fonts.heading};
   font-size: ${theme.fontSize.formTitle};
   font-weight: bold;
-  margin-top: 5mm;
+  margin-top: ${theme.spacing.titleMarginTop};
+}`
 }
 
+/**
+ * 生成区块通用样式
+ * @param theme - 主题配置
+ */
+function generateSectionStyles(theme: Theme): string {
+  return `
 /* 区块通用 */
 .print-section {
   margin-bottom: ${theme.spacing.sectionGap};
@@ -120,13 +171,21 @@ export function generateCss(theme: Theme): string {
   font-family: ${theme.fonts.heading};
   font-size: ${theme.fontSize.sectionTitle};
   font-weight: bold;
-  margin-bottom: 2mm;
+  margin-bottom: ${theme.spacing.xs};
+}`
 }
 
+/**
+ * 生成信息网格样式
+ * @param theme - 主题配置
+ */
+function generateInfoGridStyles(theme: Theme): string {
+  return `
 /* 信息网格 */
 .info-grid table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .info-grid td {
@@ -139,12 +198,22 @@ export function generateCss(theme: Theme): string {
   background: ${theme.colors.labelBackground};
   white-space: nowrap;
   font-weight: normal;
+  width: 15%;
 }
 
 .info-grid .value-cell {
-  min-width: 30mm;
+  min-width: ${theme.spacing.signatureLineWidth};
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}`
 }
 
+/**
+ * 生成数据表格样式
+ * @param theme - 主题配置
+ */
+function generateTableStyles(theme: Theme): string {
+  return `
 /* 数据表格 */
 .data-table table {
   width: 100%;
@@ -161,8 +230,15 @@ export function generateCss(theme: Theme): string {
 .data-table th {
   background: ${theme.colors.labelBackground};
   font-weight: normal;
+}`
 }
 
+/**
+ * 生成勾选框网格样式
+ * @param theme - 主题配置
+ */
+function generateCheckboxStyles(theme: Theme): string {
+  return `
 /* 勾选框网格 */
 .checkbox-grid {
   display: flex;
@@ -172,34 +248,57 @@ export function generateCss(theme: Theme): string {
 .checkbox-item {
   display: flex;
   align-items: center;
-  gap: 2mm;
-  padding: 1mm 3mm;
+  gap: ${theme.spacing.xs};
+  padding: 1mm ${theme.spacing.sm};
 }
 
 .checkbox-symbol {
   font-family: "Segoe UI Symbol", "Apple Symbols", sans-serif;
+}`
 }
 
+/**
+ * 生成签名区域样式
+ * @param theme - 主题配置
+ */
+function generateSignatureStyles(theme: Theme): string {
+  return `
 /* 签名区域 */
 .signature-area {
   display: flex;
   justify-content: flex-end;
-  gap: 20mm;
-  margin-top: 10mm;
+  gap: ${theme.spacing.signatureGap};
+  margin-top: ${theme.spacing.signatureMarginTop};
 }
 
 .signature-item {
   display: flex;
   align-items: baseline;
-  gap: 2mm;
+  gap: ${theme.spacing.xs};
+}
+
+.signature-label {
+  white-space: nowrap;
 }
 
 .signature-line {
   display: inline-block;
-  min-width: 30mm;
+  min-width: ${theme.spacing.signatureLineWidth};
   border-bottom: ${theme.borderWidth} solid ${theme.colors.border};
+  line-height: 1.5;
 }
 
+.signature-line:empty::before {
+  content: '\\00a0';
+}`
+}
+
+/**
+ * 生成备注和自由文本样式
+ * @param theme - 主题配置
+ */
+function generateNotesStyles(theme: Theme): string {
+  return `
 /* 备注区域 */
 .notes-section {
   padding: ${theme.spacing.cellPadding};
@@ -215,19 +314,33 @@ export function generateCss(theme: Theme): string {
 .free-text {
   border: ${theme.borderWidth} solid ${theme.colors.border};
   padding: ${theme.spacing.cellPadding};
-  min-height: 20mm;
+  min-height: ${theme.spacing.freeTextMinHeight};
   white-space: pre-wrap;
+}`
 }
 
+/**
+ * 生成页脚样式
+ * @param theme - 主题配置
+ */
+function generateFooterStyles(theme: Theme): string {
+  return `
 /* 页脚 */
 .print-footer {
-  margin-top: 10mm;
+  margin-top: ${theme.spacing.footerMarginTop};
   display: flex;
   justify-content: space-between;
   font-size: ${theme.fontSize.small};
   color: ${theme.colors.textSecondary};
+}`
 }
 
+/**
+ * 生成打印媒体查询样式
+ * @param theme - 主题配置
+ */
+function generatePrintStyles(theme: Theme): string {
+  return `
 /* 打印样式 */
 @media print {
   .print-page {
@@ -277,8 +390,14 @@ export function generateCss(theme: Theme): string {
   .data-table tfoot {
     display: table-footer-group;
   }
+}`
 }
 
+/**
+ * 生成水印样式
+ */
+function generateWatermarkStyles(): string {
+  return `
 /* 水印 */
 .watermark {
   position: fixed;
@@ -290,6 +409,39 @@ export function generateCss(theme: Theme): string {
   pointer-events: none;
   z-index: 1000;
   white-space: nowrap;
+}`
 }
-`
+
+// ==================== 主入口 ====================
+
+/**
+ * 生成 CSS 样式字符串
+ * @param theme - 主题配置
+ * @returns 完整的 CSS 样式字符串
+ *
+ * @description
+ * 生成的 CSS 包含：
+ * - 基础样式（重置、页面布局）
+ * - 页眉页脚样式
+ * - 各区块类型样式（info-grid、table、checkbox-grid 等）
+ * - 打印媒体查询
+ * - 水印样式
+ *
+ * 所有尺寸值从主题配置中获取，支持通过基准单位系统实现整体缩放。
+ */
+export function generateCss(theme: Theme): string {
+  return [
+    generateResetStyles(),
+    generatePageStyles(theme),
+    generateHeaderStyles(theme),
+    generateSectionStyles(theme),
+    generateInfoGridStyles(theme),
+    generateTableStyles(theme),
+    generateCheckboxStyles(theme),
+    generateSignatureStyles(theme),
+    generateNotesStyles(theme),
+    generateFooterStyles(theme),
+    generatePrintStyles(theme),
+    generateWatermarkStyles(),
+  ].join('\n')
 }

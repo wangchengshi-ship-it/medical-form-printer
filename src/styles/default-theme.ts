@@ -51,6 +51,7 @@ export const defaultScaledConfig: ScaledThemeConfig = {
  */
 export function createScaledTheme(config: ScaledThemeConfig = defaultScaledConfig): Theme {
   const { baseUnit, multipliers, fonts, colors } = config
+  const s = multipliers.spacing
 
   // 计算各尺寸的毫米值
   const fontSizeMm = {
@@ -61,13 +62,6 @@ export function createScaledTheme(config: ScaledThemeConfig = defaultScaledConfi
     formTitle: scaleValue(multipliers.fontSize.formTitle, baseUnit),
   }
 
-  const spacingMm = {
-    pageMargin: scaleValue(multipliers.spacing.pageMargin, baseUnit),
-    sectionGap: scaleValue(multipliers.spacing.sectionGap, baseUnit),
-    cellPaddingY: scaleValue(multipliers.spacing.cellPaddingY, baseUnit),
-    cellPaddingX: scaleValue(multipliers.spacing.cellPaddingX, baseUnit),
-  }
-
   const borderWidthMm = scaleValue(multipliers.borderWidth, baseUnit)
 
   // 生成主题对象，使用 pt 作为字号单位（更适合打印）
@@ -75,9 +69,23 @@ export function createScaledTheme(config: ScaledThemeConfig = defaultScaledConfi
     fonts,
     colors,
     spacing: {
-      pageMargin: formatSize(spacingMm.pageMargin, 'mm'),
-      sectionGap: formatSize(spacingMm.sectionGap, 'mm'),
-      cellPadding: formatPadding(spacingMm.cellPaddingY, spacingMm.cellPaddingX, 'mm'),
+      pageMargin: formatSize(scaleValue(s.pageMargin, baseUnit), 'mm'),
+      sectionGap: formatSize(scaleValue(s.sectionGap, baseUnit), 'mm'),
+      cellPadding: formatPadding(
+        scaleValue(s.cellPaddingY, baseUnit),
+        scaleValue(s.cellPaddingX, baseUnit),
+        'mm'
+      ),
+      headerMarginBottom: formatSize(scaleValue(s.headerMarginBottom, baseUnit), 'mm'),
+      departmentMarginTop: formatSize(scaleValue(s.departmentMarginTop, baseUnit), 'mm'),
+      titleMarginTop: formatSize(scaleValue(s.titleMarginTop, baseUnit), 'mm'),
+      signatureGap: formatSize(scaleValue(s.signatureGap, baseUnit), 'mm'),
+      signatureMarginTop: formatSize(scaleValue(s.signatureMarginTop, baseUnit), 'mm'),
+      signatureLineWidth: formatSize(scaleValue(s.signatureLineWidth, baseUnit), 'mm'),
+      freeTextMinHeight: formatSize(scaleValue(s.freeTextMinHeight, baseUnit), 'mm'),
+      footerMarginTop: formatSize(scaleValue(s.footerMarginTop, baseUnit), 'mm'),
+      xs: formatSize(scaleValue(s.xs, baseUnit), 'mm'),
+      sm: formatSize(scaleValue(s.sm, baseUnit), 'mm'),
     },
     fontSize: {
       body: formatSize(fontSizeMm.body, 'pt'),

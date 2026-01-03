@@ -64,6 +64,26 @@ export const SIZE_MULTIPLIERS = {
     cellPaddingX: 3,
     /** 单元格垂直内边距 - 2mm */
     cellPaddingY: 2,
+    /** 页眉底部间距 - 10mm */
+    headerMarginBottom: 10,
+    /** 科室名称顶部间距 - 2mm */
+    departmentMarginTop: 2,
+    /** 表单标题顶部间距 - 5mm */
+    titleMarginTop: 5,
+    /** 签名区域间距 - 20mm */
+    signatureGap: 20,
+    /** 签名区域顶部间距 - 10mm */
+    signatureMarginTop: 10,
+    /** 签名线最小宽度 - 30mm */
+    signatureLineWidth: 30,
+    /** 自由文本最小高度 - 20mm */
+    freeTextMinHeight: 20,
+    /** 页脚顶部间距 - 10mm */
+    footerMarginTop: 10,
+    /** 小间距 - 2mm */
+    xs: 2,
+    /** 中间距 - 3mm */
+    sm: 3,
   },
   /** 边框宽度倍数 - 0.35mm ≈ 1px */
   borderWidth: 0.35,

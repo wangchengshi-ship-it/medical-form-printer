@@ -4,7 +4,7 @@
  */
 
 export { defaultTheme, createScaledTheme, createThemeWithBaseUnit, defaultScaledConfig, defaultFonts, defaultColors, defaultMultipliers } from './default-theme'
-export { generateCss, mergeTheme } from './css-generator'
+export { generateCss, mergeTheme, type DeepPartial } from './css-generator'
 export {
   DEFAULT_BASE_UNIT,
   UNIT_CONVERSIONS,
@@ -25,3 +25,4 @@ export {
   type StyleObject,
   type InlineStyleMap,
 } from './inline-styles'
+export { PAGE_SIZES, type PageSizeKey } from './page-sizes'

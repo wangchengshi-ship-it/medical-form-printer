@@ -140,6 +140,26 @@ const html = renderToHtml(schema, data, {
 })
 ```
 
+### 页面尺寸 CSS 常量
+
+用于 CSS 样式生成的页面尺寸字符串常量：
+
+```typescript
+import { PAGE_SIZES } from '@medical/print-renderer'
+import type { PageSizeKey } from '@medical/print-renderer'
+
+// 预设尺寸（CSS 字符串）
+// PAGE_SIZES.A4: { width: '210mm', height: '297mm' }
+// PAGE_SIZES.A5: { width: '148mm', height: '210mm' }
+// PAGE_SIZES['16K']: { width: '195mm', height: '270mm' }
+
+const pageSize: PageSizeKey = 'A4'
+const { width, height } = PAGE_SIZES[pageSize]
+// width: '210mm', height: '297mm'
+```
+
+> **注意**: `PAGE_SIZES` 用于 CSS 样式生成，返回带单位的字符串。如需数值计算（如分页），请使用 `pagination` 模块的 `PAGE_A4`、`PAGE_16K` 等常量。
+
 ## 智能分页
 
 支持基于内容高度的智能分页，适用于长表单和多页文档。
