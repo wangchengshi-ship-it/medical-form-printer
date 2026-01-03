@@ -62,10 +62,7 @@ export function namespaceClasses(classNames: string[]): string[] {
 export function generateIsolationCss(): string {
   return `/* CSS 隔离容器 */
 .${ISOLATION_ROOT_CLASS} {
-  /* 重置所有继承属性 */
-  all: initial;
-  
-  /* 样式隔离 */
+  /* 样式隔离 - 创建新的堆叠上下文 */
   isolation: isolate;
   
   /* 布局隔离 - 使用 layout 而非 strict，避免高度塌陷 */
@@ -90,6 +87,17 @@ export function generateIsolationCss(): string {
   /* 确保高度自适应 */
   height: auto;
   min-height: 0;
+  
+  /* 重置继承的文本样式 */
+  font-style: normal;
+  font-variant: normal;
+  font-weight: normal;
+  letter-spacing: normal;
+  line-height: normal;
+  text-decoration: none;
+  text-transform: none;
+  white-space: normal;
+  word-spacing: normal;
 }
 
 /* 防止外部样式通过通配符选择器影响内部 */

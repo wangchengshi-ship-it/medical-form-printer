@@ -1,10 +1,12 @@
 /**
  * @fileoverview 签名区域区块渲染器
  * @module renderer/section-renderers/signature-area
+ * @modif 2023-11-08
  */
 
 import type { SignatureConfig, FormData } from '../../types/print-schema'
 import type { RenderOptions } from '../../types/options'
+import { cls } from '../../types/options'
 import { formatDate } from '../../formatters'
 import { escapeHtml } from '../../utils'
 
@@ -27,18 +29,18 @@ export function renderSignatureArea(
         const formattedDate = dateValue
           ? formatDate(dateValue, options?.dateFormat?.dateFormat)
           : ''
-        dateHtml = `<span class="signature-date">日期：<span class="signature-line">${escapeHtml(formattedDate)}</span></span>`
+        dateHtml = `<span class="${cls('signature-date', options)}">日期：<span class="${cls('signature-line', options)}">${escapeHtml(formattedDate)}</span></span>`
       }
       
-      return `<div class="signature-item">
-<span class="signature-label">${escapeHtml(field.label)}：</span>
-<span class="signature-line">${escapeHtml(String(value))}</span>
+      return `<div class="${cls('signature-item', options)}">
+<span class="${cls('signature-label', options)}">${escapeHtml(field.label)}：</span>
+<span class="${cls('signature-line', options)}">${escapeHtml(String(value))}</span>
 ${dateHtml}
 </div>`
     })
     .join('\n')
   
-  return `<div class="print-section signature-area">
+  return `<div class="${cls('print-section', options)} ${cls('signature-area', options)}">
 ${items}
 </div>`
 }

@@ -27,6 +27,8 @@ export interface RenderOptions {
   emptyPlaceholder?: string
   /** 自定义格式化器 */
   formatters?: Record<string, (value: unknown) => string>
+  /** CSS 类名前缀（用于隔离模式） */
+  classPrefix?: string
 }
 
 /** PDF 生成选项 */
@@ -55,4 +57,25 @@ export interface MergeDocumentItem {
   data: import('./print-schema').FormData
   /** 文档标题（用于目录） */
   title?: string
+}
+
+/**
+ * 创建类名生成函数
+ * @param options - 渲染选项
+ * @returns 类名生成函数
+ */
+export function createClassNameFn(options?: RenderOptions): (name: string) => string {
+  const prefix = options?.classPrefix
+  return prefix ? (name: string) => `${prefix}-${name}` : (name: string) => name
+}
+
+/**
+ * 获取类名（支持命名空间）
+ * @param name - 原始类名
+ * @param options - 渲染选项
+ * @returns 处理后的类名
+ */
+export function cls(name: string, options?: RenderOptions): string {
+  const prefix = options?.classPrefix
+  return prefix ? `${prefix}-${name}` : name
 }

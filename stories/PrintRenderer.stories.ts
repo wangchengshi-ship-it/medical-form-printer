@@ -177,18 +177,24 @@ const createRenderer = (schema: PrintSchema, data: FormData) => {
       watermark: args.watermark,
     })
     
-    // 创建容器并直接插入 HTML
+    // 创建容器
     const container = document.createElement('div')
     container.style.width = '100%'
-    container.style.minHeight = '800px'
+    container.style.height = '800px'
     container.style.overflow = 'auto'
     container.style.background = '#f5f5f5'
     container.style.padding = '20px'
     container.style.boxSizing = 'border-box'
     
-    // 直接设置 innerHTML
-    container.innerHTML = html
+    // 使用 iframe 来完全隔离样式
+    const iframe = document.createElement('iframe')
+    iframe.style.width = '100%'
+    iframe.style.height = '100%'
+    iframe.style.border = '1px solid #ccc'
+    iframe.style.background = '#fff'
+    iframe.srcdoc = html
     
+    container.appendChild(iframe)
     return container
   }
 }

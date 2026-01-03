@@ -20,7 +20,15 @@ import * as fc from 'fast-check'
 import { renderToIsolatedHtml, renderToIsolatedFragment } from '../src/renderer'
 import { FONT_FAMILY } from '../src/fonts'
 import { CSS_NAMESPACE, ISOLATION_ROOT_CLASS } from '../src/styles'
-import type { PrintSchema, FormData, InfoGridConfig, TableConfig } from '../src/types/print-schema'
+import type {
+  PrintSchema,
+  InfoGridConfig,
+  TableConfig,
+  CheckboxGridConfig,
+  SignatureConfig,
+  NotesConfig,
+  FreeTextConfig,
+} from '../src/types/print-schema'
 
 // ==================== 生成器定义 ====================
 
@@ -194,17 +202,6 @@ describe('Property 2: CSS Isolation Container', () => {
         // 提取所有 class="..." 中的类名（排除 style 标签内的内容）
         const htmlWithoutStyle = containerContent.replace(/<style>[\s\S]*?<\/style>/g, '')
 
-        // 验证顶层容器类名使用 mpr- 前缀
-        // 注意：section-renderers 内部的类名（如 label-cell, value-cell）目前不带前缀
-        // 这是已知限制，参见 isolated-html-renderer.ts 中的注释
-        const topLevelClasses = [
-          'mpr-print-page',
-          'mpr-print-header',
-          'mpr-print-content',
-          'mpr-print-footer',
-          'mpr-watermark',
-        ]
-
         // 验证至少包含 mpr-print-page 类
         expect(htmlWithoutStyle).toContain('class="mpr-print-page')
 
@@ -229,9 +226,8 @@ describe('Property 2: CSS Isolation Container', () => {
       fc.property(printSchemaArb, formDataArb, (schema, data) => {
         const html = renderToIsolatedHtml(schema as PrintSchema, data)
 
-        // 验证隔离 CSS 属性
-        expect(html).toContain('all: initial')
-        expect(html).toContain('contain: strict')
+        // 验证隔离 CSS 属性（使用 layout style 而非 strict，避免高度塌陷）
+        expect(html).toContain('contain: layout style')
         expect(html).toContain('isolation: isolate')
 
         return true
@@ -401,6 +397,284 @@ describe('Property 4: Font Data Embedding', () => {
         return true
       }),
       { numRuns: 100 }
+    )
+  })
+})
+
+
+// ==================== Property 5: All Class Names Namespaced ====================
+
+/**
+ * 生成包含所有区块类型的 PrintSchema
+ * 用于全面测试命名空间前缀
+ */
+const comprehensivePrintSchemaArb = fc.record({
+  pageSize: fc.constantFrom('A4', 'A5', '16K') as fc.Arbitrary<'A4' | 'A5' | '16K'>,
+  orientation: fc.constantFrom('portrait', 'landscape') as fc.Arbitrary<'portrait' | 'landscape'>,
+  header: fc.record({
+    hospital: fc.string({ minLength: 1, maxLength: 50 }),
+    department: fc.option(fc.string({ minLength: 1, maxLength: 30 }), { nil: undefined }),
+    title: fc.string({ minLength: 1, maxLength: 50 }),
+    showLogo: fc.boolean(),
+    logoUrl: fc.option(fc.constant('https://example.com/logo.png'), { nil: undefined }),
+  }),
+  sections: fc.constant([
+    // info-grid 区块
+    {
+      type: 'info-grid' as const,
+      title: '基本信息',
+      config: {
+        columns: 4,
+        rows: [
+          {
+            cells: [
+              { label: '姓名', field: 'name', type: 'text' as const },
+              { label: '年龄', field: 'age', type: 'number' as const, suffix: '岁' },
+            ],
+          },
+          {
+            cells: [
+              { label: '过敏史', field: 'allergy', type: 'checkbox-inline' as const, inlineOptions: ['无', '有'] },
+              { label: '血压', field: 'bp', type: 'compound' as const, compoundFormat: '{systolic}/{diastolic}mmHg', compoundFields: { systolic: 'bpSystolic', diastolic: 'bpDiastolic' } },
+            ],
+          },
+          {
+            cells: [
+              { label: '备注', field: 'notes', type: 'textarea' as const, span: 3, minHeight: '50px' },
+            ],
+          },
+        ],
+      } as InfoGridConfig,
+    },
+    // table 区块
+    {
+      type: 'table' as const,
+      title: '记录表',
+      config: {
+        columns: [
+          { header: '日期', field: 'date', width: '100px' },
+          { header: '内容', field: 'content' },
+          { header: '操作人', field: 'operator' },
+        ],
+        dataField: 'records',
+      } as TableConfig,
+    },
+    // checkbox-grid 区块
+    {
+      type: 'checkbox-grid' as const,
+      title: '症状选择',
+      config: {
+        field: 'symptoms',
+        columns: 4,
+        options: [
+          { value: 'fever', label: '发热' },
+          { value: 'cough', label: '咳嗽' },
+          { value: 'headache', label: '头痛' },
+          { value: 'fatigue', label: '乏力' },
+        ],
+      } as CheckboxGridConfig,
+    },
+    // signature-area 区块
+    {
+      type: 'signature-area' as const,
+      config: {
+        fields: [
+          { label: '医生签名', field: 'doctorSignature', showDate: true },
+          { label: '护士签名', field: 'nurseSignature', showDate: true },
+        ],
+      } as SignatureConfig,
+    },
+    // notes 区块
+    {
+      type: 'notes' as const,
+      config: {
+        content: '注意事项：请仔细核对信息',
+        showBorder: true,
+      } as NotesConfig,
+    },
+    // free-text 区块
+    {
+      type: 'free-text' as const,
+      title: '补充说明',
+      config: {
+        field: 'additionalNotes',
+        minHeight: '100px',
+      } as FreeTextConfig,
+    },
+  ]),
+  footer: fc.constant({
+    notes: '页脚备注',
+    showPageNumber: true,
+  }),
+})
+
+/**
+ * 生成包含数据的 FormData
+ */
+const comprehensiveFormDataArb = fc.constant({
+  name: '张三',
+  age: 30,
+  allergy: true,
+  bpSystolic: 120,
+  bpDiastolic: 80,
+  notes: '无特殊情况',
+  records: [
+    { date: '2026-01-01', content: '入院检查', operator: '李医生' },
+    { date: '2026-01-02', content: '常规护理', operator: '王护士' },
+  ],
+  fever: true,
+  cough: false,
+  headache: false,
+  fatigue: true,
+  doctorSignature: '李医生',
+  nurseSignature: '王护士',
+  additionalNotes: '患者状态良好',
+})
+
+describe('Property 5: All Class Names Namespaced', () => {
+  /**
+   * **Property 5: All Class Names Namespaced**
+   * **Validates: Requirements 3.5, 3.6**
+   *
+   * *For any* rendered HTML output from `renderToIsolatedHtml()` with sections,
+   * ALL class names in the HTML content (excluding style tag) SHALL either:
+   * - Start with 'mpr-' prefix, OR
+   * - Be the root class 'mpr-root'
+   *
+   * This ensures complete CSS isolation with no unprefixed class names that could
+   * conflict with external styles.
+   */
+  it('should have all class names prefixed with mpr- in isolated mode', () => {
+    fc.assert(
+      fc.property(comprehensivePrintSchemaArb, comprehensiveFormDataArb, (schema, data) => {
+        const html = renderToIsolatedHtml(schema as PrintSchema, data)
+
+        // 提取 mpr-root 容器内的 HTML（排除 style 标签）
+        const mprRootMatch = html.match(/<div class="mpr-root">([\s\S]*?)<\/div>\s*<\/body>/)
+        expect(mprRootMatch).not.toBeNull()
+
+        const containerContent = mprRootMatch![1]
+        const htmlWithoutStyle = containerContent.replace(/<style>[\s\S]*?<\/style>/g, '')
+
+        // 提取所有 class="..." 属性中的类名
+        const classMatches = htmlWithoutStyle.matchAll(/class="([^"]+)"/g)
+        const allClasses: string[] = []
+
+        for (const match of classMatches) {
+          const classValue = match[1]
+          // 分割多个类名（如 "mpr-print-page mpr-16k mpr-portrait"）
+          const classes = classValue.split(/\s+/).filter(Boolean)
+          allClasses.push(...classes)
+        }
+
+        // 验证所有类名都以 mpr- 开头
+        const unprefixedClasses = allClasses.filter(
+          (cls) => !cls.startsWith(`${CSS_NAMESPACE}-`)
+        )
+
+        // 如果有未加前缀的类名，测试失败并显示具体类名
+        if (unprefixedClasses.length > 0) {
+          throw new Error(
+            `Found unprefixed class names: ${unprefixedClasses.join(', ')}\n` +
+            `All classes found: ${allClasses.join(', ')}`
+          )
+        }
+
+        return true
+      }),
+      { numRuns: 100 }
+    )
+  })
+
+  it('should have matching CSS selectors for all HTML class names', () => {
+    fc.assert(
+      fc.property(comprehensivePrintSchemaArb, comprehensiveFormDataArb, (schema, data) => {
+        const html = renderToIsolatedHtml(schema as PrintSchema, data)
+
+        // 提取 style 标签内容
+        const styleMatch = html.match(/<style>([\s\S]*?)<\/style>/)
+        expect(styleMatch).not.toBeNull()
+        const cssContent = styleMatch![1]
+
+        // 提取 HTML 中的所有类名
+        const mprRootMatch = html.match(/<div class="mpr-root">([\s\S]*?)<\/div>\s*<\/body>/)
+        expect(mprRootMatch).not.toBeNull()
+        const htmlWithoutStyle = mprRootMatch![1].replace(/<style>[\s\S]*?<\/style>/g, '')
+
+        const classMatches = htmlWithoutStyle.matchAll(/class="([^"]+)"/g)
+        const htmlClasses = new Set<string>()
+
+        for (const match of classMatches) {
+          const classes = match[1].split(/\s+/).filter(Boolean)
+          classes.forEach((cls) => htmlClasses.add(cls))
+        }
+
+        // 验证关键类名在 CSS 中有对应的选择器
+        // 注意：某些类名（如 mpr-print-content）只在 HTML 中使用，不需要专门的 CSS 规则
+        const criticalClasses = [
+          'mpr-print-page',
+          'mpr-print-header',
+          // 'mpr-print-content', // 这个类只用于结构，不需要专门的 CSS 规则
+          'mpr-print-section',
+          'mpr-info-grid',
+          'mpr-label-cell',
+          'mpr-value-cell',
+          'mpr-data-table',
+          'mpr-checkbox-grid',
+          'mpr-checkbox-item',
+          'mpr-signature-area',
+          'mpr-signature-item',
+        ]
+
+        for (const cls of criticalClasses) {
+          if (htmlClasses.has(cls)) {
+            // 验证 CSS 中包含该类的选择器
+            expect(cssContent).toContain(`.${cls}`)
+          }
+        }
+
+        return true
+      }),
+      { numRuns: 100 }
+    )
+  })
+
+  it('should namespace all section renderer class names', () => {
+    // 测试每种区块类型的类名都正确命名空间化
+    const sectionTypes = [
+      { type: 'info-grid', expectedClasses: ['mpr-info-grid', 'mpr-label-cell', 'mpr-value-cell'] },
+      { type: 'table', expectedClasses: ['mpr-data-table'] },
+      { type: 'checkbox-grid', expectedClasses: ['mpr-checkbox-grid', 'mpr-checkbox-item'] },
+      { type: 'signature-area', expectedClasses: ['mpr-signature-area', 'mpr-signature-item'] },
+      { type: 'notes', expectedClasses: ['mpr-notes-section'] },
+      { type: 'free-text', expectedClasses: ['mpr-free-text'] },
+    ]
+
+    fc.assert(
+      fc.property(comprehensivePrintSchemaArb, comprehensiveFormDataArb, (schema, data) => {
+        const html = renderToIsolatedHtml(schema as PrintSchema, data)
+
+        // 提取 HTML 内容（排除 style）
+        const mprRootMatch = html.match(/<div class="mpr-root">([\s\S]*?)<\/div>\s*<\/body>/)
+        expect(mprRootMatch).not.toBeNull()
+        const htmlWithoutStyle = mprRootMatch![1].replace(/<style>[\s\S]*?<\/style>/g, '')
+
+        // 验证每种区块类型的预期类名都存在
+        for (const { type, expectedClasses } of sectionTypes) {
+          for (const expectedClass of expectedClasses) {
+            // 检查类名是否存在于 HTML 中
+            const classRegex = new RegExp(`class="[^"]*${expectedClass}[^"]*"`)
+            if (!classRegex.test(htmlWithoutStyle)) {
+              throw new Error(
+                `Expected class '${expectedClass}' for section type '${type}' not found in HTML`
+              )
+            }
+          }
+        }
+
+        return true
+      }),
+      { numRuns: 50 }
     )
   })
 })

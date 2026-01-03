@@ -104,6 +104,31 @@
     - **Property 4: Font Data Embedding**
     - **Validates: Requirements 4.2**
     - 验证 style 标签包含 data:font/woff2;base64
+  - [x]*5.5 编写 Property 5 测试：All Class Names Namespaced
+    - **Property 5: All Class Names Namespaced**
+    - **Validates: Requirements 3.5, 3.6, 3.7, 3.8**
+    - 验证所有 HTML 类名都以 mpr- 开头
+    - 验证 CSS 选择器与 HTML 类名匹配
+    - 验证每种 section renderer 生成正确的命名空间类名
+
+- [x] 5.6 修复 CSS 隔离架构问题
+  - [x] 5.6.1 添加 `cls()` 辅助函数到 `src/types/options.ts`
+    - 添加 `classPrefix` 选项到 `RenderOptions`
+    - 实现 `cls(name, options)` 函数生成命名空间类名
+    - _Requirements: 3.7_
+  - [x] 5.6.2 更新所有 Section Renderers 使用 `cls()` 函数
+    - 更新 `info-grid.ts`, `table.ts`, `checkbox-grid.ts`
+    - 更新 `signature-area.ts`, `notes.ts`, `free-text.ts`
+    - 更新 `section-title.ts`, `inline-row.ts`, `container.ts`
+    - 更新 `medical-checkbox-row.ts`
+    - _Requirements: 3.7_
+  - [x] 5.6.3 更新 `isolated-html-renderer.ts` 传递 `classPrefix`
+    - `renderSections()` 函数传递 `classPrefix: CSS_NAMESPACE`
+    - _Requirements: 3.8_
+  - [x] 5.6.4 修复隔离 CSS 属性
+    - 将 `contain: strict` 改为 `contain: layout style`（避免高度塌陷）
+    - 移除 `all: initial`（会重置所有样式）
+    - _Requirements: 3.2_
 
 - [x] 6. Checkpoint - 确保所有测试通过
   - 运行 `npm run test` 确保所有测试通过 ✅ (428 tests passed)
@@ -122,8 +147,9 @@
     - _Requirements: 4.1_
 
 - [x] 8. Final Checkpoint - 最终验证
-  - 确保所有测试通过 ✅ (499 tests passed)
+  - 确保所有测试通过 ✅ (501 tests passed)
   - 确保 Storybook 正常显示 ✅ (build successful)
+  - CSS 隔离架构修复完成 ✅ (所有类名使用 mpr- 前缀)
   - 如有问题，询问用户
 
 ## Notes

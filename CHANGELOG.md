@@ -40,7 +40,7 @@
   - `ISOLATION_ROOT_CLASS` - 隔离容器根类名 (`mpr-root`)
   - `namespaceClass` - 为类名添加命名空间前缀
   - `namespaceClasses` - 批量转换类名
-  - `generateIsolationCss` - 生成隔离容器样式（all: initial, contain: layout style, isolation: isolate）
+  - `generateIsolationCss` - 生成隔离容器样式（contain: layout style, isolation: isolate）
   - `generateIsolatedCss` - 生成完整的隔离 CSS（字体 + 隔离容器 + 带命名空间的组件样式）
   - `CLASS_NAME_MAP` - 类名映射表
   - `getNamespacedClass` - 获取命名空间类名
@@ -59,6 +59,7 @@
 
 ### Changed
 
+- 隔离模式配置 `ISOLATED_CONFIG.namespaced` 改为 `true`，section renderers 现已完整支持命名空间前缀
 - 重构 `src/renderer/templates/index.ts` (v1.2.0)：
   - 增强类型安全，引入 `PaginatedPageContext` 接口消除非空断言
   - 页码格式化提取为可配置项 `DEFAULT_PAGE_NUMBER_FORMAT`

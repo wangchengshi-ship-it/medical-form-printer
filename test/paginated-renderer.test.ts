@@ -506,10 +506,9 @@ describe('Isolated Mode', () => {
         config: { isolated: true },
       })
 
-      // 检查隔离 CSS 规则
-      expect(html).toContain('all: initial')
+      // 检查隔离 CSS 规则（使用 layout style 而非 strict，避免高度塌陷）
       expect(html).toContain('isolation: isolate')
-      expect(html).toContain('contain: strict')
+      expect(html).toContain('contain: layout style')
     })
   })
 

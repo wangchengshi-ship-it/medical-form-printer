@@ -124,6 +124,45 @@ export function namespaceClass(className: string): string
 export function namespaceClasses(classNames: string[]): string[]
 ```
 
+### 2.1 Class Name Helper (`src/types/options.ts`)
+
+为 Section Renderers 提供类名生成辅助函数，确保 HTML 类名与 CSS 选择器匹配。
+
+```typescript
+// src/types/options.ts
+
+/** 渲染选项 */
+export interface RenderOptions {
+  // ... 其他字段
+  /** CSS 类名前缀（用于隔离模式） */
+  classPrefix?: string
+}
+
+/**
+ * 获取类名（支持命名空间）
+ * @param name - 原始类名
+ * @param options - 渲染选项
+ * @returns 处理后的类名
+ */
+export function cls(name: string, options?: RenderOptions): string {
+  const prefix = options?.classPrefix
+  return prefix ? `${prefix}-${name}` : name
+}
+```
+
+**使用示例（Section Renderer）：**
+
+```typescript
+import { cls } from '../../types/options'
+
+export function renderInfoGrid(config, data, options) {
+  return `<div class="${cls('print-section', options)} ${cls('info-grid', options)}">
+    <div class="${cls('label-cell', options)}">...</div>
+    <div class="${cls('value-cell', options)}">...</div>
+  </div>`
+}
+```
+
 ### 3. Enhanced CSS Generator (`src/styles/css-generator.ts`)
 
 扩展现有 CSS 生成器，整合字体和隔离样式。
@@ -205,8 +244,15 @@ src/fonts/
 - Has class `mpr-root`
 - Contains inline `<style>` tag with all CSS rules
 - All internal class names start with `mpr-` prefix
+- CSS selectors match HTML class names (both use `mpr-` prefix)
 
-**Validates: Requirements 3.1, 3.5, 3.6**
+**Validates: Requirements 3.1, 3.5, 3.6, 3.7, 3.8**
+
+### Property 5: All Class Names Namespaced
+
+*For any* rendered HTML output from `renderToIsolatedHtml()` with sections, ALL class names in the HTML content (excluding style tag) SHALL start with `mpr-` prefix. This ensures complete CSS isolation with no unprefixed class names that could conflict with external styles.
+
+**Validates: Requirements 3.5, 3.6, 3.7, 3.8**
 
 ### Property 3: External Font Config Ignored
 

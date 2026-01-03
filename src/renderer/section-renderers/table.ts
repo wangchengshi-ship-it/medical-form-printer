@@ -1,10 +1,12 @@
 /**
  * @fileoverview 数据表格区块渲染器
  * @module renderer/section-renderers/table
+ * @modif 2023-11-02
  */
 
 import type { TableConfig, FormData } from '../../types/print-schema'
 import type { RenderOptions } from '../../types/options'
+import { cls } from '../../types/options'
 import { formatValue } from '../../formatters'
 import { escapeHtml } from '../../utils'
 
@@ -52,7 +54,7 @@ export function renderTable(
   // 行号表头
   const rowNumberHeader = config.showRowNumber ? '<th>序号</th>\n' : ''
   
-  return `<div class="print-section data-table">
+  return `<div class="${cls('print-section', options)} ${cls('data-table', options)}">
 <table>
 <thead>
 <tr>

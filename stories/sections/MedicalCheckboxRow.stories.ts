@@ -1,48 +1,11 @@
+/**
+ * @fileoverview 医疗勾选行区块 Story
+ * @module stories/sections/MedicalCheckboxRow
+ */
+
 import type { Meta, StoryObj } from '@storybook/html'
-import { renderMedicalCheckboxRow } from '../../src/renderer/section-renderers/medical-checkbox-row'
-import { generateIsolatedCss, ISOLATION_ROOT_CLASS, CSS_NAMESPACE } from '../../src/styles'
 import type { MedicalCheckboxRowConfig } from '../../src/types/print-schema'
-
-// 命名空间前缀
-const ns = CSS_NAMESPACE
-
-// 包装函数：添加隔离样式（使用内嵌思源宋体）
-const wrapWithStyles = (html: string): HTMLElement => {
-  const css = generateIsolatedCss()
-  
-  const container = document.createElement('div')
-  container.innerHTML = `
-    <div class="${ISOLATION_ROOT_CLASS}">
-      <style>
-        ${css}
-        .medical-checkbox-row {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: baseline;
-          gap: 8px;
-          padding: 4px 0;
-        }
-        .prefix-label { font-weight: 500; }
-        .checkbox-option { margin-right: 12px; }
-        .checkbox-symbol { margin-right: 2px; }
-        .input-value { 
-          border-bottom: 1px solid #000; 
-          min-width: 40px; 
-          display: inline-block;
-          text-align: center;
-        }
-        .input-label { margin-right: 4px; }
-        .extra-label { margin-right: 4px; }
-        .extra-suffix { margin-left: 2px; }
-        .extra-input { margin-left: 8px; }
-      </style>
-      <div class="${ns}-print-page ${ns}-a4 ${ns}-portrait" style="padding: 20px;">
-        ${html}
-      </div>
-    </div>
-  `
-  return container
-}
+import { createSectionStory, createMultiSectionStory } from './_story-utils'
 
 const meta: Meta = {
   title: 'PrintRenderer/Sections/MedicalCheckboxRow',
@@ -50,143 +13,157 @@ const meta: Meta = {
 }
 
 export default meta
-
 type Story = StoryObj
 
 // 基础选项勾选
 export const BasicOptions: Story = {
   name: '基础选项勾选',
-  render: () => {
-    const config: MedicalCheckboxRowConfig = {
-      prefixLabel: '排便情况：',
-      field: 'bowelMovement',
-      options: [
-        { value: 'yes', label: '有' },
-        { value: 'no', label: '无' },
-      ],
-    }
-    const data = { bowelMovement: 'yes' }
-    const html = renderMedicalCheckboxRow(config, data)
-    return wrapWithStyles(html)
-  },
+  render: createSectionStory(
+    {
+      type: 'medical-checkbox-row',
+      config: {
+        prefixLabel: '排便情况：',
+        field: 'bowelMovement',
+        options: [
+          { value: 'yes', label: '有' },
+          { value: 'no', label: '无' },
+        ],
+      } as MedicalCheckboxRowConfig,
+    },
+    { bowelMovement: 'yes' },
+    { title: '基础选项', description: '简单的是/否选项', height: '280px' }
+  ),
 }
 
 // 带输入框模板
 export const WithInputFormat: Story = {
   name: '带输入框模板',
-  render: () => {
-    const config: MedicalCheckboxRowConfig = {
-      prefixLabel: '排便次数：',
-      inputFormat: '{input}次/日',
-      inputField: 'bowelCount',
-    }
-    const data = { bowelCount: 3 }
-    const html = renderMedicalCheckboxRow(config, data)
-    return wrapWithStyles(html)
-  },
+  render: createSectionStory(
+    {
+      type: 'medical-checkbox-row',
+      config: {
+        prefixLabel: '排便次数：',
+        inputFormat: '{input}次/日',
+        inputField: 'bowelCount',
+      } as MedicalCheckboxRowConfig,
+    },
+    { bowelCount: 3 },
+    { title: '带输入框模板', description: '使用模板格式化输入值', height: '280px' }
+  ),
 }
 
 // 带简单输入框标签
 export const WithInputLabel: Story = {
   name: '带简单输入框标签',
-  render: () => {
-    const config: MedicalCheckboxRowConfig = {
-      inputLabel: '疾病名称',
-      inputLabelField: 'diseaseName',
-    }
-    const data = { diseaseName: '高血压' }
-    const html = renderMedicalCheckboxRow(config, data)
-    return wrapWithStyles(html)
-  },
+  render: createSectionStory(
+    {
+      type: 'medical-checkbox-row',
+      config: {
+        inputLabel: '疾病名称',
+        inputLabelField: 'diseaseName',
+      } as MedicalCheckboxRowConfig,
+    },
+    { diseaseName: '高血压' },
+    { title: '带输入框标签', description: '标签 + 输入框组合', height: '280px' }
+  ),
 }
 
 // 带额外输入项
 export const WithExtraInputs: Story = {
   name: '带额外输入项',
-  render: () => {
-    const config: MedicalCheckboxRowConfig = {
-      prefixLabel: '体温：',
-      extraInputs: [
-        { field: 'temperature', suffix: '℃' },
-      ],
-    }
-    const data = { temperature: 36.5 }
-    const html = renderMedicalCheckboxRow(config, data)
-    return wrapWithStyles(html)
-  },
+  render: createSectionStory(
+    {
+      type: 'medical-checkbox-row',
+      config: {
+        prefixLabel: '体温：',
+        extraInputs: [{ field: 'temperature', suffix: '℃' }],
+      } as MedicalCheckboxRowConfig,
+    },
+    { temperature: 36.5 },
+    { title: '带额外输入项', description: '前缀标签 + 额外输入', height: '280px' }
+  ),
 }
 
 // 复杂组合
 export const ComplexCombination: Story = {
   name: '复杂组合',
-  render: () => {
-    const config: MedicalCheckboxRowConfig = {
-      prefixLabel: '过敏史：',
-      field: 'hasAllergy',
-      options: [
-        { value: 'yes', label: '有' },
-        { value: 'no', label: '无' },
-      ],
-      inputLabel: '过敏原',
-      inputLabelField: 'allergen',
-    }
-    const data = { 
-      hasAllergy: 'yes',
-      allergen: '青霉素',
-    }
-    const html = renderMedicalCheckboxRow(config, data)
-    return wrapWithStyles(html)
-  },
+  render: createSectionStory(
+    {
+      type: 'medical-checkbox-row',
+      config: {
+        prefixLabel: '过敏史：',
+        field: 'hasAllergy',
+        options: [
+          { value: 'yes', label: '有' },
+          { value: 'no', label: '无' },
+        ],
+        inputLabel: '过敏原',
+        inputLabelField: 'allergen',
+      } as MedicalCheckboxRowConfig,
+    },
+    { hasAllergy: 'yes', allergen: '青霉素' },
+    { title: '复杂组合', description: '勾选框 + 输入框组合', height: '280px' }
+  ),
 }
 
 // 真实医疗表单示例
 export const RealMedicalExample: Story = {
   name: '真实医疗表单示例',
-  render: () => {
-    const configs: MedicalCheckboxRowConfig[] = [
+  render: createMultiSectionStory(
+    [
       {
-        prefixLabel: '大便：',
-        field: 'stool',
-        options: [
-          { value: 'normal', label: '正常' },
-          { value: 'abnormal', label: '异常' },
-        ],
-        inputFormat: '{input}次/日',
-        inputField: 'stoolCount',
+        type: 'section-title',
+        config: { text: '日常评估', align: 'left' },
       },
       {
-        prefixLabel: '小便：',
-        field: 'urine',
-        options: [
-          { value: 'normal', label: '正常' },
-          { value: 'abnormal', label: '异常' },
-        ],
-        inputFormat: '{input}次/日',
-        inputField: 'urineCount',
+        type: 'medical-checkbox-row',
+        config: {
+          prefixLabel: '大便：',
+          field: 'stool',
+          options: [
+            { value: 'normal', label: '正常' },
+            { value: 'abnormal', label: '异常' },
+          ],
+          inputFormat: '{input}次/日',
+          inputField: 'stoolCount',
+        } as MedicalCheckboxRowConfig,
       },
       {
-        prefixLabel: '睡眠：',
-        field: 'sleep',
-        options: [
-          { value: 'good', label: '好' },
-          { value: 'fair', label: '一般' },
-          { value: 'poor', label: '差' },
-        ],
-        inputFormat: '{input}小时',
-        inputField: 'sleepHours',
+        type: 'medical-checkbox-row',
+        config: {
+          prefixLabel: '小便：',
+          field: 'urine',
+          options: [
+            { value: 'normal', label: '正常' },
+            { value: 'abnormal', label: '异常' },
+          ],
+          inputFormat: '{input}次/日',
+          inputField: 'urineCount',
+        } as MedicalCheckboxRowConfig,
       },
-    ]
-    
-    const data = {
+      {
+        type: 'medical-checkbox-row',
+        config: {
+          prefixLabel: '睡眠：',
+          field: 'sleep',
+          options: [
+            { value: 'good', label: '好' },
+            { value: 'fair', label: '一般' },
+            { value: 'poor', label: '差' },
+          ],
+          inputFormat: '{input}小时',
+          inputField: 'sleepHours',
+        } as MedicalCheckboxRowConfig,
+      },
+    ],
+    {
       stool: 'normal',
       stoolCount: 2,
       urine: 'normal',
       urineCount: 6,
       sleep: 'good',
       sleepHours: 8,
-    }
-    
-    const html = configs.map(config => renderMedicalCheckboxRow(config, data)).join('\n')
-    return wrapWithStyles(html)
-  },
+    },
+    { title: '日常评估', description: '真实医疗场景：产妇日常评估记录', height: '400px' }
+  ),
 }

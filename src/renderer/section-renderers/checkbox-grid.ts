@@ -2,10 +2,12 @@
  * @fileoverview 勾选框网格区块渲染器
  * @module renderer/section-renderers/checkbox-grid
  * @description 支持 options 模式和 items 模式，支持 grid/flex 布局
+ * @modif 2023-11-20
  */
 
 import type { CheckboxGridConfig, CheckboxOption, CheckboxItem, FormData } from '../../types/print-schema'
 import type { RenderOptions } from '../../types/options'
+import { cls } from '../../types/options'
 import { formatBoolean, isChecked } from '../../formatters'
 import { escapeHtml } from '../../utils'
 
@@ -23,7 +25,7 @@ export function renderCheckboxGrid(
   
   // 前缀标签
   const prefixHtml = config.prefixLabel 
-    ? `<span class="prefix-label">${escapeHtml(config.prefixLabel)}</span>` 
+    ? `<span class="${cls('prefix-label', options)}">${escapeHtml(config.prefixLabel)}</span>` 
     : ''
   
   // 渲染项目
@@ -36,9 +38,9 @@ export function renderCheckboxGrid(
     itemsHtml = ''
   }
   
-  const layoutClass = layout === 'flex' ? 'checkbox-grid-flex' : 'checkbox-grid-grid'
+  const layoutClass = layout === 'flex' ? cls('checkbox-grid-flex', options) : cls('checkbox-grid-grid', options)
   
-  return `<div class="print-section checkbox-grid ${layoutClass}">
+  return `<div class="${cls('print-section', options)} ${cls('checkbox-grid', options)} ${layoutClass}">
 ${prefixHtml}${itemsHtml}
 </div>`
 }
@@ -67,14 +69,14 @@ function renderOptions(
         const displayValue = inputValue !== undefined && inputValue !== null && inputValue !== ''
           ? String(inputValue)
           : '________'
-        inputHtml = `<span class="input-line">${escapeHtml(displayValue)}</span>`
+        inputHtml = `<span class="${cls('input-line', options)}">${escapeHtml(displayValue)}</span>`
       }
       
       const styleAttr = layout === 'grid' ? ` style="width: ${columnWidth}"` : ''
       
-      return `<div class="checkbox-item"${styleAttr}>
-<span class="checkbox-symbol">${symbol}</span>
-<span class="checkbox-label">${escapeHtml(opt.label)}</span>
+      return `<div class="${cls('checkbox-item', options)}"${styleAttr}>
+<span class="${cls('checkbox-symbol', options)}">${symbol}</span>
+<span class="${cls('checkbox-label', options)}">${escapeHtml(opt.label)}</span>
 ${inputHtml}
 </div>`
     })
@@ -106,9 +108,9 @@ function renderItems(
           ? String(inputValue)
           : '________'
         
-        return `<div class="checkbox-item text-input-item"${styleAttr}>
-<span class="text-input-label">${escapeHtml(item.label)}</span>
-<span class="input-line">${escapeHtml(displayValue)}</span>
+        return `<div class="${cls('checkbox-item', options)} ${cls('text-input-item', options)}"${styleAttr}>
+<span class="${cls('text-input-label', options)}">${escapeHtml(item.label)}</span>
+<span class="${cls('input-line', options)}">${escapeHtml(displayValue)}</span>
 </div>`
       } else {
         // checkbox 类型
@@ -121,12 +123,12 @@ function renderItems(
           const displayValue = inputValue !== undefined && inputValue !== null && inputValue !== ''
             ? String(inputValue)
             : '________'
-          inputHtml = `<span class="input-line">${escapeHtml(displayValue)}</span>`
+          inputHtml = `<span class="${cls('input-line', options)}">${escapeHtml(displayValue)}</span>`
         }
         
-        return `<div class="checkbox-item"${styleAttr}>
-<span class="checkbox-symbol">${symbol}</span>
-<span class="checkbox-label">${escapeHtml(item.label)}</span>
+        return `<div class="${cls('checkbox-item', options)}"${styleAttr}>
+<span class="${cls('checkbox-symbol', options)}">${symbol}</span>
+<span class="${cls('checkbox-label', options)}">${escapeHtml(item.label)}</span>
 ${inputHtml}
 </div>`
       }

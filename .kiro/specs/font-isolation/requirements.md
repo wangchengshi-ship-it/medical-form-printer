@@ -47,11 +47,13 @@
 #### Acceptance Criteria
 
 1. THE Print_Renderer SHALL wrap all rendered content in an isolation container
-2. THE Print_Renderer SHALL use CSS `all: initial` to reset inherited styles on the isolation container
-3. THE Print_Renderer SHALL use CSS `contain: strict` for layout containment
-4. THE Print_Renderer SHALL use CSS `isolation: isolate` to create a new stacking context
-5. WHEN external CSS targets elements inside the isolation container, THE Print_Renderer SHALL override them using high-specificity selectors
-6. THE Print_Renderer SHALL prefix all internal CSS class names with a unique namespace (e.g., `mpr-`)
+2. THE Print_Renderer SHALL use CSS `contain: layout style` for layout containment (not `strict` to avoid height collapse)
+3. THE Print_Renderer SHALL use CSS `isolation: isolate` to create a new stacking context
+4. WHEN external CSS targets elements inside the isolation container, THE Print_Renderer SHALL override them using high-specificity selectors
+5. THE Print_Renderer SHALL prefix ALL internal CSS class names with a unique namespace (`mpr-`)
+6. THE Print_Renderer SHALL ensure HTML class names match CSS selectors (both use `mpr-` prefix)
+7. THE Section_Renderers SHALL use `cls()` helper function to generate namespaced class names
+8. THE `renderSections()` function SHALL pass `classPrefix: 'mpr'` to all section renderers in isolated mode
 
 ### Requirement 4: 跨环境一致性
 

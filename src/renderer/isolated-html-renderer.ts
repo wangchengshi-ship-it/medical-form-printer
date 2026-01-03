@@ -112,15 +112,20 @@ function renderSectionTitle(title: string | undefined): string {
 
 /**
  * 渲染所有区块
- * @remarks 区块渲染器内部的类名目前不带命名空间前缀，
- * 这是已知限制。完整的命名空间支持需要修改所有 section-renderers。
- * @see {@link file://.kiro/specs/font-isolation/tasks.md} Task 4.1
+ * @description 在隔离模式下，自动为所有区块渲染器传递 classPrefix: 'mpr'，
+ * 确保生成的 HTML 类名与 CSS 规则匹配。
  */
 function renderSections(schema: PrintSchema, data: FormData, options?: RenderOptions): string {
+  // 在隔离模式下，强制使用 mpr 前缀
+  const isolatedOptions: RenderOptions = {
+    ...options,
+    classPrefix: CSS_NAMESPACE,
+  }
+  
   return schema.sections
     .map((section) => {
       const title = renderSectionTitle(section.title)
-      const content = renderSection(section.type, section.config, data, options)
+      const content = renderSection(section.type, section.config, data, isolatedOptions)
       return `${title}${content}`
     })
     .join('\n')

@@ -89,16 +89,10 @@ describe('CSS Isolation Module', () => {
       expect(isolationCss).toContain('.mpr-root')
     })
 
-    // Requirement 3.2: all: initial
-    it('should contain "all: initial" for style reset', () => {
+    // Requirement 3.2: contain: layout style (changed from strict to avoid height collapse)
+    it('should contain "contain: layout style" for layout containment', () => {
       const isolationCss = generateIsolationCss()
-      expect(isolationCss).toContain('all: initial')
-    })
-
-    // Requirement 3.3: contain: strict
-    it('should contain "contain: strict" for layout containment', () => {
-      const isolationCss = generateIsolationCss()
-      expect(isolationCss).toContain('contain: strict')
+      expect(isolationCss).toContain('contain: layout style')
     })
 
     // Requirement 3.4: isolation: isolate

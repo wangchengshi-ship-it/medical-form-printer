@@ -1,33 +1,12 @@
+/**
+ * @fileoverview 内联行区块 Story
+ * @module stories/sections/InlineRow
+ * @description InlineRow 用于将多个区块水平排列在一行
+ */
+
 import type { Meta, StoryObj } from '@storybook/html'
-import { renderInlineRow } from '../../src/renderer/section-renderers/inline-row'
-import { generateIsolatedCss, ISOLATION_ROOT_CLASS, CSS_NAMESPACE } from '../../src/styles'
-import type { InlineRowConfig, NotesConfig, SectionTitleConfig, CheckboxGridConfig } from '../../src/types/print-schema'
-
-// 命名空间前缀
-const ns = CSS_NAMESPACE
-
-// 包装函数：添加隔离样式（使用内嵌思源宋体）
-const wrapWithStyles = (html: string): HTMLElement => {
-  const css = generateIsolatedCss()
-  
-  const container = document.createElement('div')
-  container.innerHTML = `
-    <div class="${ISOLATION_ROOT_CLASS}">
-      <style>
-        ${css}
-        .inline-row-item { overflow: hidden; }
-        .checkbox-grid-flex { display: flex; flex-wrap: wrap; gap: 8px; }
-        .checkbox-item { display: inline-flex; align-items: center; }
-        .checkbox-symbol { margin-right: 2px; }
-        .prefix-label { font-weight: 500; margin-right: 8px; }
-      </style>
-      <div class="${ns}-print-page ${ns}-a4 ${ns}-portrait" style="padding: 20px;">
-        ${html}
-      </div>
-    </div>
-  `
-  return container
-}
+import type { InlineRowConfig, InfoGridConfig, CheckboxGridConfig, NotesConfig } from '../../src/types/print-schema'
+import { createSectionStory, createMultiSectionStory } from './_story-utils'
 
 const meta: Meta = {
   title: 'PrintRenderer/Sections/InlineRow',
@@ -35,173 +14,158 @@ const meta: Meta = {
 }
 
 export default meta
-
 type Story = StoryObj
 
-// 等分两列
-export const TwoEqualColumns: Story = {
-  name: '等分两列',
-  render: () => {
-    const config: InlineRowConfig = {
-      columns: [1, 1],
-      gap: '16px',
-      children: [
-        {
-          type: 'notes',
-          config: { content: '左侧内容区域', showBorder: true } as NotesConfig,
-        },
-        {
-          type: 'notes',
-          config: { content: '右侧内容区域', showBorder: true } as NotesConfig,
-        },
-      ],
-    }
-    
-    const html = renderInlineRow(config, {})
-    return wrapWithStyles(html)
-  },
+// 基础内联行（两列等宽）
+export const Basic: Story = {
+  name: '基础内联行',
+  render: createSectionStory(
+    {
+      type: 'inline-row',
+      config: {
+        children: [
+          {
+            type: 'notes',
+            config: { content: '左侧内容' } as NotesConfig,
+          },
+          {
+            type: 'notes',
+            config: { content: '右侧内容' } as NotesConfig,
+          },
+        ],
+      } as InlineRowConfig,
+    },
+    {},
+    { title: '内联行', description: '两个区块水平排列', height: '280px' }
+  ),
 }
 
-// 1:2:1 比例
-export const OneTwoOneRatio: Story = {
-  name: '1:2:1 比例',
-  render: () => {
-    const config: InlineRowConfig = {
-      columns: [1, 2, 1],
-      gap: '12px',
-      children: [
-        {
-          type: 'notes',
-          config: { content: '左侧 (1)', showBorder: true } as NotesConfig,
-        },
-        {
-          type: 'notes',
-          config: { content: '中间 (2)', showBorder: true } as NotesConfig,
-        },
-        {
-          type: 'notes',
-          config: { content: '右侧 (1)', showBorder: true } as NotesConfig,
-        },
-      ],
-    }
-    
-    const html = renderInlineRow(config, {})
-    return wrapWithStyles(html)
-  },
-}
-
-// 2:1 比例
-export const TwoOneRatio: Story = {
-  name: '2:1 比例',
-  render: () => {
-    const config: InlineRowConfig = {
-      columns: [2, 1],
-      gap: '16px',
-      children: [
-        {
-          type: 'notes',
-          config: { content: '主要内容区域（占 2/3）\n这里可以放置更多内容', showBorder: true } as NotesConfig,
-        },
-        {
-          type: 'notes',
-          config: { content: '侧边栏（占 1/3）', showBorder: true } as NotesConfig,
-        },
-      ],
-    }
-    
-    const html = renderInlineRow(config, {})
-    return wrapWithStyles(html)
-  },
+// 自定义列比例
+export const CustomColumns: Story = {
+  name: '自定义列比例',
+  render: createSectionStory(
+    {
+      type: 'inline-row',
+      config: {
+        columns: [1, 2, 1],
+        gap: '16px',
+        children: [
+          {
+            type: 'notes',
+            config: { content: '1份宽度' } as NotesConfig,
+          },
+          {
+            type: 'notes',
+            config: { content: '2份宽度（中间更宽）' } as NotesConfig,
+          },
+          {
+            type: 'notes',
+            config: { content: '1份宽度' } as NotesConfig,
+          },
+        ],
+      } as InlineRowConfig,
+    },
+    {},
+    { title: '自定义列比例', description: '1:2:1 比例布局', height: '280px' }
+  ),
 }
 
 // 混合区块类型
-export const MixedSectionTypes: Story = {
+export const MixedTypes: Story = {
   name: '混合区块类型',
-  render: () => {
-    const config: InlineRowConfig = {
-      columns: [1, 1],
-      gap: '16px',
-      children: [
-        {
-          type: 'section-title',
-          config: { text: '左侧标题', align: 'center' } as SectionTitleConfig,
-        },
-        {
-          type: 'checkbox-grid',
-          config: {
-            field: 'options',
-            layout: 'flex',
-            options: [
-              { value: 'a', label: '选项A' },
-              { value: 'b', label: '选项B' },
-              { value: 'c', label: '选项C' },
-            ],
-          } as CheckboxGridConfig,
-        },
-      ],
-    }
-    
-    const data = { options: ['a', 'c'] }
-    const html = renderInlineRow(config, data)
-    return wrapWithStyles(html)
-  },
+  render: createSectionStory(
+    {
+      type: 'inline-row',
+      config: {
+        columns: [2, 1],
+        gap: '16px',
+        children: [
+          {
+            type: 'info-grid',
+            config: {
+              columns: 2,
+              rows: [
+                {
+                  cells: [
+                    { label: '姓名', field: 'name', type: 'text' },
+                    { label: '年龄', field: 'age', type: 'number', suffix: '岁' },
+                  ],
+                },
+              ],
+            } as InfoGridConfig,
+          },
+          {
+            type: 'checkbox-grid',
+            config: {
+              field: 'gender',
+              layout: 'flex',
+              prefixLabel: '性别：',
+              options: [
+                { value: 'male', label: '男' },
+                { value: 'female', label: '女' },
+              ],
+            } as CheckboxGridConfig,
+          },
+        ],
+      } as InlineRowConfig,
+    },
+    { name: '张三', age: 28, gender: ['female'] },
+    { title: '混合区块类型', description: 'InfoGrid + CheckboxGrid 组合' }
+  ),
 }
 
-// 真实医疗表单示例
-export const RealMedicalExample: Story = {
-  name: '真实医疗表单示例',
-  render: () => {
-    const config: InlineRowConfig = {
-      columns: [1, 1, 1],
-      gap: '12px',
-      children: [
-        {
-          type: 'checkbox-grid',
-          config: {
-            field: 'stool',
-            layout: 'flex',
-            prefixLabel: '大便：',
-            options: [
-              { value: 'normal', label: '正常' },
-              { value: 'abnormal', label: '异常' },
-            ],
-          } as CheckboxGridConfig,
-        },
-        {
-          type: 'checkbox-grid',
-          config: {
-            field: 'urine',
-            layout: 'flex',
-            prefixLabel: '小便：',
-            options: [
-              { value: 'normal', label: '正常' },
-              { value: 'abnormal', label: '异常' },
-            ],
-          } as CheckboxGridConfig,
-        },
-        {
-          type: 'checkbox-grid',
-          config: {
-            field: 'sleep',
-            layout: 'flex',
-            prefixLabel: '睡眠：',
-            options: [
-              { value: 'good', label: '好' },
-              { value: 'fair', label: '一般' },
-              { value: 'poor', label: '差' },
-            ],
-          } as CheckboxGridConfig,
-        },
-      ],
-    }
-    
-    const data = {
-      stool: ['normal'],
-      urine: ['normal'],
-      sleep: ['good'],
-    }
-    
-    const html = renderInlineRow(config, data)
-    return wrapWithStyles(html)
-  },
+// 产妇信息行（真实场景）
+export const MaternalInfoRow: Story = {
+  name: '产妇信息行',
+  render: createMultiSectionStory(
+    [
+      {
+        type: 'section-title',
+        config: { text: '产妇基本信息', align: 'left' },
+      },
+      {
+        type: 'inline-row',
+        config: {
+          columns: [3, 2],
+          gap: '16px',
+          children: [
+            {
+              type: 'info-grid',
+              config: {
+                columns: 3,
+                rows: [
+                  {
+                    cells: [
+                      { label: '姓名', field: 'name', type: 'text' },
+                      { label: '年龄', field: 'age', type: 'number', suffix: '岁' },
+                      { label: '床号', field: 'bedNo', type: 'text' },
+                    ],
+                  },
+                ],
+              } as InfoGridConfig,
+            },
+            {
+              type: 'checkbox-grid',
+              config: {
+                field: 'deliveryMethod',
+                layout: 'flex',
+                prefixLabel: '分娩方式：',
+                options: [
+                  { value: 'natural', label: '顺产' },
+                  { value: 'cesarean', label: '剖宫产' },
+                ],
+              } as CheckboxGridConfig,
+            },
+          ],
+        } as InlineRowConfig,
+      },
+    ],
+    {
+      name: '李女士',
+      age: 30,
+      bedNo: 'A-201',
+      deliveryMethod: ['natural'],
+    },
+    { title: '产妇信息行', description: '真实医疗场景：产妇基本信息水平布局' }
+  ),
 }

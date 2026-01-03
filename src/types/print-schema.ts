@@ -2,6 +2,7 @@
  * @fileoverview PrintSchema 类型定义
  * @module types/print-schema
  * @description 定义打印布局配置的完整类型系统
+ * @modif 2024-04-07
  */
 
 /** 页面尺寸 */

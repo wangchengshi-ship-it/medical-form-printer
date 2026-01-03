@@ -182,7 +182,7 @@ const css = generateIsolatedCss()
 // 包含：
 // 1. @font-face 声明（内嵌 Base64 思源宋体）
 // 2. 字体强制覆盖规则
-// 3. CSS 隔离容器样式（all: initial, contain: layout style, isolation: isolate）
+// 3. CSS 隔离容器样式（contain: layout style, isolation: isolate）
 // 4. 所有组件样式（带 mpr- 前缀）
 // 5. 打印媒体查询
 

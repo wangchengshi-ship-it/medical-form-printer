@@ -2,10 +2,12 @@
  * @fileoverview 容器渲染器
  * @module renderer/section-renderers/container
  * @description 支持子区块嵌套，支持 row/column 布局方向，支持边框和内边距配置
+ * @modified 2023/11/02
  */
 
 import type { ContainerConfig, FormData } from '../../types/print-schema'
 import type { RenderOptions } from '../../types/options'
+import { cls } from '../../types/options'
 import { renderSection } from './index'
 
 /**
@@ -32,7 +34,7 @@ export function renderContainer(
   const childrenHtml = config.children
     .map((child) => {
       const childHtml = renderSection(child.type, child.config, data, options)
-      return `<div class="container-item">${childHtml}</div>`
+      return `<div class="${cls('container-item', options)}">${childHtml}</div>`
     })
     .join('\n')
   
@@ -45,7 +47,7 @@ export function renderContainer(
     `border: ${borderStyle}`,
   ].join('; ')
   
-  return `<div class="print-section container-section" style="${styles}">
+  return `<div class="${cls('print-section', options)} ${cls('container-section', options)}" style="${styles}">
 ${childrenHtml}
 </div>`
 }

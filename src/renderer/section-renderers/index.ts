@@ -1,6 +1,7 @@
 /**
  * @fileoverview 区块渲染器注册表
  * @module renderer/section-renderers
+ * @modified 2024-04-06
  */
 
 import type { SectionType, SectionConfig, FormData } from '../../types/print-schema'

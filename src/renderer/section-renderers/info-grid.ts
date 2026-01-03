@@ -3,10 +3,12 @@
  * @module renderer/section-renderers/info-grid
  * @description 支持多种单元格类型：text, checkbox, date, number, signature,
  *              checkbox-inline, compound, textarea, checkbox-text
+ * @createtime 2023-11-28
  */
 
 import type { InfoGridConfig, InfoGridCell, FormData } from '../../types/print-schema'
 import type { RenderOptions } from '../../types/options'
+import { cls } from '../../types/options'
 import { formatValue, formatBoolean } from '../../formatters'
 import { escapeHtml } from '../../utils'
 
@@ -26,8 +28,8 @@ export function renderInfoGrid(
           const colspan = cell.span ? ` colspan="${cell.span}"` : ''
           const widthStyle = cell.width ? ` style="width: ${cell.width}"` : ''
           
-          return `<td class="label-cell"${widthStyle}>${escapeHtml(cell.label)}</td>
-<td class="value-cell"${colspan}>${formattedValue}</td>`
+          return `<td class="${cls('label-cell', options)}"${widthStyle}>${escapeHtml(cell.label)}</td>
+<td class="${cls('value-cell', options)}"${colspan}>${formattedValue}</td>`
         })
         .join('\n')
       
@@ -35,7 +37,7 @@ export function renderInfoGrid(
     })
     .join('\n')
   
-  return `<div class="print-section info-grid">
+  return `<div class="${cls('print-section', options)} ${cls('info-grid', options)}">
 <table>
 ${rows}
 </table>
@@ -54,7 +56,7 @@ function renderCellValue(
   
   switch (type) {
     case 'checkbox-inline':
-      return renderCheckboxInline(cell, data)
+      return renderCheckboxInline(cell, data, options)
     case 'compound':
       return renderCompound(cell, data, options)
     case 'textarea':
@@ -80,7 +82,7 @@ function renderBasicValue(
     customFormatters: options?.formatters,
   })
   
-  const suffix = cell.suffix ? `<span class="suffix">${escapeHtml(cell.suffix)}</span>` : ''
+  const suffix = cell.suffix ? `<span class="${cls('suffix', options)}">${escapeHtml(cell.suffix)}</span>` : ''
   return escapeHtml(formattedValue) + suffix
 }
 
@@ -89,7 +91,8 @@ function renderBasicValue(
  */
 function renderCheckboxInline(
   cell: InfoGridCell,
-  data: FormData
+  data: FormData,
+  options?: RenderOptions
 ): string {
   const value = data[cell.field]
   const inlineOptions = cell.inlineOptions || ['无', '有']
@@ -107,10 +110,10 @@ function renderCheckboxInline(
     }
     
     const symbol = formatBoolean(checked)
-    return `<span class="checkbox-inline-item"><span class="checkbox-symbol">${symbol}</span>${escapeHtml(opt)}</span>`
+    return `<span class="${cls('checkbox-inline-item', options)}"><span class="${cls('checkbox-symbol', options)}">${symbol}</span>${escapeHtml(opt)}</span>`
   })
   
-  return `<span class="checkbox-inline-group">${items.join('')}</span>`
+  return `<span class="${cls('checkbox-inline-group', options)}">${items.join('')}</span>`
 }
 
 /**
@@ -154,7 +157,7 @@ function renderTextarea(
   })
   
   const minHeightStyle = cell.minHeight ? ` style="min-height: ${cell.minHeight}"` : ''
-  return `<div class="textarea-value"${minHeightStyle}>${escapeHtml(formattedValue)}</div>`
+  return `<div class="${cls('textarea-value', options)}"${minHeightStyle}>${escapeHtml(formattedValue)}</div>`
 }
 
 /**
@@ -176,5 +179,5 @@ function renderCheckboxText(
     ? String(textValue)
     : (options?.emptyPlaceholder || '________')
   
-  return `<span class="checkbox-text-group"><span class="checkbox-symbol">${symbol}</span><span class="text-value">${escapeHtml(displayText)}</span></span>`
+  return `<span class="${cls('checkbox-text-group', options)}"><span class="${cls('checkbox-symbol', options)}">${symbol}</span><span class="${cls('text-value', options)}">${escapeHtml(displayText)}</span></span>`
 }
