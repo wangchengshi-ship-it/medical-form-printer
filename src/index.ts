@@ -1,30 +1,30 @@
 /**
- * @fileoverview 医疗表单打印渲染库 - 主入口
- * @module @medical/print-renderer
+ * @fileoverview Medical form print renderer library - Main entry
+ * @module medical-form-printer
  * @version 0.1.0
- * 
+ *
  * @description
- * 将结构化表单数据渲染为可打印的 HTML。
- * 此入口可在浏览器和 Node.js 环境中使用。
- * 
+ * Renders structured form data to printable HTML.
+ * This entry point can be used in both browser and Node.js environments.
+ *
  * @example
  * ```typescript
- * import { renderToHtml } from '@medical/print-renderer'
- * 
+ * import { renderToHtml } from 'medical-form-printer'
+ *
  * const html = renderToHtml(printSchema, formData, {
  *   theme: { colors: { primary: '#000' } },
- *   watermark: '仅供内部使用'
+ *   watermark: 'Internal Use Only'
  * })
  * ```
  */
 
-// 核心渲染
+// Core rendering
 export { renderToHtml, renderToIsolatedHtml, renderToIsolatedFragment } from './renderer'
 export type { IsolatedRenderOptions } from './renderer/isolated-html-renderer'
 export { registerSectionRenderer, getSectionRenderer } from './renderer'
 export type { SectionRenderer } from './renderer'
 
-// 字体模块
+// Font module
 export {
   FONT_FAMILY,
   FONT_WEIGHT,
@@ -37,14 +37,14 @@ export {
 } from './fonts'
 export type { FontLoadOptions } from './fonts'
 
-// Strategy 模式
+// Strategy pattern
 export {
   StrategyContext,
   createDefaultStrategyContext,
 } from './renderer'
 export type { SectionRenderStrategy } from './renderer'
 
-// Factory 模式
+// Factory pattern
 export {
   SectionRendererFactory,
   getDefaultSectionRendererFactory,
@@ -53,7 +53,7 @@ export {
 } from './renderer'
 export type { RendererCreator, Formatter, FormatterConfig } from './renderer'
 
-// Builder 模式
+// Builder pattern
 export {
   HtmlElementBuilder,
   PageBuilder,
@@ -74,7 +74,7 @@ export {
 } from './renderer'
 export type { PageConfig, HeaderConfig, FooterConfig, ColumnConfig } from './renderer'
 
-// Composite 模式
+// Composite pattern
 export {
   LeafSection,
   ContainerSection,
@@ -85,7 +85,7 @@ export {
 } from './renderer'
 export type { SectionComponent } from './renderer'
 
-// Template Method 模式
+// Template Method pattern
 export {
   AbstractPageRenderer,
   SinglePageRenderer,
@@ -95,7 +95,7 @@ export {
 } from './renderer'
 export type { PageRenderContext } from './renderer'
 
-// Visitor 模式
+// Visitor pattern
 export {
   FormatVisitor,
   ValidationVisitor,
@@ -113,19 +113,19 @@ export type {
   MeasureResult,
 } from './renderer'
 
-// 样式
+// Styles
 export {
   defaultTheme,
   generateCss,
   generateIsolatedCss,
   mergeTheme,
-  // CSS 隔离
+  // CSS isolation
   CSS_NAMESPACE,
   ISOLATION_ROOT_CLASS,
   namespaceClass,
   namespaceClasses,
   getNamespacedClass,
-  // 基准单位系统
+  // Base unit system
   createScaledTheme,
   createThemeWithBaseUnit,
   defaultScaledConfig,
@@ -140,7 +140,7 @@ export {
   convertToMm,
   formatSize,
   formatPadding,
-  // 内联样式
+  // Inline styles
   createInlineStyles,
   styleToString,
   mergeStyles,
@@ -149,7 +149,7 @@ export {
 } from './styles'
 export type { Unit, StyleObject, InlineStyleMap } from './styles'
 
-// 格式化器
+// Formatters
 export {
   formatDate,
   formatBoolean,
@@ -158,7 +158,7 @@ export {
   isChecked,
 } from './formatters'
 
-// HTML 构建工具
+// HTML builder utilities
 export {
   HtmlBuilder,
   h,
@@ -167,7 +167,7 @@ export {
   each,
   escapeHtml,
   escapeAttr,
-  // 水印工具
+  // Watermark utilities
   clamp,
   normalizeOpacity,
   renderWatermarkHtml,
@@ -175,9 +175,9 @@ export {
 } from './utils'
 export type { WatermarkOptions } from './utils'
 
-// 类型
+// Types
 export type {
-  // PrintSchema 相关
+  // PrintSchema related
   PrintSchema,
   PrintHeader,
   PrintFooter,
@@ -186,7 +186,7 @@ export type {
   SectionConfig,
   PageSize,
   PageOrientation,
-  // 区块配置
+  // Section configs
   InfoGridConfig,
   InfoGridRow,
   InfoGridCell,
@@ -203,7 +203,7 @@ export type {
 } from './types/print-schema'
 
 export type {
-  // 选项
+  // Options
   RenderOptions,
   PdfOptions,
   MergeOptions,
@@ -212,7 +212,7 @@ export type {
 } from './types/options'
 
 export type {
-  // 主题
+  // Theme
   Theme,
   FontConfig,
   ColorConfig,
@@ -222,33 +222,33 @@ export type {
   ScaledThemeConfig,
 } from './types/theme'
 
-// 分页模块
+// Pagination module
 export {
-  // 页面尺寸预设
+  // Page size presets
   PAGE_16K,
   PAGE_A4,
   PAGE_A5,
   PAGE_PRESETS,
-  // 单位转换
+  // Unit conversion
   mmToPx,
   pxToMm,
   mmToPt,
   ptToMm,
-  // 尺寸计算
+  // Dimension calculation
   calculateUsableHeight,
   calculateUsableWidth,
   calculateUsableHeightMm,
   calculateUsableWidthMm,
   getPageDimensions,
   createPageDimensions,
-  // 分页算法
+  // Pagination algorithm
   calculatePageBreaks,
   calculatePageBreaksSimple,
   findTableHeader,
   buildTableHeaderMap,
   validatePageBreakResult,
   getPageContentHeight,
-  // 溢出字段处理
+  // Overflow field handling
   getOverflowFirstLine,
   getOverflowRest,
   hasOverflowContent,
@@ -258,21 +258,21 @@ export {
   isOverflowField,
   processOverflowFields,
   hasAnyOverflowContent,
-  // 分页渲染器
+  // Paginated renderer
   renderPaginatedHtml,
   renderPaginatedHtmlSimple,
   generatePaginationCss,
   createRenderConfigFromPaginationConfig,
   DEFAULT_PAGINATED_RENDER_CONFIG,
-  // Composable 风格 API
+  // Composable style API
   usePrintPagination,
-  // 常量
+  // Constants
   DEFAULT_DPI,
   MM_PER_INCH,
 } from './pagination'
 
 export type {
-  // 分页类型
+  // Pagination types
   PageDimensions,
   MeasurableItemType,
   MeasurableItem,
@@ -285,7 +285,7 @@ export type {
   PaginationConfig,
   PageBreakOptions,
   OverflowFieldResult,
-  // 分页渲染器类型
+  // Paginated renderer types
   PaginatedRenderConfig,
   PaginatedRenderContext,
 } from './pagination'

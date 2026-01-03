@@ -101,13 +101,13 @@ describe('StrategyContext', () => {
           { cells: [{ label: '姓名', field: 'name' }] }
         ]
       }
-      const data = { name: '张三' }
+      const data = { name: 'Jane Doe' }
       
       const html = context.render('info-grid', config, data)
       
       expect(html).toContain('info-grid')
       expect(html).toContain('姓名')
-      expect(html).toContain('张三')
+      expect(html).toContain('Jane Doe')
     })
 
     it('should return comment for unknown type', () => {

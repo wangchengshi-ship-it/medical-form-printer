@@ -1,18 +1,18 @@
 /**
- * @fileoverview 字体隔离功能 Storybook 示例
+ * @fileoverview Font isolation Storybook examples
  * @module stories/FontIsolation
  * @version 1.0.0
  * @author Kiro
  * @created 2026-01-03
  *
  * @description
- * 展示字体隔离功能的 Storybook 示例，包括：
- * - 隔离渲染模式
- * - 字体加载状态展示
- * - 与外部样式的隔离效果
+ * Storybook examples demonstrating font isolation features, including:
+ * - Isolated rendering mode
+ * - Font loading status display
+ * - Isolation from external styles
  *
  * @requirements
- * - Requirements 4.1: 浏览器预览与 PDF 生成输出一致
+ * - Requirements 4.1: Browser preview matches PDF generation output
  */
 
 import type { Meta, StoryObj } from '@storybook/html'
@@ -26,16 +26,17 @@ import {
   ISOLATION_ROOT_CLASS,
 } from '../src'
 import type { PrintSchema, FormData } from '../src/types/print-schema'
+import { PLACEHOLDER } from '../src/test-utils/placeholder-data'
 
-// ==================== 示例数据 ====================
+// ==================== Sample Data ====================
 
 const sampleSchema: PrintSchema = {
   pageSize: '16K',
   orientation: 'portrait',
   header: {
-    hospital: '天津中医药大学第二附属医院',
-    department: '国际产后康复中心',
-    title: '字体隔离测试表单',
+    hospital: PLACEHOLDER.hospital.name,
+    department: PLACEHOLDER.hospital.department,
+    title: 'Font Isolation Test Form',
   },
   sections: [
     {
@@ -45,18 +46,18 @@ const sampleSchema: PrintSchema = {
         rows: [
           {
             cells: [
-              { label: '房号', field: 'roomNumber', type: 'text' },
-              { label: '住院号', field: 'hospitalNumber', type: 'text' },
-              { label: '入院时间', field: 'admissionTime', type: 'date' },
-              { label: '姓名', field: 'name', type: 'text' },
+              { label: 'Room', field: 'roomNumber', type: 'text' },
+              { label: 'Hospital No.', field: 'hospitalNumber', type: 'text' },
+              { label: 'Admission Time', field: 'admissionTime', type: 'date' },
+              { label: 'Name', field: 'name', type: 'text' },
             ],
           },
           {
             cells: [
-              { label: '年龄', field: 'age', type: 'number' },
-              { label: '血型', field: 'bloodType', type: 'text' },
-              { label: '民族', field: 'ethnicity', type: 'text' },
-              { label: '籍贯', field: 'birthplace', type: 'text' },
+              { label: 'Age', field: 'age', type: 'number' },
+              { label: 'Blood Type', field: 'bloodType', type: 'text' },
+              { label: 'Ethnicity', field: 'ethnicity', type: 'text' },
+              { label: 'Birthplace', field: 'birthplace', type: 'text' },
             ],
           },
         ],
@@ -64,15 +65,15 @@ const sampleSchema: PrintSchema = {
     },
     {
       type: 'checkbox-grid',
-      title: '过敏史',
+      title: 'Allergy History',
       config: {
         field: 'allergies',
         columns: 4,
         options: [
-          { value: 'none', label: '无' },
-          { value: 'penicillin', label: '青霉素' },
-          { value: 'sulfa', label: '磺胺类' },
-          { value: 'other', label: '其他', hasInput: true, inputField: 'allergyOther' },
+          { value: 'none', label: 'None' },
+          { value: 'penicillin', label: 'Penicillin' },
+          { value: 'sulfa', label: 'Sulfonamides' },
+          { value: 'other', label: 'Other', hasInput: true, inputField: 'allergyOther' },
         ],
       },
     },
@@ -80,14 +81,14 @@ const sampleSchema: PrintSchema = {
       type: 'signature-area',
       config: {
         fields: [
-          { label: '评估护士', field: 'nurseSignature', showDate: true },
+          { label: 'Assessment Nurse', field: 'nurseSignature', showDate: true },
         ],
       },
     },
   ],
   footer: {
     showPageNumber: true,
-    notes: '本表由护士填写，入院24小时内完成',
+    notes: 'This form is filled by nurses within 24 hours of admission',
   },
 }
 
@@ -95,41 +96,41 @@ const sampleData: FormData = {
   roomNumber: '301',
   hospitalNumber: '2024010001',
   admissionTime: '2024-01-15T10:30:00',
-  name: '张三',
+  name: PLACEHOLDER.patient.name,
   age: 28,
-  bloodType: 'A型',
-  ethnicity: '汉族',
-  birthplace: '天津',
+  bloodType: 'A',
+  ethnicity: 'Asian',
+  birthplace: PLACEHOLDER.location.city,
   allergies: ['none'],
-  nurseSignature: '李护士',
+  nurseSignature: PLACEHOLDER.staff.nurse,
 }
 
-// ==================== Story 配置 ====================
+// ==================== Story Configuration ====================
 
 const meta: Meta = {
-  title: 'FontIsolation/字体隔离',
+  title: 'FontIsolation/Font Isolation',
   tags: ['autodocs'],
   parameters: {
     docs: {
       description: {
         component: `
-## 字体隔离功能
+## Font Isolation Feature
 
-此组件展示了 \`@medical/print-renderer\` 库的字体隔离功能：
+This component demonstrates the font isolation features of the \`medical-form-printer\` library:
 
-- **强制字体绑定**: 所有文本使用内嵌的思源宋体 SC (${FONT_FAMILY})
-- **CSS 隔离**: 使用 \`.${ISOLATION_ROOT_CLASS}\` 容器隔离样式
-- **命名空间**: 所有类名使用 \`${CSS_NAMESPACE}-\` 前缀
+- **Forced Font Binding**: All text uses embedded Source Han Serif SC (${FONT_FAMILY})
+- **CSS Isolation**: Uses \`.${ISOLATION_ROOT_CLASS}\` container for style isolation
+- **Namespace**: All class names use \`${CSS_NAMESPACE}-\` prefix
 
-### 使用方法
+### Usage
 
 \`\`\`typescript
-import { renderToIsolatedHtml, waitForFonts } from '@medical/print-renderer'
+import { renderToIsolatedHtml, waitForFonts } from 'medical-form-printer'
 
-// 等待字体加载
+// Wait for font to load
 await waitForFonts({ timeout: 5000 })
 
-// 渲染隔离的 HTML
+// Render isolated HTML
 const html = renderToIsolatedHtml(schema, data)
 \`\`\`
         `,
@@ -142,10 +143,10 @@ export default meta
 
 type Story = StoryObj
 
-// ==================== 辅助函数 ====================
+// ==================== Helper Functions ====================
 
 /**
- * 创建字体加载状态指示器
+ * Create font loading status indicator
  */
 function createFontStatusIndicator(): HTMLDivElement {
   const indicator = document.createElement('div')
@@ -168,16 +169,16 @@ function createFontStatusIndicator(): HTMLDivElement {
     indicator.innerHTML = `
       <span style="font-size: 18px;">${loaded ? '✓' : '⏳'}</span>
       <span>
-        <strong>字体状态:</strong> ${loaded ? '已加载' : '加载中...'}
+        <strong>Font Status:</strong> ${loaded ? 'Loaded' : 'Loading...'}
         <br>
-        <small>字体: ${FONT_FAMILY}</small>
+        <small>Font: ${FONT_FAMILY}</small>
       </span>
     `
   }
 
   updateStatus()
 
-  // 如果字体未加载，等待加载完成后更新状态
+  // If font not loaded, wait for it and update status
   if (!isFontLoaded()) {
     waitForFonts({ timeout: 10000 })
       .then(() => updateStatus())
@@ -188,9 +189,9 @@ function createFontStatusIndicator(): HTMLDivElement {
         indicator.innerHTML = `
           <span style="font-size: 18px;">✗</span>
           <span>
-            <strong>字体状态:</strong> 加载失败
+            <strong>Font Status:</strong> Load Failed
             <br>
-            <small>请检查网络连接</small>
+            <small>Please check network connection</small>
           </span>
         `
       })
@@ -200,23 +201,23 @@ function createFontStatusIndicator(): HTMLDivElement {
 }
 
 /**
- * 创建隔离渲染器（完整 HTML 文档）
+ * Create isolated renderer (full HTML document)
  */
 function createIsolatedRenderer(schema: PrintSchema, data: FormData) {
   return (args: { watermark?: string; showFontStatus?: boolean }) => {
     const container = document.createElement('div')
 
-    // 字体状态指示器
+    // Font status indicator
     if (args.showFontStatus) {
       container.appendChild(createFontStatusIndicator())
     }
 
-    // 渲染隔离的 HTML
+    // Render isolated HTML
     const html = renderToIsolatedHtml(schema, data, {
       watermark: args.watermark,
     })
 
-    // 使用 iframe 显示完整的 HTML 文档
+    // Use iframe to display full HTML document
     const iframe = document.createElement('iframe')
     iframe.style.cssText = `
       width: 100%;
@@ -233,18 +234,18 @@ function createIsolatedRenderer(schema: PrintSchema, data: FormData) {
 }
 
 /**
- * 创建片段渲染器（嵌入式）
+ * Create fragment renderer (embedded)
  */
 function createFragmentRenderer(schema: PrintSchema, data: FormData) {
   return (args: { watermark?: string; showFontStatus?: boolean; externalStyles?: boolean }) => {
     const container = document.createElement('div')
 
-    // 字体状态指示器
+    // Font status indicator
     if (args.showFontStatus) {
       container.appendChild(createFontStatusIndicator())
     }
 
-    // 外部样式干扰测试
+    // External style interference test
     if (args.externalStyles) {
       const styleInfo = document.createElement('div')
       styleInfo.style.cssText = `
@@ -258,16 +259,16 @@ function createFragmentRenderer(schema: PrintSchema, data: FormData) {
         font-size: 14px;
       `
       styleInfo.innerHTML = `
-        <strong>⚠️ 外部样式干扰测试</strong>
+        <strong>⚠️ External Style Interference Test</strong>
         <br>
-        <small>已注入外部 CSS 规则，但隔离容器内的样式不受影响</small>
+        <small>External CSS rules injected, but isolated container styles are unaffected</small>
       `
       container.appendChild(styleInfo)
 
-      // 注入干扰样式
+      // Inject interference styles
       const externalStyle = document.createElement('style')
       externalStyle.textContent = `
-        /* 外部样式干扰测试 */
+        /* External style interference test */
         * { font-family: Comic Sans MS, cursive !important; }
         div { color: red !important; }
         table { border: 5px solid purple !important; }
@@ -276,12 +277,12 @@ function createFragmentRenderer(schema: PrintSchema, data: FormData) {
       container.appendChild(externalStyle)
     }
 
-    // 渲染隔离的 HTML 片段
+    // Render isolated HTML fragment
     const fragment = renderToIsolatedFragment(schema, data, {
       watermark: args.watermark,
     })
 
-    // 创建包装容器
+    // Create wrapper container
     const wrapper = document.createElement('div')
     wrapper.style.cssText = `
       border: 1px solid #ccc;
@@ -299,11 +300,11 @@ function createFragmentRenderer(schema: PrintSchema, data: FormData) {
 // ==================== Stories ====================
 
 /**
- * 隔离渲染 - 完整 HTML 文档
- * 使用 iframe 展示完整的隔离 HTML 文档
+ * Isolated Rendering - Full HTML Document
+ * Uses iframe to display complete isolated HTML document
  */
 export const IsolatedHtml: Story = {
-  name: '隔离渲染 (完整文档)',
+  name: 'Isolated Rendering (Full Document)',
   render: createIsolatedRenderer(sampleSchema, sampleData),
   args: {
     watermark: '',
@@ -312,28 +313,28 @@ export const IsolatedHtml: Story = {
   argTypes: {
     watermark: {
       control: 'text',
-      description: '水印文本',
+      description: 'Watermark text',
     },
     showFontStatus: {
       control: 'boolean',
-      description: '显示字体加载状态',
+      description: 'Show font loading status',
     },
   },
   parameters: {
     docs: {
       description: {
-        story: '使用 `renderToIsolatedHtml()` 生成完整的 HTML 文档，适用于 PDF 生成或独立预览。',
+        story: 'Uses `renderToIsolatedHtml()` to generate complete HTML document, suitable for PDF generation or standalone preview.',
       },
     },
   },
 }
 
 /**
- * 隔离渲染 - HTML 片段
- * 直接嵌入页面的隔离片段
+ * Isolated Rendering - HTML Fragment
+ * Directly embedded isolated fragment
  */
 export const IsolatedFragment: Story = {
-  name: '隔离渲染 (HTML 片段)',
+  name: 'Isolated Rendering (HTML Fragment)',
   render: createFragmentRenderer(sampleSchema, sampleData),
   args: {
     watermark: '',
@@ -343,32 +344,32 @@ export const IsolatedFragment: Story = {
   argTypes: {
     watermark: {
       control: 'text',
-      description: '水印文本',
+      description: 'Watermark text',
     },
     showFontStatus: {
       control: 'boolean',
-      description: '显示字体加载状态',
+      description: 'Show font loading status',
     },
     externalStyles: {
       control: 'boolean',
-      description: '启用外部样式干扰测试',
+      description: 'Enable external style interference test',
     },
   },
   parameters: {
     docs: {
       description: {
-        story: '使用 `renderToIsolatedFragment()` 生成 HTML 片段，适用于嵌入现有页面。',
+        story: 'Uses `renderToIsolatedFragment()` to generate HTML fragment, suitable for embedding in existing pages.',
       },
     },
   },
 }
 
 /**
- * 样式隔离测试
- * 验证外部样式不会影响隔离容器内的内容
+ * Style Isolation Test
+ * Verifies external styles do not affect isolated container content
  */
 export const StyleIsolationTest: Story = {
-  name: '样式隔离测试',
+  name: 'Style Isolation Test',
   render: createFragmentRenderer(sampleSchema, sampleData),
   args: {
     watermark: '',
@@ -379,14 +380,14 @@ export const StyleIsolationTest: Story = {
     docs: {
       description: {
         story: `
-启用外部样式干扰测试，验证 CSS 隔离效果。
+Enable external style interference test to verify CSS isolation effect.
 
-外部注入的样式规则：
+Externally injected style rules:
 - \`* { font-family: Comic Sans MS !important; }\`
 - \`div { color: red !important; }\`
 - \`table { border: 5px solid purple !important; }\`
 
-隔离容器内的内容应该不受这些规则影响。
+Content inside the isolated container should not be affected by these rules.
         `,
       },
     },
@@ -394,29 +395,29 @@ export const StyleIsolationTest: Story = {
 }
 
 /**
- * 带水印的隔离渲染
+ * Isolated Rendering with Watermark
  */
 export const IsolatedWithWatermark: Story = {
-  name: '带水印的隔离渲染',
+  name: 'Isolated Rendering with Watermark',
   render: createIsolatedRenderer(sampleSchema, sampleData),
   args: {
-    watermark: '仅供内部使用',
+    watermark: 'Internal Use Only',
     showFontStatus: true,
   },
   parameters: {
     docs: {
       description: {
-        story: '展示带水印的隔离渲染效果。',
+        story: 'Demonstrates isolated rendering with watermark effect.',
       },
     },
   },
 }
 
 /**
- * 字体加载 API 演示
+ * Font Loading API Demo
  */
 export const FontLoadingApi: Story = {
-  name: '字体加载 API',
+  name: 'Font Loading API',
   render: () => {
     const container = document.createElement('div')
     container.style.cssText = `
@@ -425,12 +426,12 @@ export const FontLoadingApi: Story = {
     `
 
     container.innerHTML = `
-      <h2 style="margin-top: 0;">字体加载 API 演示</h2>
+      <h2 style="margin-top: 0;">Font Loading API Demo</h2>
       
       <div style="margin-bottom: 20px;">
-        <h3>1. 同步检查字体状态</h3>
+        <h3>1. Synchronous Font Status Check</h3>
         <pre style="background: #f5f5f5; padding: 12px; border-radius: 4px; overflow-x: auto;">
-import { isFontLoaded } from '@medical/print-renderer'
+import { isFontLoaded } from 'medical-form-printer'
 
 const loaded = isFontLoaded()
 console.log('Font loaded:', loaded) // ${isFontLoaded()}
@@ -438,9 +439,9 @@ console.log('Font loaded:', loaded) // ${isFontLoaded()}
       </div>
 
       <div style="margin-bottom: 20px;">
-        <h3>2. 异步等待字体加载</h3>
+        <h3>2. Async Wait for Font Loading</h3>
         <pre style="background: #f5f5f5; padding: 12px; border-radius: 4px; overflow-x: auto;">
-import { waitForFonts, FontLoadError } from '@medical/print-renderer'
+import { waitForFonts, FontLoadError } from 'medical-form-printer'
 
 try {
   await waitForFonts({ timeout: 5000 })
@@ -454,9 +455,9 @@ try {
       </div>
 
       <div style="margin-bottom: 20px;">
-        <h3>3. 字体配置常量</h3>
+        <h3>3. Font Configuration Constants</h3>
         <pre style="background: #f5f5f5; padding: 12px; border-radius: 4px; overflow-x: auto;">
-import { FONT_FAMILY, CSS_NAMESPACE, ISOLATION_ROOT_CLASS } from '@medical/print-renderer'
+import { FONT_FAMILY, CSS_NAMESPACE, ISOLATION_ROOT_CLASS } from 'medical-form-printer'
 
 FONT_FAMILY         // '${FONT_FAMILY}'
 CSS_NAMESPACE       // '${CSS_NAMESPACE}'
@@ -467,7 +468,7 @@ ISOLATION_ROOT_CLASS // '${ISOLATION_ROOT_CLASS}'
       <div id="font-status-demo"></div>
     `
 
-    // 添加实时字体状态
+    // Add live font status
     const statusDemo = container.querySelector('#font-status-demo')
     if (statusDemo) {
       statusDemo.appendChild(createFontStatusIndicator())
@@ -478,7 +479,7 @@ ISOLATION_ROOT_CLASS // '${ISOLATION_ROOT_CLASS}'
   parameters: {
     docs: {
       description: {
-        story: '展示字体加载相关的 API 使用方法。',
+        story: 'Demonstrates font loading related API usage.',
       },
     },
   },

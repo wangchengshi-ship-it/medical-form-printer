@@ -1,21 +1,21 @@
 /**
- * @fileoverview 内联样式映射
+ * @fileoverview Inline style mapping
  * @module styles/inline-styles
  * 
  * @description
- * 定义可直接注入到 HTML 元素 style 属性的内联样式。
- * 用于生成不依赖外部 CSS 文件的自包含 HTML。
+ * Defines inline styles that can be directly injected into HTML element style attributes.
+ * Used to generate self-contained HTML that doesn't depend on external CSS files.
  */
 
 import type { Theme } from '../types/theme'
 import { defaultTheme } from './default-theme'
 
-/** 样式对象类型 */
+/** Style object type */
 export type StyleObject = Record<string, string | number>
 
-/** 内联样式映射类型 */
+/** Inline style map type */
 export interface InlineStyleMap {
-  // 页面级
+  // Page level
   printPage: StyleObject
   printPageLandscape: StyleObject
   printPageA5: StyleObject
@@ -23,61 +23,61 @@ export interface InlineStyleMap {
   printPage16K: StyleObject
   printPage16KLandscape: StyleObject
   
-  // 页眉
+  // Header
   printHeader: StyleObject
   hospitalName: StyleObject
   departmentName: StyleObject
   formTitle: StyleObject
   
-  // 区块通用
+  // Section common
   printSection: StyleObject
   sectionTitle: StyleObject
   
-  // 信息网格
+  // Info grid
   infoGridTable: StyleObject
   infoGridTd: StyleObject
   infoGridLabelCell: StyleObject
   infoGridValueCell: StyleObject
   
-  // 数据表格
+  // Data table
   dataTableTable: StyleObject
   dataTableTh: StyleObject
   dataTableTd: StyleObject
   
-  // 勾选框网格
+  // Checkbox grid
   checkboxGrid: StyleObject
   checkboxGridFlex: StyleObject
   checkboxItem: StyleObject
   checkboxSymbol: StyleObject
   
-  // 签名区域
+  // Signature area
   signatureArea: StyleObject
   signatureItem: StyleObject
   signatureLine: StyleObject
   
-  // 备注区域
+  // Notes section
   notesSection: StyleObject
   notesSectionBordered: StyleObject
   
-  // 自由文本
+  // Free text
   freeText: StyleObject
   
-  // 页脚
+  // Footer
   printFooter: StyleObject
   
-  // 水印
+  // Watermark
   watermark: StyleObject
 }
 
 /**
- * 将样式对象转换为 CSS 字符串
- * @param styles - 样式对象
- * @returns CSS 字符串（用于 style 属性）
+ * Convert style object to CSS string
+ * @param styles - Style object
+ * @returns CSS string (for style attribute)
  */
 export function styleToString(styles: StyleObject): string {
   return Object.entries(styles)
     .map(([key, value]) => {
-      // 将 camelCase 转换为 kebab-case
+      // Convert camelCase to kebab-case
       const cssKey = key.replace(/([A-Z])/g, '-$1').toLowerCase()
       return `${cssKey}: ${value}`
     })
@@ -85,9 +85,9 @@ export function styleToString(styles: StyleObject): string {
 }
 
 /**
- * 合并多个样式对象
- * @param styles - 样式对象数组
- * @returns 合并后的样式对象
+ * Merge multiple style objects
+ * @param styles - Array of style objects
+ * @returns Merged style object
  */
 export function mergeStyles(...styles: (StyleObject | undefined | null)[]): StyleObject {
   return styles.reduce<StyleObject>((acc, style) => {
@@ -99,13 +99,13 @@ export function mergeStyles(...styles: (StyleObject | undefined | null)[]): Styl
 }
 
 /**
- * 根据主题生成内联样式映射
- * @param theme - 主题配置
- * @returns 内联样式映射
+ * Generate inline style map based on theme
+ * @param theme - Theme configuration
+ * @returns Inline style map
  */
 export function createInlineStyles(theme: Theme = defaultTheme): InlineStyleMap {
   return {
-    // 页面级
+    // Page level
     printPage: {
       fontFamily: theme.fonts.body,
       fontSize: theme.fontSize.body,
@@ -139,7 +139,7 @@ export function createInlineStyles(theme: Theme = defaultTheme): InlineStyleMap 
       minHeight: '185mm',
     },
     
-    // 页眉
+    // Header
     printHeader: {
       textAlign: 'center',
       marginBottom: '10mm',
@@ -160,7 +160,7 @@ export function createInlineStyles(theme: Theme = defaultTheme): InlineStyleMap 
       marginTop: '5mm',
     },
     
-    // 区块通用
+    // Section common
     printSection: {
       marginBottom: theme.spacing.sectionGap,
     },
@@ -171,7 +171,7 @@ export function createInlineStyles(theme: Theme = defaultTheme): InlineStyleMap 
       marginBottom: '2mm',
     },
     
-    // 信息网格
+    // Info grid
     infoGridTable: {
       width: '100%',
       borderCollapse: 'collapse',
@@ -190,7 +190,7 @@ export function createInlineStyles(theme: Theme = defaultTheme): InlineStyleMap 
       minWidth: '30mm',
     },
     
-    // 数据表格
+    // Data table
     dataTableTable: {
       width: '100%',
       borderCollapse: 'collapse',
@@ -208,7 +208,7 @@ export function createInlineStyles(theme: Theme = defaultTheme): InlineStyleMap 
       textAlign: 'center',
     },
     
-    // 勾选框网格
+    // Checkbox grid
     checkboxGrid: {
       display: 'flex',
       flexWrap: 'wrap',
@@ -227,7 +227,7 @@ export function createInlineStyles(theme: Theme = defaultTheme): InlineStyleMap 
       fontFamily: '"Segoe UI Symbol", "Apple Symbols", sans-serif',
     },
     
-    // 签名区域
+    // Signature area
     signatureArea: {
       display: 'flex',
       justifyContent: 'flex-end',
@@ -245,7 +245,7 @@ export function createInlineStyles(theme: Theme = defaultTheme): InlineStyleMap 
       borderBottom: `${theme.borderWidth} solid ${theme.colors.border}`,
     },
     
-    // 备注区域
+    // Notes section
     notesSection: {
       padding: theme.spacing.cellPadding,
       fontSize: theme.fontSize.small,
@@ -255,7 +255,7 @@ export function createInlineStyles(theme: Theme = defaultTheme): InlineStyleMap 
       border: `${theme.borderWidth} solid ${theme.colors.border}`,
     },
     
-    // 自由文本
+    // Free text
     freeText: {
       border: `${theme.borderWidth} solid ${theme.colors.border}`,
       padding: theme.spacing.cellPadding,
@@ -263,7 +263,7 @@ export function createInlineStyles(theme: Theme = defaultTheme): InlineStyleMap 
       whiteSpace: 'pre-wrap',
     },
     
-    // 页脚
+    // Footer
     printFooter: {
       marginTop: '10mm',
       display: 'flex',
@@ -272,7 +272,7 @@ export function createInlineStyles(theme: Theme = defaultTheme): InlineStyleMap 
       color: theme.colors.textSecondary,
     },
     
-    // 水印
+    // Watermark
     watermark: {
       position: 'fixed',
       top: '50%',
@@ -288,11 +288,11 @@ export function createInlineStyles(theme: Theme = defaultTheme): InlineStyleMap 
 }
 
 /**
- * 获取页面尺寸的内联样式
- * @param pageSize - 页面尺寸 ('A4' | 'A5' | '16K')
- * @param orientation - 页面方向 ('portrait' | 'landscape')
- * @param styles - 内联样式映射
- * @returns 合并后的页面样式
+ * Get inline styles for page size
+ * @param pageSize - Page size ('A4' | 'A5' | '16K')
+ * @param orientation - Page orientation ('portrait' | 'landscape')
+ * @param styles - Inline style map
+ * @returns Merged page styles
  */
 export function getPageStyles(
   pageSize: string,
@@ -324,5 +324,5 @@ export function getPageStyles(
   return pageStyles
 }
 
-/** 默认内联样式映射（使用默认主题） */
+/** Default inline style map (using default theme) */
 export const defaultInlineStyles = createInlineStyles(defaultTheme)

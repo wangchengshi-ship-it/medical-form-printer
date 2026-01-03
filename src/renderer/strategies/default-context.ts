@@ -1,5 +1,5 @@
 /**
- * @fileoverview 默认策略上下文
+ * @fileoverview Default Strategy Context
  * @module renderer/strategies/default-context
  */
 
@@ -16,9 +16,9 @@ import { InlineRowStrategy } from './inline-row-strategy'
 import { ContainerStrategy } from './container-strategy'
 
 /**
- * 创建默认策略上下文
- * 包含所有内置区块类型的渲染策略
- * @returns 配置好的策略上下文
+ * Create default strategy context
+ * Contains render strategies for all built-in section types
+ * @returns Configured strategy context
  */
 export function createDefaultStrategyContext(): StrategyContext {
   const context = new StrategyContext()
@@ -39,12 +39,12 @@ export function createDefaultStrategyContext(): StrategyContext {
   return context
 }
 
-/** 默认策略上下文单例 */
+/** Default strategy context singleton */
 let defaultContext: StrategyContext | null = null
 
 /**
- * 获取默认策略上下文（单例）
- * @returns 默认策略上下文
+ * Get default strategy context (singleton)
+ * @returns Default strategy context
  */
 export function getDefaultStrategyContext(): StrategyContext {
   if (!defaultContext) {

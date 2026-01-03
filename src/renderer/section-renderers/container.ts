@@ -1,7 +1,7 @@
 /**
- * @fileoverview 容器渲染器
+ * @fileoverview Container Renderer
  * @module renderer/section-renderers/container
- * @description 支持子区块嵌套，支持 row/column 布局方向，支持边框和内边距配置
+ * @description Supports nested child sections, supports row/column layout direction, supports border and padding configuration
  * @modified 2023/11/02
  */
 
@@ -11,7 +11,7 @@ import { cls } from '../../types/options'
 import { renderSection } from './index'
 
 /**
- * 渲染容器区块
+ * Render container section
  */
 export function renderContainer(
   config: ContainerConfig,
@@ -22,7 +22,7 @@ export function renderContainer(
   const gap = config.gap || '8px'
   const padding = config.padding || '0'
   
-  // 边框样式
+  // Border style
   let borderStyle = 'none'
   if (config.border === true) {
     borderStyle = '1px solid #000'
@@ -30,7 +30,7 @@ export function renderContainer(
     borderStyle = config.border
   }
   
-  // 渲染子区块
+  // Render child sections
   const childrenHtml = config.children
     .map((child) => {
       const childHtml = renderSection(child.type, child.config, data, options)

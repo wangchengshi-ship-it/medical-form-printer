@@ -87,13 +87,13 @@ const createTestSchema = (): PrintSchema => ({
 })
 
 const createTestData = (): FormData => ({
-  name: '张三',
+  name: 'Jane Doe',
   age: 30,
   records: [
     { date: '2026-01-01', content: '内容1' },
     { date: '2026-01-02', content: '内容2' },
   ],
-  signature: '李四',
+  signature: 'John Doe',
   signatureDate: '2026-01-03',
 })
 

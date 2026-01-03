@@ -1,5 +1,5 @@
 /**
- * @fileoverview 自由文本区块渲染器
+ * @fileoverview Free Text Section Renderer
  * @module renderer/section-renderers/free-text
  * @modif 2023-11-20
  */
@@ -10,7 +10,7 @@ import { cls } from '../../types/options'
 import { escapeHtml } from '../../utils'
 
 /**
- * 渲染自由文本区块
+ * Render free text section
  */
 export function renderFreeText(
   config: FreeTextConfig,

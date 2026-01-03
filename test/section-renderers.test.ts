@@ -48,7 +48,7 @@ describe('renderInfoGrid', () => {
   }
 
   it('should render info grid with underline style', () => {
-    const data: FormData = { name: '张三', age: 30 }
+    const data: FormData = { name: 'Jane Doe', age: 30 }
     const html = renderInfoGrid(basicConfig, data)
 
     // 新的下划线填空样式
@@ -60,7 +60,7 @@ describe('renderInfoGrid', () => {
     expect(html).toContain('class="text"')
     expect(html).toContain('class="line"')
     expect(html).toContain('姓名')
-    expect(html).toContain('张三')
+    expect(html).toContain('Jane Doe')
     expect(html).toContain('年龄')
     expect(html).toContain('30')
   })
@@ -297,22 +297,22 @@ describe('renderSignatureArea', () => {
 
   it('should render signature area', () => {
     const data: FormData = {
-      nurseSignature: '李护士',
-      doctorSignature: '王医生',
+      nurseSignature: 'Nurse Smith',
+      doctorSignature: 'Dr. Williams',
       doctorSignatureDate: '2024-03-15',
     }
     const html = renderSignatureArea(basicConfig, data)
 
     expect(html).toContain('class="print-section signature-area"')
     expect(html).toContain('护士签名')
-    expect(html).toContain('李护士')
+    expect(html).toContain('Nurse Smith')
     expect(html).toContain('医生签名')
-    expect(html).toContain('王医生')
+    expect(html).toContain('Dr. Williams')
   })
 
   it('should render date when showDate is true', () => {
     const data: FormData = {
-      doctorSignature: '王医生',
+      doctorSignature: 'Dr. Williams',
       doctorSignatureDate: '2024-03-15',
     }
     const html = renderSignatureArea(basicConfig, data)
@@ -720,7 +720,7 @@ describe('renderInfoGrid - Extended Types', () => {
         }],
       }],
     }
-    const html = renderInfoGrid(config, { name: '张三' })
+    const html = renderInfoGrid(config, { name: 'Jane Doe' })
 
     expect(html).toContain('style="width: 150px"')
     expect(html).toContain('custom-width')
@@ -879,11 +879,11 @@ describe('renderInlineRow', () => {
         },
       ],
     }
-    const data: FormData = { name: '张三' }
+    const data: FormData = { name: 'Jane Doe' }
     const html = renderInlineRow(config, data)
 
     expect(html).toContain('姓名')
-    expect(html).toContain('张三')
+    expect(html).toContain('Jane Doe')
   })
 })
 
@@ -1008,10 +1008,10 @@ describe('renderContainer', () => {
         },
       ],
     }
-    const data: FormData = { name: '李四' }
+    const data: FormData = { name: 'John Doe' }
     const html = renderContainer(config, data)
 
-    expect(html).toContain('李四')
+    expect(html).toContain('John Doe')
   })
 })
 

@@ -7,9 +7,9 @@ const singlePageSchema: PrintSchema = {
   pageSize: '16K',
   orientation: 'portrait',
   header: {
-    hospital: '天津中医药大学第二附属医院',
-    department: '国际产后康复中心',
-    title: '产妇入院评估单',
+    hospital: 'Sample Hospital',
+    department: 'Postpartum Care Center',
+    title: 'Maternal Admission Assessment',
   },
   sections: [
     {

@@ -1,5 +1,5 @@
 /**
- * @fileoverview 内容测量器
+ * @fileoverview Content measurer
  * @module pagination/content-measurer
  * @version 1.0.0
  * @author Kiro
@@ -7,31 +7,31 @@
  * @modified 2026-01-03
  *
  * @description
- * 提供 DOM 元素高度测量功能，用于智能打印分页。
- * 核心功能：
- * - 创建隐藏的测量容器（与打印样式一致）
- * - 测量单个元素的实际渲染高度
- * - 批量测量表格行高度
- * - 处理动态行高（文本换行）
- * - 文本高度估算（无 DOM 环境降级方案）
+ * Provides DOM element height measurement functionality for smart print pagination.
+ * Core features:
+ * - Create hidden measurement container (matching print styles)
+ * - Measure actual rendered height of single elements
+ * - Batch measure table row heights
+ * - Handle dynamic row heights (text wrapping)
+ * - Text height estimation (fallback for non-DOM environments)
  *
- * 注意：此模块仅在浏览器环境可用，Node.js 环境需要使用 Puppeteer 进行测量。
+ * Note: This module is only available in browser environment. Node.js environment requires Puppeteer for measurement.
  *
  * @requirements
- * - 10.1: 创建隐藏容器匹配打印样式进行测量
- * - 10.2: 测量实际渲染高度，包含 line-height、padding、margin
- * - 10.3: 支持测量可变高度的表格行
- * - 10.4: 处理文本换行估算
- * - 10.5: 支持批量测量多个元素
- * - 10.6: 测量后清理容器
+ * - 10.1: Create hidden container matching print styles for measurement
+ * - 10.2: Measure actual rendered height including line-height, padding, margin
+ * - 10.3: Support measuring variable height table rows
+ * - 10.4: Handle text wrapping estimation
+ * - 10.5: Support batch measuring multiple elements
+ * - 10.6: Clean up container after measurement
  *
  * @dependencies
- * - ./measurer-types.ts - 类型定义
- * - ./types.ts - MeasurableItem 类型
+ * - ./measurer-types.ts - Type definitions
+ * - ./types.ts - MeasurableItem type
  *
  * @usedBy
- * - ./index.ts - 模块入口
- * - international-postpartum-frontend - 前端打印模块
+ * - ./index.ts - Module entry
+ * - international-postpartum-frontend - Frontend print module
  */
 
 import type { MeasurableItem } from './types'
@@ -52,11 +52,11 @@ import {
   MEASURE_SELECTORS,
 } from './measurer-types'
 
-// ==================== 环境检测 ====================
+// ==================== Environment Detection ====================
 
 /**
- * 检查是否在浏览器环境
- * @returns 是否在浏览器环境
+ * Check if running in browser environment
+ * @returns Whether in browser environment
  */
 export function isBrowserEnvironment(): boolean {
   return (
@@ -67,8 +67,8 @@ export function isBrowserEnvironment(): boolean {
 }
 
 /**
- * 确保在浏览器环境中运行
- * @throws Error 如果不在浏览器环境
+ * Ensure running in browser environment
+ * @throws Error if not in browser environment
  */
 function ensureBrowserEnvironment(): void {
   if (!isBrowserEnvironment()) {
@@ -79,19 +79,19 @@ function ensureBrowserEnvironment(): void {
   }
 }
 
-// ==================== 测量容器管理 ====================
+// ==================== Measurement Container Management ====================
 
 /**
- * 创建隐藏的测量容器
- * @requirements 10.1 - 创建隐藏容器匹配打印样式
+ * Create hidden measurement container
+ * @requirements 10.1 - Create hidden container matching print styles
  *
- * @param config - 测量配置
- * @param options - 容器创建选项
- * @returns 测量容器元素
+ * @param config - Measurement configuration
+ * @param options - Container creation options
+ * @returns Measurement container element
  *
  * @example
  * const container = createMeasureContainer({ containerWidth: 624 })
- * // 使用容器进行测量...
+ * // Use container for measurement...
  * destroyMeasureContainer(container)
  */
 export function createMeasureContainer(
@@ -114,25 +114,25 @@ export function createMeasureContainer(
   const container = document.createElement('div')
   container.className = className
 
-  // 设置容器样式，模拟打印环境
-  // @requirements 10.1 - 与打印样式一致的渲染环境
+  // Set container styles to simulate print environment
+  // @requirements 10.1 - Rendering environment consistent with print styles
   Object.assign(container.style, {
-    // 隐藏容器
+    // Hide container
     position: 'absolute',
     left: '-9999px',
     top: '-9999px',
     visibility: 'hidden',
-    // 尺寸
+    // Dimensions
     width: `${mergedConfig.containerWidth}px`,
-    // 打印样式
+    // Print styles
     fontSize: mergedConfig.fontSize,
     lineHeight: String(mergedConfig.lineHeight),
     fontFamily: mergedConfig.fontFamily,
-    // 确保盒模型一致
+    // Ensure consistent box model
     boxSizing: 'border-box',
-    // 防止内容溢出影响测量
+    // Prevent content overflow affecting measurement
     overflow: 'hidden',
-    // 自定义样式
+    // Custom styles
     ...customStyles,
   })
 
@@ -144,14 +144,14 @@ export function createMeasureContainer(
 }
 
 /**
- * 销毁测量容器
- * @requirements 10.6 - 测量后清理容器
+ * Destroy measurement container
+ * @requirements 10.6 - Clean up container after measurement
  *
- * @param container - 测量容器元素
+ * @param container - Measurement container element
  *
  * @example
  * const container = createMeasureContainer()
- * // 使用容器...
+ * // Use container...
  * destroyMeasureContainer(container)
  */
 export function destroyMeasureContainer(container: HTMLDivElement | null): void {
@@ -161,15 +161,15 @@ export function destroyMeasureContainer(container: HTMLDivElement | null): void 
 }
 
 
-// ==================== 元素高度测量 ====================
+// ==================== Element Height Measurement ====================
 
 /**
- * 测量单个元素的高度
- * @requirements 10.2 - 测量实际渲染高度，包含 line-height、padding、margin
+ * Measure height of a single element
+ * @requirements 10.2 - Measure actual rendered height including line-height, padding, margin
  *
- * @param element - 要测量的元素
- * @param container - 测量容器
- * @returns 元素高度 (px)，包含 margin
+ * @param element - Element to measure
+ * @param container - Measurement container
+ * @returns Element height (px), including margin
  *
  * @example
  * const container = createMeasureContainer()
@@ -183,40 +183,40 @@ export function measureElementHeight(
 ): number {
   ensureBrowserEnvironment()
 
-  // 克隆元素以避免影响原始 DOM
+  // Clone element to avoid affecting original DOM
   const clone = element.cloneNode(true) as HTMLElement
 
-  // 确保元素可见
+  // Ensure element is visible
   clone.style.visibility = 'visible'
   clone.style.position = 'static'
   clone.style.display = ''
 
-  // 添加到测量容器
+  // Add to measurement container
   container.appendChild(clone)
 
-  // 获取计算后的样式，包含 margin
-  // @requirements 10.2 - 包含 line-height、padding、margin
+  // Get computed style including margin
+  // @requirements 10.2 - Include line-height, padding, margin
   const computedStyle = window.getComputedStyle(clone)
   const marginTop = parseFloat(computedStyle.marginTop) || 0
   const marginBottom = parseFloat(computedStyle.marginBottom) || 0
 
-  // 使用 getBoundingClientRect 获取精确高度
+  // Use getBoundingClientRect for precise height
   const rect = clone.getBoundingClientRect()
   const height = rect.height + marginTop + marginBottom
 
-  // 清理
+  // Cleanup
   container.removeChild(clone)
 
   return height
 }
 
 /**
- * 使用选项测量单个元素并返回 MeasurableItem
+ * Measure single element with options and return MeasurableItem
  *
- * @param element - 要测量的 DOM 元素
- * @param container - 测量容器
- * @param options - 测量选项
- * @returns MeasurableItem 对象
+ * @param element - DOM element to measure
+ * @param container - Measurement container
+ * @param options - Measurement options
+ * @returns MeasurableItem object
  *
  * @example
  * const container = createMeasureContainer()
@@ -242,12 +242,12 @@ export function measureElementWithOptions(
 }
 
 /**
- * 批量测量多个元素
+ * Batch measure multiple elements
  *
- * @param elements - 要测量的元素数组
- * @param container - 测量容器
- * @param optionsArray - 每个元素的测量选项
- * @returns MeasurableItem 数组
+ * @param elements - Array of elements to measure
+ * @param container - Measurement container
+ * @param optionsArray - Measurement options for each element
+ * @returns Array of MeasurableItem
  */
 export function measureElements(
   elements: HTMLElement[],
@@ -264,16 +264,16 @@ export function measureElements(
 }
 
 
-// ==================== 表格行批量测量 ====================
+// ==================== Table Row Batch Measurement ====================
 
 /**
- * 批量测量表格行
- * @requirements 10.3 - 支持测量可变高度的表格行
- * @requirements 10.5 - 支持批量测量多个元素
+ * Batch measure table rows
+ * @requirements 10.3 - Support measuring variable height table rows
+ * @requirements 10.5 - Support batch measuring multiple elements
  *
- * @param tableElement - 表格元素
- * @param options - 表格测量选项
- * @returns 测量结果数组，包含表头和每行的高度
+ * @param tableElement - Table element
+ * @param options - Table measurement options
+ * @returns Array of measurement results, including header and each row height
  *
  * @example
  * const container = createMeasureContainer()
@@ -295,13 +295,13 @@ export function measureTableRows(
   const { tableId, includeHeader = true, includeRows = true } = options
   const results: MeasurableItem[] = []
 
-  // 克隆表格以进行测量
+  // Clone table for measurement
   const tableClone = tableElement.cloneNode(true) as HTMLElement
   tableClone.style.visibility = 'visible'
   tableClone.style.position = 'static'
   container.appendChild(tableClone)
 
-  // 测量表头（thead）
+  // Measure header (thead)
   if (includeHeader) {
     const thead = tableClone.querySelector(MEASURE_SELECTORS.TABLE_HEADER)
     if (thead) {
@@ -315,7 +315,7 @@ export function measureTableRows(
     }
   }
 
-  // 测量每一行（tbody tr）
+  // Measure each row (tbody tr)
   if (includeRows) {
     const rows = tableClone.querySelectorAll(MEASURE_SELECTORS.TABLE_ROWS)
     rows.forEach((row, index) => {
@@ -330,19 +330,19 @@ export function measureTableRows(
     })
   }
 
-  // 清理
+  // Cleanup
   container.removeChild(tableClone)
 
   return results
 }
 
 /**
- * 测量多个表格
+ * Measure multiple tables
  *
- * @param tables - 表格元素数组
- * @param container - 测量容器
- * @param tableIds - 表格 ID 数组
- * @returns 所有表格的测量结果
+ * @param tables - Array of table elements
+ * @param container - Measurement container
+ * @param tableIds - Array of table IDs
+ * @returns Measurement results for all tables
  */
 export function measureMultipleTables(
   tables: HTMLElement[],
@@ -366,23 +366,23 @@ export function measureMultipleTables(
 }
 
 
-// ==================== 文本高度估算 ====================
+// ==================== Text Height Estimation ====================
 
 /**
- * 估算文本高度（当无法直接测量时使用）
- * @requirements 10.4 - 处理文本换行估算
+ * Estimate text height (used when direct measurement is not possible)
+ * @requirements 10.4 - Handle text wrapping estimation
  *
- * 此函数用于无 DOM 环境的降级方案，通过计算文本行数来估算高度。
- * 对于中文文本，假设每个字符宽度约等于字体大小。
- * 对于英文文本，假设每个字符宽度约为字体大小的 0.5 倍。
+ * This function is a fallback for non-DOM environments, estimating height by calculating text lines.
+ * For Chinese text, assumes each character width equals font size.
+ * For English text, assumes each character width is about 0.5 times font size.
  *
- * @param text - 文本内容
- * @param options - 估算选项
- * @returns 估算高度 (px)
+ * @param text - Text content
+ * @param options - Estimation options
+ * @returns Estimated height (px)
  *
  * @example
- * // 估算中文文本高度
- * const height = estimateTextHeight('这是一段测试文本', {
+ * // Estimate Chinese text height
+ * const height = estimateTextHeight('This is a test text', {
  *   containerWidth: 624,
  *   fontSize: 13.33,
  *   lineHeight: 1.8
@@ -401,12 +401,12 @@ export function estimateTextHeight(
     isChinese = DEFAULT_TEXT_ESTIMATE_OPTIONS.isChinese,
   } = options
 
-  // 估算每行字符数
-  // 中文字符宽度约等于字体大小，英文字符约为 0.5 倍
+  // Estimate characters per line
+  // Chinese character width equals font size, English character is about 0.5 times
   const charWidth = isChinese ? fontSize : fontSize * 0.5
   const charsPerLine = Math.floor(containerWidth / charWidth)
 
-  // 计算行数（考虑换行符和自动换行）
+  // Calculate lines (considering line breaks and auto-wrapping)
   const lines = text.split('\n')
   let totalLines = 0
 
@@ -414,7 +414,7 @@ export function estimateTextHeight(
     if (line.length === 0) {
       totalLines += 1
     } else {
-      // 对于混合文本，使用更保守的估算
+      // For mixed text, use more conservative estimation
       const effectiveLength = isChinese
         ? line.length
         : countEffectiveChars(line)
@@ -422,21 +422,21 @@ export function estimateTextHeight(
     }
   }
 
-  // 计算高度
+  // Calculate height
   return totalLines * fontSize * lineHeight
 }
 
 /**
- * 计算文本的有效字符数（考虑中英文混合）
- * 中文字符计为 2，英文字符计为 1
+ * Count effective characters in text (considering mixed Chinese/English)
+ * Chinese characters count as 2, English characters count as 1
  *
- * @param text - 文本内容
- * @returns 有效字符数
+ * @param text - Text content
+ * @returns Effective character count
  */
 function countEffectiveChars(text: string): number {
   let count = 0
   for (const char of text) {
-    // 中文字符范围（包括常用汉字、标点等）
+    // Chinese character range (including common characters, punctuation, etc.)
     if (char.charCodeAt(0) > 127) {
       count += 2
     } else {
@@ -447,11 +447,11 @@ function countEffectiveChars(text: string): number {
 }
 
 /**
- * 估算多行文本的总高度
+ * Estimate total height of multiple text lines
  *
- * @param texts - 文本数组
- * @param options - 估算选项
- * @returns 总高度 (px)
+ * @param texts - Array of texts
+ * @param options - Estimation options
+ * @returns Total height (px)
  */
 export function estimateMultipleTextHeights(
   texts: string[],
@@ -461,39 +461,39 @@ export function estimateMultipleTextHeights(
 }
 
 /**
- * 估算表格行高度（基于单元格内容）
+ * Estimate table row height (based on cell contents)
  *
- * @param cellContents - 单元格内容数组
- * @param options - 估算选项
- * @returns 估算的行高度 (px)
+ * @param cellContents - Array of cell contents
+ * @param options - Estimation options
+ * @returns Estimated row height (px)
  */
 export function estimateTableRowHeight(
   cellContents: string[],
   options: TextEstimateOptions = DEFAULT_TEXT_ESTIMATE_OPTIONS
 ): number {
-  // 找出最高的单元格
+  // Find the tallest cell
   const maxCellHeight = Math.max(
     ...cellContents.map((content) => estimateTextHeight(content, options)),
-    options.fontSize || DEFAULT_TEXT_ESTIMATE_OPTIONS.fontSize // 最小高度
+    options.fontSize || DEFAULT_TEXT_ESTIMATE_OPTIONS.fontSize // Minimum height
   )
 
-  // 添加单元格 padding（估算为字体大小的 0.5 倍）
+  // Add cell padding (estimated as 0.5 times font size)
   const padding = (options.fontSize || DEFAULT_TEXT_ESTIMATE_OPTIONS.fontSize) * 0.5
   return maxCellHeight + padding * 2
 }
 
 
-// ==================== 批量测量所有内容 ====================
+// ==================== Batch Measure All Content ====================
 
 /**
- * 测量整个内容容器的所有元素
- * @requirements 10.5 - 支持批量测量多个元素
- * @requirements 10.6 - 测量后清理容器
+ * Measure all elements in the entire content container
+ * @requirements 10.5 - Support batch measuring multiple elements
+ * @requirements 10.6 - Clean up container after measurement
  *
- * @param contentContainer - 包含所有内容的容器元素
- * @param container - 测量容器
- * @param options - 批量测量选项
- * @returns 所有可测量项的数组
+ * @param contentContainer - Container element containing all content
+ * @param container - Measurement container
+ * @param options - Batch measurement options
+ * @returns Array of all measurable items
  *
  * @example
  * const measureContainer = createMeasureContainer()
@@ -518,13 +518,13 @@ export function measureAll(
 
   const results: MeasurableItem[] = []
 
-  // 克隆整个内容容器
+  // Clone entire content container
   const clone = contentContainer.cloneNode(true) as HTMLElement
   clone.style.visibility = 'visible'
   clone.style.position = 'static'
   container.appendChild(clone)
 
-  // 1. 页眉 (.print-header) - 直接子元素
+  // 1. Page header (.print-header) - direct child element
   if (measureHeader) {
     const header = clone.querySelector(MEASURE_SELECTORS.HEADER)
     if (header) {
@@ -537,11 +537,11 @@ export function measureAll(
     }
   }
 
-  // 获取 print-body 容器
+  // Get print-body container
   const printBody = clone.querySelector(MEASURE_SELECTORS.BODY)
   if (printBody) {
     if (measureSections) {
-      // 2. 区块标题 (.section-title-block) - 直接子元素
+      // 2. Section titles (.section-title-block) - direct child elements
       const sectionTitles = printBody.querySelectorAll(MEASURE_SELECTORS.SECTION_TITLE)
       sectionTitles.forEach((title, index) => {
         const rect = title.getBoundingClientRect()
@@ -552,7 +552,7 @@ export function measureAll(
         })
       })
 
-      // 3. 信息网格 - 查找带 data-section-id 的包装 div
+      // 3. Info grids - find wrapper div with data-section-id
       const infoGridWrappers = printBody.querySelectorAll(MEASURE_SELECTORS.INFO_GRID_WRAPPER)
       infoGridWrappers.forEach((wrapper, index) => {
         const rect = wrapper.getBoundingClientRect()
@@ -563,7 +563,7 @@ export function measureAll(
         })
       })
 
-      // 5. 勾选框网格 - 查找带 data-section-id 的包装 div
+      // 5. Checkbox grids - find wrapper div with data-section-id
       const checkboxGridWrappers = printBody.querySelectorAll(
         MEASURE_SELECTORS.CHECKBOX_GRID_WRAPPER
       )
@@ -576,7 +576,7 @@ export function measureAll(
         })
       })
 
-      // 7. 医疗勾选行 - 查找带 data-section-id 的包装 div
+      // 7. Medical checkbox row - Find wrapper div with data-section-id
       const medicalCheckboxRows = printBody.querySelectorAll(
         MEASURE_SELECTORS.MEDICAL_CHECKBOX_ROW_WRAPPER
       )
@@ -590,13 +590,13 @@ export function measureAll(
       })
     }
 
-    // 4. 表格 - 查找带 data-section-id 的包装 div
+    // 4. Tables - find wrapper div with data-section-id
     if (measureTables) {
       const tableWrappers = printBody.querySelectorAll(MEASURE_SELECTORS.TABLE_WRAPPER)
       tableWrappers.forEach((wrapper, tableIndex) => {
         const tableId = `table-${tableIndex}`
 
-        // 测量表头（thead）- 在包装 div 内查找
+        // Measure header (thead) - find within wrapper div
         const thead = wrapper.querySelector(MEASURE_SELECTORS.TABLE_HEADER)
         if (thead) {
           const theadRect = thead.getBoundingClientRect()
@@ -608,7 +608,7 @@ export function measureAll(
           })
         }
 
-        // 测量每一行（tbody tr）
+        // Measure each row (tbody tr)
         const rows = wrapper.querySelectorAll(MEASURE_SELECTORS.TABLE_ROWS)
         rows.forEach((row, rowIndex) => {
           const rowRect = row.getBoundingClientRect()
@@ -623,7 +623,7 @@ export function measureAll(
       })
     }
 
-    // 6. 备注 (.notes-text) - 直接子元素
+    // 6. Notes (.notes-text) - direct child elements
     if (measureFooter) {
       const notes = printBody.querySelectorAll(MEASURE_SELECTORS.NOTES)
       notes.forEach((note, index) => {
@@ -637,7 +637,7 @@ export function measureAll(
     }
   }
 
-  // 8. 签名区域 (.signature-area) - 直接子元素
+  // 8. Signature area (.signature-area) - direct child elements
   if (measureSignature) {
     const signatures = clone.querySelectorAll(MEASURE_SELECTORS.SIGNATURE)
     signatures.forEach((sig, index) => {
@@ -650,16 +650,16 @@ export function measureAll(
     })
   }
 
-  // 清理
+  // Cleanup
   container.removeChild(clone)
 
   return results
 }
 
-// ==================== Composable 风格 API ====================
+// ==================== Composable Style API ====================
 
 /**
- * 内容测量器状态
+ * Content measurer state
  */
 interface ContentMeasurerState {
   container: HTMLDivElement | null
@@ -667,25 +667,25 @@ interface ContentMeasurerState {
 }
 
 /**
- * 创建内容测量器实例
- * 提供类似 Vue Composable 的 API 风格，但不依赖 Vue
+ * Create content measurer instance
+ * Provides Vue Composable-like API style, but without Vue dependency
  *
- * @param config - 测量配置
- * @returns 测量相关的工具函数
+ * @param config - Measurement configuration
+ * @returns Measurement utility functions
  *
  * @example
  * const measurer = createContentMeasurer({ containerWidth: 624 })
  *
- * // 测量单个元素
+ * // Measure single element
  * const height = measurer.measureElement(element)
  *
- * // 批量测量表格行
+ * // Batch measure table rows
  * const results = measurer.measureTableRows(tableElement, { tableId: 'table-1' })
  *
- * // 测量所有内容
+ * // Measure all content
  * const allItems = measurer.measureAll(contentContainer)
  *
- * // 清理
+ * // Cleanup
  * measurer.cleanup()
  */
 export function createContentMeasurer(config: MeasureConfig = DEFAULT_MEASURE_CONFIG) {
@@ -695,7 +695,7 @@ export function createContentMeasurer(config: MeasureConfig = DEFAULT_MEASURE_CO
   }
 
   /**
-   * 获取或创建测量容器
+   * Get or create measurement container
    */
   const getContainer = (): HTMLDivElement => {
     if (!state.container) {
@@ -705,7 +705,7 @@ export function createContentMeasurer(config: MeasureConfig = DEFAULT_MEASURE_CO
   }
 
   /**
-   * 测量单个元素
+   * Measure single element
    */
   const measureElement = (element: HTMLElement): number => {
     const container = getContainer()
@@ -713,7 +713,7 @@ export function createContentMeasurer(config: MeasureConfig = DEFAULT_MEASURE_CO
   }
 
   /**
-   * 使用选项测量元素
+   * Measure element with options
    */
   const measureElementWith = (
     element: HTMLElement,
@@ -724,7 +724,7 @@ export function createContentMeasurer(config: MeasureConfig = DEFAULT_MEASURE_CO
   }
 
   /**
-   * 批量测量表格行
+   * Batch measure table rows
    */
   const measureTable = (
     tableElement: HTMLElement,
@@ -735,7 +735,7 @@ export function createContentMeasurer(config: MeasureConfig = DEFAULT_MEASURE_CO
   }
 
   /**
-   * 测量所有内容
+   * Measure all content
    */
   const measureAllContent = (
     contentContainer: HTMLElement,
@@ -746,7 +746,7 @@ export function createContentMeasurer(config: MeasureConfig = DEFAULT_MEASURE_CO
   }
 
   /**
-   * 清理测量容器
+   * Clean up measurement container
    */
   const cleanup = (): void => {
     if (state.container) {
@@ -756,26 +756,26 @@ export function createContentMeasurer(config: MeasureConfig = DEFAULT_MEASURE_CO
   }
 
   return {
-    /** 测量单个元素高度 */
+    /** Measure single element height */
     measureElement,
-    /** 使用选项测量元素 */
+    /** Measure element with options */
     measureElementWith,
-    /** 批量测量表格行 */
+    /** Batch measure table rows */
     measureTable,
-    /** 测量所有内容 */
+    /** Measure all content */
     measureAll: measureAllContent,
-    /** 估算文本高度 */
+    /** Estimate text height */
     estimateTextHeight,
-    /** 清理测量容器 */
+    /** Clean up measurement container */
     cleanup,
-    /** 测量配置 */
+    /** Measurement configuration */
     config: state.config,
-    /** 检查是否在浏览器环境 */
+    /** Check if in browser environment */
     isBrowserEnvironment,
   }
 }
 
-// ==================== 导出类型 ====================
+// ==================== Export Types ====================
 
 export type {
   MeasureConfig,

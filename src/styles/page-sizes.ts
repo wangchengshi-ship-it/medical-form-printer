@@ -1,39 +1,39 @@
 /**
- * @fileoverview 页面尺寸常量（CSS 单位）
+ * @fileoverview Page size constants (CSS units)
  * @module styles/page-sizes
  * @version 1.0.0
  * @author Kiro
  * @created 2026-01-03
  *
  * @description
- * 定义页面尺寸的 CSS 字符串常量，用于 CSS 生成器。
- * 与 pagination/page-dimensions.ts 中的数值常量保持一致。
+ * Defines page size CSS string constants for CSS generator.
+ * Consistent with numeric constants in pagination/page-dimensions.ts.
  *
  * @dependencies
- * - ../pagination/page-dimensions - 数值常量来源
+ * - ../pagination/page-dimensions - Source of numeric constants
  *
  * @usedBy
- * - ./css-generator.ts - CSS 样式生成
+ * - ./css-generator.ts - CSS style generation
  */
 
-/** 页面尺寸 CSS 常量 */
+/** Page size CSS constants */
 export const PAGE_SIZES = {
-  /** A4 纸张: 210mm × 297mm */
+  /** A4 paper: 210mm × 297mm */
   A4: {
     width: '210mm',
     height: '297mm',
   },
-  /** A5 纸张: 148mm × 210mm */
+  /** A5 paper: 148mm × 210mm */
   A5: {
     width: '148mm',
     height: '210mm',
   },
-  /** 十六开纸张: 185mm × 260mm (与前端 Vue 组件一致) */
+  /** 16K paper: 185mm × 260mm (consistent with frontend Vue components) */
   '16K': {
     width: '185mm',
     height: '260mm',
   },
 } as const
 
-/** 页面尺寸类型 */
+/** Page size type */
 export type PageSizeKey = keyof typeof PAGE_SIZES

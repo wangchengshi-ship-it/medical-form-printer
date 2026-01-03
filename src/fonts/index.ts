@@ -1,22 +1,22 @@
 /**
- * @fileoverview 字体模块入口
+ * @fileoverview Font module entry point
  * @module fonts
  * @version 1.0.0
  * @author Kiro
  * @created 2026-01-03
  *
  * @description
- * 导出字体相关的所有 API，包括：
- * - 字体 Data URL 获取
- * - 字体 CSS 生成
- * - 字体加载状态检查和等待
+ * Exports all font-related APIs, including:
+ * - Font Data URL retrieval
+ * - Font CSS generation
+ * - Font loading state checking and waiting
  *
  * @usedBy
- * - ../styles/css-generator.ts - CSS 生成器
- * - ../renderer/html-renderer.ts - HTML 渲染器
+ * - ../styles/css-generator.ts - CSS generator
+ * - ../renderer/html-renderer.ts - HTML renderer
  */
 
-// 字体 CSS 相关
+// Font CSS related
 export {
   FONT_FAMILY,
   FONT_WEIGHT,
@@ -27,7 +27,7 @@ export {
   generateFontOverrideCss,
 } from './font-css'
 
-// 字体加载相关
+// Font loading related
 export {
   isFontLoaded,
   waitForFonts,
@@ -35,5 +35,5 @@ export {
   type FontLoadOptions,
 } from './font-loader'
 
-// 字体数据（仅导出 URL，不导出原始 Base64 数据以减少 bundle 大小）
+// Font data (only export URL, not raw Base64 data to reduce bundle size)
 export { FONT_DATA_URL } from './font-data'

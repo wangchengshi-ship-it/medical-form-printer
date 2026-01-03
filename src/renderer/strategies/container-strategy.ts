@@ -1,5 +1,5 @@
 /**
- * @fileoverview 容器渲染策略
+ * @fileoverview Container Render Strategy
  * @module renderer/strategies/container-strategy
  */
 
@@ -9,7 +9,7 @@ import type { RenderOptions } from '../../types/options'
 import { renderContainer } from '../section-renderers/container'
 
 /**
- * 容器渲染策略
+ * Container Render Strategy
  */
 export class ContainerStrategy implements SectionRenderStrategy {
   readonly type = 'container'

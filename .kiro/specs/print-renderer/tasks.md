@@ -238,7 +238,7 @@
     - _Requirements: 4.1, 4.4_
   
   - [x] 9.8.5 真实表单 Stories ✅
-    - `stories/forms/MaternalAdmission.stories.ts` - 产妇入院评估单 ✅
+    - `stories/forms/MaternalAdmission.stories.ts` - Maternal Admission Assessment ✅
     - `stories/forms/NewbornNursing.stories.ts` - 新生儿护理记录单 ✅
     - `stories/forms/DailyLog.stories.ts` - 每日记录表 ✅
     - `stories/forms/DischargeAssessment.stories.ts` - 出院评估单 ✅

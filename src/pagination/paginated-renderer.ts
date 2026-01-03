@@ -260,14 +260,14 @@ function renderPageHeader(ctx: SinglePageContext, cls: ClassNameFn): string {
     )
   }
 
-  // 医院名称
+  // Hospital name
   if (headerConfig.hospital) {
     parts.push(
       div().class(cls(CSS_CLASSES.HOSPITAL_NAME)).text(headerConfig.hospital).build()
     )
   }
 
-  // 科室名称
+  // Department name
   if (headerConfig.department) {
     parts.push(
       div().class(cls(CSS_CLASSES.DEPARTMENT_NAME)).text(headerConfig.department).build()

@@ -358,9 +358,9 @@ describe('Visitor 模式 - 数据格式化', () => {
   describe('FormatVisitor', () => {
     it('should format string values', () => {
       const visitor = createFormatVisitor()
-      const result = visitor.visitString({ name: 'name', value: '张三' })
+      const result = visitor.visitString({ name: 'name', value: 'Jane Doe' })
       
-      expect(result).toBe('张三')
+      expect(result).toBe('Jane Doe')
     })
 
     it('should format number values', () => {
@@ -395,11 +395,11 @@ describe('Visitor 模式 - 数据格式化', () => {
 
     it('should return formatted data map', () => {
       const visitor = new FormatVisitor()
-      visitor.visitString({ name: 'name', value: '张三' })
+      visitor.visitString({ name: 'name', value: 'Jane Doe' })
       visitor.visitNumber({ name: 'age', value: 30 })
       
       const data = visitor.getFormattedData()
-      expect(data.get('name')).toBe('张三')
+      expect(data.get('name')).toBe('Jane Doe')
       expect(data.get('age')).toBe('30')
     })
   })
@@ -419,7 +419,7 @@ describe('Visitor 模式 - 数据格式化', () => {
 
     it('should pass when all required fields are filled', () => {
       const visitor = new ValidationVisitor(['name'])
-      visitor.visitString({ name: 'name', value: '张三' })
+      visitor.visitString({ name: 'name', value: 'Jane Doe' })
       
       const result = visitor.getResult()
       expect(result.valid).toBe(true)
@@ -496,7 +496,7 @@ describe('Visitor 模式 - 数据格式化', () => {
   describe('FormDataTraverser', () => {
     it('should traverse form data and apply visitor', () => {
       const data: FormData = {
-        name: '张三',
+        name: 'Jane Doe',
         age: 30,
         active: true,
       }
@@ -506,7 +506,7 @@ describe('Visitor 模式 - 数据格式化', () => {
       traverser.traverse(data, visitor)
       
       const formatted = visitor.getFormattedData()
-      expect(formatted.get('name')).toBe('张三')
+      expect(formatted.get('name')).toBe('Jane Doe')
       expect(formatted.get('age')).toBe('30')
       expect(formatted.get('active')).toBe('☑')
     })

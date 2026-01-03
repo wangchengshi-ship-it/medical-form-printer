@@ -1,5 +1,5 @@
 /**
- * @fileoverview 勾选框网格渲染策略
+ * @fileoverview Checkbox Grid Render Strategy
  * @module renderer/strategies/checkbox-grid-strategy
  */
 
@@ -9,7 +9,7 @@ import type { RenderOptions } from '../../types/options'
 import { renderCheckboxGrid } from '../section-renderers/checkbox-grid'
 
 /**
- * 勾选框网格渲染策略
+ * Checkbox Grid Render Strategy
  */
 export class CheckboxGridStrategy implements SectionRenderStrategy {
   readonly type = 'checkbox-grid'

@@ -1,10 +1,10 @@
 /**
- * @fileoverview 格式化器工厂
+ * @fileoverview Formatter Factory
  * @module renderer/factory/formatter-factory
  * 
  * @description
- * 使用 Factory 模式创建数据格式化器实例。
- * 支持注册自定义格式化器，实现格式化逻辑的解耦和扩展。
+ * Uses Factory pattern to create data formatter instances.
+ * Supports registering custom formatters for decoupling and extensibility.
  */
 
 import {
@@ -14,34 +14,34 @@ import {
   formatValue,
 } from '../../formatters'
 
-/** 格式化函数类型 */
+/** Formatter function type */
 export type Formatter<T = unknown> = (value: T, options?: Record<string, unknown>) => string
 
-/** 格式化器配置 */
+/** Formatter configuration */
 export interface FormatterConfig {
-  /** 日期格式 */
+  /** Date format */
   dateFormat?: string
-  /** 空值占位符 */
+  /** Empty value placeholder */
   emptyPlaceholder?: string
-  /** 数字精度 */
+  /** Number precision */
   numberPrecision?: number
-  /** 布尔值真值显示 */
+  /** Boolean true value display */
   booleanTrueSymbol?: string
-  /** 布尔值假值显示 */
+  /** Boolean false value display */
   booleanFalseSymbol?: string
 }
 
 /**
- * 格式化器工厂
- * 负责创建和管理数据格式化器
+ * Formatter Factory
+ * Responsible for creating and managing data formatters
  */
 export class FormatterFactory {
   private formatters: Map<string, Formatter> = new Map()
   private config: FormatterConfig
 
   /**
-   * 创建工厂实例
-   * @param config - 格式化器配置
+   * Create factory instance
+   * @param config - Formatter configuration
    */
   constructor(config: FormatterConfig = {}) {
     this.config = config
@@ -49,15 +49,15 @@ export class FormatterFactory {
   }
 
   /**
-   * 注册内置格式化器
+   * Register built-in formatters
    */
   private registerBuiltInFormatters(): void {
-    // 日期格式化器
+    // Date formatter
     this.register('date', (value: unknown) => {
       return formatDate(value, this.config.dateFormat)
     })
 
-    // 布尔值格式化器
+    // Boolean formatter
     this.register('boolean', (value: unknown) => {
       return formatBoolean(value as boolean)
     })
@@ -65,12 +65,12 @@ export class FormatterFactory {
       return formatBoolean(value as boolean)
     })
 
-    // 数字格式化器
+    // Number formatter
     this.register('number', (value: unknown) => {
       return formatNumber(value)
     })
 
-    // 文本格式化器
+    // Text formatter
     this.register('text', (value: unknown) => {
       if (value === undefined || value === null || value === '') {
         return this.config.emptyPlaceholder || ''
@@ -78,7 +78,7 @@ export class FormatterFactory {
       return String(value)
     })
 
-    // 签名格式化器
+    // Signature formatter
     this.register('signature', (value: unknown) => {
       if (value === undefined || value === null || value === '') {
         return this.config.emptyPlaceholder || '________'
@@ -88,37 +88,37 @@ export class FormatterFactory {
   }
 
   /**
-   * 注册格式化器
-   * @param type - 格式化器类型
-   * @param formatter - 格式化函数
+   * Register formatter
+   * @param type - Formatter type
+   * @param formatter - Formatter function
    */
   register(type: string, formatter: Formatter): void {
     this.formatters.set(type, formatter)
   }
 
   /**
-   * 获取格式化器
-   * @param type - 格式化器类型
-   * @returns 格式化函数，如果不存在则返回 undefined
+   * Get formatter
+   * @param type - Formatter type
+   * @returns Formatter function, or undefined if not found
    */
   get(type: string): Formatter | undefined {
     return this.formatters.get(type)
   }
 
   /**
-   * 检查是否存在指定类型的格式化器
-   * @param type - 格式化器类型
-   * @returns 是否存在
+   * Check if formatter of specified type exists
+   * @param type - Formatter type
+   * @returns Whether exists
    */
   has(type: string): boolean {
     return this.formatters.has(type)
   }
 
   /**
-   * 格式化值
-   * @param value - 要格式化的值
-   * @param type - 格式化器类型
-   * @returns 格式化后的字符串
+   * Format value
+   * @param value - Value to format
+   * @param type - Formatter type
+   * @returns Formatted string
    */
   format(value: unknown, type?: string): string {
     if (type && this.formatters.has(type)) {
@@ -126,43 +126,43 @@ export class FormatterFactory {
       return formatter(value)
     }
 
-    // 使用通用格式化
+    // Use generic formatting
     return formatValue(value, type, {
       emptyPlaceholder: this.config.emptyPlaceholder,
     })
   }
 
   /**
-   * 获取所有已注册的格式化器类型
-   * @returns 类型数组
+   * Get all registered formatter types
+   * @returns Type array
    */
   getRegisteredTypes(): string[] {
     return Array.from(this.formatters.keys())
   }
 
   /**
-   * 更新配置
-   * @param config - 新配置
+   * Update configuration
+   * @param config - New configuration
    */
   updateConfig(config: Partial<FormatterConfig>): void {
     this.config = { ...this.config, ...config }
   }
 
   /**
-   * 获取当前配置
-   * @returns 当前配置
+   * Get current configuration
+   * @returns Current configuration
    */
   getConfig(): FormatterConfig {
     return { ...this.config }
   }
 }
 
-/** 默认工厂实例 */
+/** Default factory instance */
 let defaultFactory: FormatterFactory | null = null
 
 /**
- * 获取默认工厂实例（单例）
- * @returns 默认工厂实例
+ * Get default factory instance (singleton)
+ * @returns Default factory instance
  */
 export function getDefaultFormatterFactory(): FormatterFactory {
   if (!defaultFactory) {

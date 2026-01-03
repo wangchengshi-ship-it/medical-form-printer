@@ -1,60 +1,60 @@
 /**
- * @fileoverview Visitor 模式 - 数据格式化
+ * @fileoverview Visitor pattern - Data formatting
  * @module renderer/visitors
  * 
  * @modified 2023.12.15
  * 
  * @description
- * 使用 Visitor 模式分离数据遍历和操作逻辑。
- * FormDataVisitor 接口定义访问方法，
- * 不同的 Visitor 实现不同的操作：格式化、验证、测量等。
+ * Uses Visitor pattern to separate data traversal and operation logic.
+ * FormDataVisitor interface defines visit methods,
+ * Different Visitors implement different operations: formatting, validation, measurement, etc.
  */
 
 import type { FormData, PrintSection, InfoGridConfig, TableConfig } from '../../types/print-schema'
 import { formatValue, formatDate, formatNumber } from '../../formatters'
 
 /**
- * 字段信息
+ * Field information
  */
 export interface FieldInfo {
-  /** 字段名 */
+  /** Field name */
   name: string
-  /** 字段值 */
+  /** Field value */
   value: unknown
-  /** 字段类型 */
+  /** Field type */
   type?: string
-  /** 字段标签 */
+  /** Field label */
   label?: string
-  /** 所属区块 */
+  /** Parent section */
   section?: PrintSection
 }
 
 /**
- * 表单数据访问者接口（Visitor 模式的 Visitor）
- * 定义访问不同类型数据的方法
+ * Form data visitor interface (Visitor pattern's Visitor)
+ * Defines methods for visiting different data types
  */
 export interface FormDataVisitor<T = void> {
-  /** 访问字符串字段 */
+  /** Visit string field */
   visitString(field: FieldInfo): T
-  /** 访问数字字段 */
+  /** Visit number field */
   visitNumber(field: FieldInfo): T
-  /** 访问布尔字段 */
+  /** Visit boolean field */
   visitBoolean(field: FieldInfo): T
-  /** 访问日期字段 */
+  /** Visit date field */
   visitDate(field: FieldInfo): T
-  /** 访问数组字段 */
+  /** Visit array field */
   visitArray(field: FieldInfo): T
-  /** 访问对象字段 */
+  /** Visit object field */
   visitObject(field: FieldInfo): T
-  /** 访问空值字段 */
+  /** Visit null field */
   visitNull(field: FieldInfo): T
-  /** 获取结果 */
+  /** Get result */
   getResult(): T
 }
 
 /**
- * 格式化访问者
- * 将数据格式化为显示字符串
+ * Format visitor
+ * Formats data into display strings
  */
 export class FormatVisitor implements FormDataVisitor<string> {
   private results: Map<string, string> = new Map()
@@ -127,7 +127,7 @@ export class FormatVisitor implements FormDataVisitor<string> {
 }
 
 /**
- * 验证结果
+ * Validation result
  */
 export interface ValidationResult {
   valid: boolean
@@ -135,8 +135,8 @@ export interface ValidationResult {
 }
 
 /**
- * 验证访问者
- * 验证数据完整性
+ * Validation visitor
+ * Validates data integrity
  */
 export class ValidationVisitor implements FormDataVisitor<ValidationResult> {
   private errors: Array<{ field: string; message: string }> = []
@@ -153,7 +153,7 @@ export class ValidationVisitor implements FormDataVisitor<ValidationResult> {
       if (field.value === null || field.value === undefined || field.value === '') {
         this.errors.push({
           field: field.name,
-          message: `${field.label || field.name} 是必填字段`,
+          message: `${field.label || field.name} is a required field`,
         })
       }
     }
@@ -171,7 +171,7 @@ export class ValidationVisitor implements FormDataVisitor<ValidationResult> {
       if (isNaN(num)) {
         this.errors.push({
           field: field.name,
-          message: `${field.label || field.name} 必须是有效数字`,
+          message: `${field.label || field.name} must be a valid number`,
         })
       }
     }
@@ -190,7 +190,7 @@ export class ValidationVisitor implements FormDataVisitor<ValidationResult> {
       if (isNaN(date.getTime())) {
         this.errors.push({
           field: field.name,
-          message: `${field.label || field.name} 必须是有效日期`,
+          message: `${field.label || field.name} must be a valid date`,
         })
       }
     }
@@ -225,22 +225,22 @@ export class ValidationVisitor implements FormDataVisitor<ValidationResult> {
 }
 
 /**
- * 测量结果
+ * Measurement result
  */
 export interface MeasureResult {
-  /** 字段名 */
+  /** Field name */
   field: string
-  /** 估算字符数 */
+  /** Estimated character count */
   charCount: number
-  /** 估算行数 */
+  /** Estimated line count */
   lineCount: number
-  /** 估算高度（mm） */
+  /** Estimated height (mm) */
   estimatedHeight: number
 }
 
 /**
- * 测量访问者
- * 测量内容高度（用于分页计算）
+ * Measurement visitor
+ * Measures content height (for pagination calculation)
  */
 export class MeasureVisitor implements FormDataVisitor<MeasureResult[]> {
   private results: MeasureResult[] = []
@@ -324,15 +324,15 @@ export class MeasureVisitor implements FormDataVisitor<MeasureResult[]> {
 }
 
 /**
- * 数据遍历器
- * 遍历表单数据并应用访问者
+ * Data traverser
+ * Traverses form data and applies visitor
  */
 export class FormDataTraverser {
   /**
-   * 遍历表单数据
-   * @param data - 表单数据
-   * @param visitor - 访问者
-   * @param sections - 区块配置（可选，用于获取字段类型信息）
+   * Traverse form data
+   * @param data - Form data
+   * @param visitor - Visitor
+   * @param sections - Section configuration (optional, for field type info)
    */
   traverse<T>(
     data: FormData,
@@ -353,12 +353,12 @@ export class FormDataTraverser {
   }
 
   /**
-   * 访问单个字段
+   * Visit single field
    */
   private visitField<T>(field: FieldInfo, visitor: FormDataVisitor<T>): void {
     const { value, type } = field
 
-    // 优先使用配置的类型
+    // Prioritize configured type
     if (type === 'date') {
       visitor.visitDate(field)
       return
@@ -372,7 +372,7 @@ export class FormDataTraverser {
       return
     }
 
-    // 根据值类型推断
+    // Infer from value type
     if (value === null || value === undefined) {
       visitor.visitNull(field)
     } else if (typeof value === 'string') {
@@ -391,7 +391,7 @@ export class FormDataTraverser {
   }
 
   /**
-   * 从区块配置中提取字段类型
+   * Extract field types from section configuration
    */
   private extractFieldTypes(sections: PrintSection[]): Map<string, string> {
     const types = new Map<string, string>()
@@ -421,7 +421,7 @@ export class FormDataTraverser {
 }
 
 /**
- * 创建格式化访问者
+ * Create format visitor
  */
 export function createFormatVisitor(options?: {
   dateFormat?: string
@@ -431,14 +431,14 @@ export function createFormatVisitor(options?: {
 }
 
 /**
- * 创建验证访问者
+ * Create validation visitor
  */
 export function createValidationVisitor(requiredFields?: string[]): ValidationVisitor {
   return new ValidationVisitor(requiredFields)
 }
 
 /**
- * 创建测量访问者
+ * Create measurement visitor
  */
 export function createMeasureVisitor(options?: {
   lineHeight?: number
@@ -448,7 +448,7 @@ export function createMeasureVisitor(options?: {
 }
 
 /**
- * 创建数据遍历器
+ * Create data traverser
  */
 export function createFormDataTraverser(): FormDataTraverser {
   return new FormDataTraverser()

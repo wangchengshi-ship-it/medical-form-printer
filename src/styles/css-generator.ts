@@ -1,5 +1,5 @@
 /**
- * @fileoverview CSS 样式生成器
+ * @fileoverview CSS Style Generator
  * @module styles/css-generator
  * @version 2.0.0
  * @author Kiro
@@ -7,25 +7,25 @@
  * @modified 2026-01-03
  *
  * @description
- * 根据主题配置生成完整的 CSS 样式字符串。
- * 支持基准单位系统，所有尺寸值从主题配置中获取。
- * 支持 CSS 隔离模式，确保样式不受外部影响。
+ * Generates complete CSS style strings based on theme configuration.
+ * Supports base unit system, all size values are obtained from theme configuration.
+ * Supports CSS isolation mode to ensure styles are not affected by external styles.
  *
- * v2.0.0 重构：
- * - 使用配置驱动消除重复代码
- * - 统一普通模式和隔离模式的生成逻辑
- * - 提取公共工具函数
+ * v2.0.0 Refactoring:
+ * - Use configuration-driven approach to eliminate duplicate code
+ * - Unify generation logic for normal and isolated modes
+ * - Extract common utility functions
  *
  * @dependencies
- * - ../types/theme - 主题类型定义
- * - ./default-theme - 默认主题配置
- * - ./page-sizes - 页面尺寸常量
- * - ./isolation - CSS 隔离模块
- * - ../fonts - 字体模块
+ * - ../types/theme - Theme type definitions
+ * - ./default-theme - Default theme configuration
+ * - ./page-sizes - Page size constants
+ * - ./isolation - CSS isolation module
+ * - ../fonts - Font module
  *
  * @usedBy
- * - ../renderer/index.ts - 渲染器主入口
- * - ../pagination/paginated-renderer.ts - 分页渲染器
+ * - ../renderer/index.ts - Renderer main entry
+ * - ../pagination/paginated-renderer.ts - Paginated renderer
  */
 
 import type { Theme } from '../types/theme'
@@ -34,37 +34,37 @@ import { PAGE_SIZES } from './page-sizes'
 import { CSS_NAMESPACE, generateIsolationCss } from './isolation'
 import { getFontCss, FONT_FAMILY } from '../fonts'
 
-// ==================== 类型定义 ====================
+// ==================== Type Definitions ====================
 
-/** 深层部分类型 */
+/** Deep partial type */
 export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
 }
 
-/** 样式生成配置 */
+/** Style generation configuration */
 interface StyleConfig {
-  /** 是否使用命名空间前缀 */
+  /** Whether to use namespace prefix */
   namespaced: boolean
-  /** 是否强制使用内嵌字体（忽略主题字体配置） */
+  /** Whether to force embedded font (ignore theme font configuration) */
   forceEmbeddedFont: boolean
 }
 
-/** 默认配置：普通模式 */
+/** Default configuration: normal mode */
 const NORMAL_CONFIG: StyleConfig = {
   namespaced: false,
   forceEmbeddedFont: false,
 }
 
-/** 隔离模式配置 */
+/** Isolated mode configuration */
 const ISOLATED_CONFIG: StyleConfig = {
   namespaced: true,
   forceEmbeddedFont: true,
 }
 
-// ==================== 工具函数 ====================
+// ==================== Utility Functions ====================
 
 /**
- * 深度合并两个对象
+ * Deep merge two objects
  */
 function deepMerge<T extends object>(target: T, source: DeepPartial<T>): T {
   const result = { ...target } as T
@@ -89,9 +89,9 @@ function deepMerge<T extends object>(target: T, source: DeepPartial<T>): T {
 }
 
 /**
- * 深度合并主题配置
- * @param customTheme - 自定义主题配置（深层部分）
- * @returns 合并后的完整主题
+ * Deep merge theme configuration
+ * @param customTheme - Custom theme configuration (deep partial)
+ * @returns Merged complete theme
  */
 export function mergeTheme(customTheme?: DeepPartial<Theme>): Theme {
   if (!customTheme) return defaultTheme
@@ -99,19 +99,19 @@ export function mergeTheme(customTheme?: DeepPartial<Theme>): Theme {
 }
 
 /**
- * 创建类名生成函数
- * @param config - 样式配置
- * @returns 类名生成函数
+ * Create class name generation function
+ * @param config - Style configuration
+ * @returns Class name generation function
  */
 function createClassNameFn(config: StyleConfig): (name: string) => string {
   return config.namespaced ? (name: string) => `${CSS_NAMESPACE}-${name}` : (name: string) => name
 }
 
 /**
- * 获取字体族字符串
- * @param theme - 主题配置
- * @param config - 样式配置
- * @param type - 字体类型 ('body' | 'heading')
+ * Get font family string
+ * @param theme - Theme configuration
+ * @param config - Style configuration
+ * @param type - Font type ('body' | 'heading')
  */
 function getFontFamilyStr(theme: Theme, config: StyleConfig, type: 'body' | 'heading'): string {
   if (config.forceEmbeddedFont) {
@@ -120,15 +120,15 @@ function getFontFamilyStr(theme: Theme, config: StyleConfig, type: 'body' | 'hea
   return type === 'body' ? theme.fonts.body : theme.fonts.heading
 }
 
-// ==================== CSS 生成函数 ====================
+// ==================== CSS Generation Functions ====================
 
 /**
- * 生成基础重置样式
+ * Generate base reset styles
  */
 function generateResetStyles(cls: (name: string) => string, config: StyleConfig): string {
   const selector = config.namespaced ? `.${cls('root')} *` : '*'
   return `
-/* 基础样式 */
+/* Base Styles */
 ${selector} {
   box-sizing: border-box;
   margin: 0;
@@ -137,13 +137,13 @@ ${selector} {
 }
 
 /**
- * 生成页面布局样式
+ * Generate page layout styles
  */
 function generatePageStyles(theme: Theme, cls: (name: string) => string, config: StyleConfig): string {
   const fontFamily = getFontFamilyStr(theme, config, 'body')
   
   return `
-/* 页面布局 */
+/* Page Layout */
 .${cls('print-page')} {
   font-family: ${fontFamily};
   font-size: ${theme.fontSize.body};
@@ -170,7 +170,7 @@ function generatePageStyles(theme: Theme, cls: (name: string) => string, config:
   min-height: ${PAGE_SIZES.A5.width};
 }
 
-/* 16K 纸张：固定高度以匹配物理打印尺寸，防止内容溢出导致分页问题 */
+/* 16K paper: fixed height to match physical print size, prevent pagination issues from content overflow */
 .${cls('print-page')}.${cls('16k')} {
   width: ${PAGE_SIZES['16K'].width};
   height: ${PAGE_SIZES['16K'].height};
@@ -189,13 +189,13 @@ function generatePageStyles(theme: Theme, cls: (name: string) => string, config:
 }
 
 /**
- * 生成页眉样式
+ * Generate header styles
  */
 function generateHeaderStyles(theme: Theme, cls: (name: string) => string, config: StyleConfig): string {
   const headingFont = getFontFamilyStr(theme, config, 'heading')
   
   return `
-/* 页眉 */
+/* Header */
 .${cls('print-header')} {
   text-align: center;
   margin-bottom: 3mm;
@@ -231,13 +231,13 @@ function generateHeaderStyles(theme: Theme, cls: (name: string) => string, confi
 }
 
 /**
- * 生成区块通用样式
+ * Generate section common styles
  */
 function generateSectionStyles(theme: Theme, cls: (name: string) => string, config: StyleConfig): string {
   const headingFont = getFontFamilyStr(theme, config, 'heading')
   
   return `
-/* 区块通用 */
+/* Section Common */
 .${cls('print-section')} {
   margin-bottom: ${theme.spacing.sectionGap};
 }
@@ -251,18 +251,18 @@ function generateSectionStyles(theme: Theme, cls: (name: string) => string, conf
 }
 
 /**
- * 生成信息网格样式（下划线填空样式）
- * @param _theme - 主题配置（预留扩展，当前未使用）
- * @param cls - 类名生成函数
+ * Generate info grid styles (underline fill-in style)
+ * @param _theme - Theme configuration (reserved for extension, currently unused)
+ * @param cls - Class name generation function
  */
 function generateInfoGridStyles(_theme: Theme, cls: (name: string) => string): string {
   return `
-/* 信息网格 - 下划线填空样式 */
+/* Info Grid - Underline Fill-in Style */
 .${cls('info-grid')} {
   margin-bottom: 0.5mm;
 }
 
-/* 每个 row 是一行，使用 flex 布局 */
+/* Each row is a line, using flex layout */
 .${cls('info-row')} {
   display: flex;
   flex-wrap: nowrap;
@@ -278,7 +278,7 @@ function generateInfoGridStyles(_theme: Theme, cls: (name: string) => string): s
   flex-shrink: 0;
 }
 
-/* 最后一个 item 自动填满剩余空间 */
+/* Last item automatically fills remaining space */
 .${cls('info-item')}:last-child {
   flex: 1;
   margin-right: 0;
@@ -292,7 +292,7 @@ function generateInfoGridStyles(_theme: Theme, cls: (name: string) => string): s
   letter-spacing: 0;
 }
 
-/* 字段值容器：文字 + 下划线 */
+/* Field value container: text + underline */
 .${cls('field-value')} {
   display: inline-flex;
   flex-direction: column;
@@ -322,7 +322,7 @@ function generateInfoGridStyles(_theme: Theme, cls: (name: string) => string): s
   border-bottom: 0.5pt solid #000;
 }
 
-/* 全宽下划线（用于空标签行） */
+/* Full width underline (for empty label rows) */
 .${cls('field-value')}.${cls('full-width')} {
   width: 100%;
   flex: 1;
@@ -332,7 +332,7 @@ function generateInfoGridStyles(_theme: Theme, cls: (name: string) => string): s
   margin-left: 1mm;
 }
 
-/* checkbox-text 类型：☑/□ + 文本 */
+/* checkbox-text type: checkbox symbol + text */
 .${cls('checkbox-text-item')} {
   display: block;
   width: 100%;
@@ -345,7 +345,7 @@ function generateInfoGridStyles(_theme: Theme, cls: (name: string) => string): s
   word-wrap: break-word;
 }
 
-/* textarea 类型：标签+内容自然换行 */
+/* textarea type: label + content with natural line breaks */
 .${cls('textarea-item')} {
   display: block;
   width: 100%;
@@ -365,11 +365,11 @@ function generateInfoGridStyles(_theme: Theme, cls: (name: string) => string): s
 }
 
 /**
- * 生成数据表格样式
+ * Generate data table styles
  */
 function generateTableStyles(theme: Theme, cls: (name: string) => string): string {
   return `
-/* 数据表格 */
+/* Data Table */
 .${cls('data-table')} table {
   width: 100%;
   border-collapse: collapse;
@@ -389,25 +389,25 @@ function generateTableStyles(theme: Theme, cls: (name: string) => string): strin
 }
 
 /**
- * 生成勾选框网格样式
- * @param _theme - 主题配置（预留扩展，当前未使用）
- * @param cls - 类名生成函数
+ * Generate checkbox grid styles
+ * @param _theme - Theme configuration (reserved for extension, currently unused)
+ * @param cls - Class name generation function
  */
 function generateCheckboxStyles(_theme: Theme, cls: (name: string) => string): string {
   return `
-/* 勾选框网格 */
+/* Checkbox Grid */
 .${cls('checkbox-grid')} {
   margin: 0.5mm 0;
   line-height: 1.8;
 }
 
-/* 网格布局 */
+/* Grid layout */
 .${cls('checkbox-grid')}.${cls('checkbox-grid-grid')} {
   display: grid;
   gap: 0.5mm 2mm;
 }
 
-/* 流式布局 */
+/* Flex layout */
 .${cls('checkbox-grid')}.${cls('checkbox-grid-flex')} {
   display: flex;
   flex-wrap: wrap;
@@ -426,7 +426,7 @@ function generateCheckboxStyles(_theme: Theme, cls: (name: string) => string): s
 }
 
 .${cls('checkbox-symbol')} {
-  font-family: "SimSun", "宋体", serif;
+  font-family: "SimSun", serif;
   font-size: 10pt;
 }
 
@@ -453,11 +453,11 @@ function generateCheckboxStyles(_theme: Theme, cls: (name: string) => string): s
 }
 
 /**
- * 生成签名区域样式
+ * Generate signature area styles
  */
 function generateSignatureStyles(theme: Theme, cls: (name: string) => string): string {
   return `
-/* 签名区域 */
+/* Signature Area */
 .${cls('signature-area')} {
   display: flex;
   justify-content: flex-end;
@@ -488,11 +488,11 @@ function generateSignatureStyles(theme: Theme, cls: (name: string) => string): s
 }
 
 /**
- * 生成备注和自由文本样式
+ * Generate notes and free text styles
  */
 function generateNotesStyles(theme: Theme, cls: (name: string) => string): string {
   return `
-/* 备注区域 */
+/* Notes Area */
 .${cls('notes-section')} {
   padding: ${theme.spacing.cellPadding};
   font-size: ${theme.fontSize.small};
@@ -503,7 +503,7 @@ function generateNotesStyles(theme: Theme, cls: (name: string) => string): strin
   border: ${theme.borderWidth} solid ${theme.colors.border};
 }
 
-/* 自由文本 */
+/* Free Text */
 .${cls('free-text')} {
   border: ${theme.borderWidth} solid ${theme.colors.border};
   padding: ${theme.spacing.cellPadding};
@@ -513,11 +513,11 @@ function generateNotesStyles(theme: Theme, cls: (name: string) => string): strin
 }
 
 /**
- * 生成页脚样式
+ * Generate footer styles
  */
 function generateFooterStyles(theme: Theme, cls: (name: string) => string): string {
   return `
-/* 页脚 */
+/* Footer */
 .${cls('print-footer')} {
   margin-top: ${theme.spacing.footerMarginTop};
   display: flex;
@@ -528,13 +528,13 @@ function generateFooterStyles(theme: Theme, cls: (name: string) => string): stri
 }
 
 /**
- * 生成打印媒体查询样式
+ * Generate print media query styles
  */
 function generatePrintStyles(theme: Theme, cls: (name: string) => string, config: StyleConfig): string {
-  // 隔离模式额外的打印样式
+  // Additional print styles for isolated mode
   const isolatedPrintStyles = config.namespaced
     ? `
-  /* 打印时禁用字体平滑以获得更清晰的输出 */
+  /* Disable font smoothing for clearer print output */
   .${cls('root')},
   .${cls('root')} * {
     -webkit-font-smoothing: subpixel-antialiased !important;
@@ -543,7 +543,7 @@ function generatePrintStyles(theme: Theme, cls: (name: string) => string, config
     : ''
 
   return `
-/* 打印样式 */
+/* Print Styles */
 @media print {
   .${cls('print-page')} {
     padding: 0;
@@ -555,7 +555,7 @@ function generatePrintStyles(theme: Theme, cls: (name: string) => string, config
     margin: ${theme.spacing.pageMargin};
   }
 
-  /* 分页控制 */
+  /* Pagination Control */
   .${cls('page-break-before')} {
     page-break-before: always;
   }
@@ -568,27 +568,27 @@ function generatePrintStyles(theme: Theme, cls: (name: string) => string, config
     page-break-inside: avoid;
   }
 
-  /* 避免在表格行中间分页 */
+  /* Avoid page break in middle of table rows */
   .${cls('data-table')} tr {
     page-break-inside: avoid;
   }
 
-  /* 避免在区块标题后分页 */
+  /* Avoid page break after section title */
   .${cls('section-title')} {
     page-break-after: avoid;
   }
 
-  /* 签名区域避免分页 */
+  /* Signature area avoid page break */
   .${cls('signature-area')} {
     page-break-inside: avoid;
   }
 
-  /* 表格表头避免与内容分离 */
+  /* Table header avoid separation from content */
   .${cls('data-table')} thead {
     display: table-header-group;
   }
 
-  /* 表格页脚避免与内容分离 */
+  /* Table footer avoid separation from content */
   .${cls('data-table')} tfoot {
     display: table-footer-group;
   }${isolatedPrintStyles}
@@ -596,11 +596,11 @@ function generatePrintStyles(theme: Theme, cls: (name: string) => string, config
 }
 
 /**
- * 生成水印样式
+ * Generate watermark styles
  */
 function generateWatermarkStyles(cls: (name: string) => string): string {
   return `
-/* 水印 */
+/* Watermark */
 .${cls('watermark')} {
   position: fixed;
   top: 50%;
@@ -614,13 +614,13 @@ function generateWatermarkStyles(cls: (name: string) => string): string {
 }`
 }
 
-// ==================== 核心生成函数 ====================
+// ==================== Core Generation Functions ====================
 
 /**
- * 生成组件样式（内部函数）
- * @param theme - 主题配置
- * @param config - 样式配置
- * @returns CSS 字符串
+ * Generate component styles (internal function)
+ * @param theme - Theme configuration
+ * @param config - Style configuration
+ * @returns CSS string
  */
 function generateComponentStyles(theme: Theme, config: StyleConfig): string {
   const cls = createClassNameFn(config)
@@ -641,53 +641,53 @@ function generateComponentStyles(theme: Theme, config: StyleConfig): string {
   ].join('\n')
 }
 
-// ==================== 公共 API ====================
+// ==================== Public API ====================
 
 /**
- * 生成 CSS 样式字符串（普通模式）
- * @param theme - 主题配置
- * @returns 完整的 CSS 样式字符串
+ * Generate CSS style string (normal mode)
+ * @param theme - Theme configuration
+ * @returns Complete CSS style string
  *
  * @description
- * 生成的 CSS 包含：
- * - 基础样式（重置、页面布局）
- * - 页眉页脚样式
- * - 各区块类型样式（info-grid、table、checkbox-grid 等）
- * - 打印媒体查询
- * - 水印样式
+ * Generated CSS includes:
+ * - Base styles (reset, page layout)
+ * - Header and footer styles
+ * - Section type styles (info-grid, table, checkbox-grid, etc.)
+ * - Print media queries
+ * - Watermark styles
  *
- * 所有尺寸值从主题配置中获取，支持通过基准单位系统实现整体缩放。
+ * All size values are obtained from theme configuration, supporting overall scaling through base unit system.
  */
 export function generateCss(theme: Theme): string {
   return generateComponentStyles(theme, NORMAL_CONFIG)
 }
 
 /**
- * 生成完整的隔离 CSS
+ * Generate complete isolated CSS
  *
- * @param customTheme - 自定义主题配置（字体配置将被忽略）
- * @returns 包含字体、隔离和组件样式的完整 CSS
+ * @param customTheme - Custom theme configuration (font configuration will be ignored)
+ * @returns Complete CSS including font, isolation and component styles
  *
  * @description
- * 生成的 CSS 包含：
- * 1. @font-face 声明（内嵌 Base64 字体）
- * 2. 字体强制覆盖规则
- * 3. CSS 隔离容器样式
- * 4. 所有组件样式（带 mpr- 前缀）
- * 5. 打印媒体查询
+ * Generated CSS includes:
+ * 1. @font-face declaration (embedded Base64 font)
+ * 2. Font force override rules
+ * 3. CSS isolation container styles
+ * 4. All component styles (with mpr- prefix)
+ * 5. Print media queries
  *
- * 注意：传入的主题配置中的 fonts 属性将被忽略，
- * 始终使用内嵌的思源宋体 SC。
+ * Note: The fonts property in the passed theme configuration will be ignored,
+ * always uses embedded Source Han Serif SC.
  */
 export function generateIsolatedCss(customTheme?: DeepPartial<Theme>): string {
   const theme = mergeTheme(customTheme)
 
   return [
-    // 1. 字体 CSS（@font-face + 强制覆盖）
+    // 1. Font CSS (@font-face + force override)
     getFontCss(),
-    // 2. 隔离容器样式
+    // 2. Isolation container styles
     generateIsolationCss(),
-    // 3. 组件样式（带命名空间）
+    // 3. Component styles (with namespace)
     generateComponentStyles(theme, ISOLATED_CONFIG),
   ].join('\n')
 }

@@ -1,5 +1,5 @@
 /**
- * @fileoverview 签名区域区块渲染器
+ * @fileoverview Signature Area Section Renderer
  * @module renderer/section-renderers/signature-area
  * @modif 2023-11-08
  */
@@ -11,7 +11,7 @@ import { formatDate } from '../../formatters'
 import { escapeHtml } from '../../utils'
 
 /**
- * 渲染签名区域区块
+ * Render signature area section
  */
 export function renderSignatureArea(
   config: SignatureConfig,
@@ -29,11 +29,11 @@ export function renderSignatureArea(
         const formattedDate = dateValue
           ? formatDate(dateValue, options?.dateFormat?.dateFormat)
           : ''
-        dateHtml = `<span class="${cls('signature-date', options)}">日期：<span class="${cls('signature-line', options)}">${escapeHtml(formattedDate)}</span></span>`
+        dateHtml = `<span class="${cls('signature-date', options)}">Date: <span class="${cls('signature-line', options)}">${escapeHtml(formattedDate)}</span></span>`
       }
       
       return `<div class="${cls('signature-item', options)}">
-<span class="${cls('signature-label', options)}">${escapeHtml(field.label)}：</span>
+<span class="${cls('signature-label', options)}">${escapeHtml(field.label)}:</span>
 <span class="${cls('signature-line', options)}">${escapeHtml(String(value))}</span>
 ${dateHtml}
 </div>`

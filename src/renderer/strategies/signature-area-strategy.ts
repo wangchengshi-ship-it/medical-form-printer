@@ -1,5 +1,5 @@
 /**
- * @fileoverview 签名区域渲染策略
+ * @fileoverview Signature Area Render Strategy
  * @module renderer/strategies/signature-area-strategy
  */
 
@@ -9,7 +9,7 @@ import type { RenderOptions } from '../../types/options'
 import { renderSignatureArea } from '../section-renderers/signature-area'
 
 /**
- * 签名区域渲染策略
+ * Signature Area Render Strategy
  */
 export class SignatureAreaStrategy implements SectionRenderStrategy {
   readonly type = 'signature-area'

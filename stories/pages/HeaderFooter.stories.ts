@@ -6,8 +6,8 @@ const baseSchema: PrintSchema = {
   pageSize: '16K',
   orientation: 'portrait',
   header: {
-    hospital: '天津中医药大学第二附属医院',
-    department: '国际产后康复中心',
+    hospital: 'Sample Hospital',
+    department: 'Postpartum Care Center',
     title: '测试表单',
   },
   sections: [
@@ -63,7 +63,7 @@ export const HospitalOnly: Story = {
     const schema: PrintSchema = {
       ...baseSchema,
       header: {
-        hospital: '天津中医药大学第二附属医院',
+        hospital: 'Sample Hospital',
         title: '测试表单',
       },
     }

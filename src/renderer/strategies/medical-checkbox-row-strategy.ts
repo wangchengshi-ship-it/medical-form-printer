@@ -1,5 +1,5 @@
 /**
- * @fileoverview 医疗勾选行渲染策略
+ * @fileoverview Medical checkbox row rendering strategy
  * @module renderer/strategies/medical-checkbox-row-strategy
  */
 
@@ -9,7 +9,7 @@ import type { RenderOptions } from '../../types/options'
 import { renderMedicalCheckboxRow } from '../section-renderers/medical-checkbox-row'
 
 /**
- * 医疗勾选行渲染策略
+ * Medical checkbox row rendering strategy
  */
 export class MedicalCheckboxRowStrategy implements SectionRenderStrategy {
   readonly type = 'medical-checkbox-row'

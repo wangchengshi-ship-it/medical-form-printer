@@ -1,52 +1,52 @@
 /**
- * @fileoverview 页面构建器
+ * @fileoverview Page Builder
  * @module renderer/builders/page-builder
  * 
  * @description
- * 使用 Builder 模式构建完整的打印页面结构。
- * 支持页眉、内容、页脚、水印等组件。
+ * Uses Builder pattern to construct complete print page structure.
+ * Supports header, content, footer, watermark and other components.
  */
 
 import { HtmlElementBuilder } from './html-element-builder'
 import { escapeHtml } from '../../utils'
 
-/** 页面配置 */
+/** Page configuration */
 export interface PageConfig {
-  /** 页面尺寸 */
+  /** Page size */
   pageSize: string
-  /** 页面方向 */
+  /** Page orientation */
   orientation: string
-  /** 语言 */
+  /** Language */
   lang?: string
 }
 
-/** 页眉配置 */
+/** Header configuration */
 export interface HeaderConfig {
-  /** 医院名称 */
+  /** Hospital name */
   hospital: string
-  /** 科室名称 */
+  /** Department name */
   department?: string
-  /** 表单标题 */
+  /** Form title */
   title: string
-  /** 是否显示 Logo */
+  /** Whether to show logo */
   showLogo?: boolean
   /** Logo URL */
   logoUrl?: string
 }
 
-/** 页脚配置 */
+/** Footer configuration */
 export interface FooterConfig {
-  /** 备注 */
+  /** Notes */
   notes?: string
-  /** 是否显示页码 */
+  /** Whether to show page number */
   showPageNumber?: boolean
-  /** 页码格式 */
+  /** Page number format */
   pageNumberFormat?: string
 }
 
 /**
- * 页面构建器
- * 构建完整的打印页面结构
+ * Page Builder
+ * Constructs complete print page structure
  */
 export class PageBuilder {
   private config: PageConfig
@@ -58,16 +58,16 @@ export class PageBuilder {
   private watermarkOpacity: number = 0.1
 
   /**
-   * 创建页面构建器
-   * @param config - 页面配置
+   * Create page builder
+   * @param config - Page configuration
    */
   constructor(config: PageConfig) {
     this.config = config
   }
 
   /**
-   * 设置 CSS 样式
-   * @param css - CSS 字符串
+   * Set CSS styles
+   * @param css - CSS string
    */
   setCSS(css: string): this {
     this.css = css
@@ -75,8 +75,8 @@ export class PageBuilder {
   }
 
   /**
-   * 设置页眉
-   * @param config - 页眉配置
+   * Set header
+   * @param config - Header configuration
    */
   setHeader(config: HeaderConfig): this {
     this.headerConfig = config
@@ -84,8 +84,8 @@ export class PageBuilder {
   }
 
   /**
-   * 设置页脚
-   * @param config: FooterConfig | null
+   * Set footer
+   * @param config - Footer configuration
    */
   setFooter(config: FooterConfig | null): this {
     this.footerConfig = config
@@ -93,8 +93,8 @@ export class PageBuilder {
   }
 
   /**
-   * 添加区块内容
-   * @param html - 区块 HTML
+   * Add section content
+   * @param html - Section HTML
    */
   addSection(html: string): this {
     this.sections.push(html)
@@ -102,8 +102,8 @@ export class PageBuilder {
   }
 
   /**
-   * 批量添加区块内容
-   * @param htmls - 区块 HTML 数组
+   * Add multiple section contents
+   * @param htmls - Section HTML array
    */
   addSections(htmls: string[]): this {
     this.sections.push(...htmls)
@@ -111,9 +111,9 @@ export class PageBuilder {
   }
 
   /**
-   * 设置水印
-   * @param text - 水印文本
-   * @param opacity - 透明度
+   * Set watermark
+   * @param text - Watermark text
+   * @param opacity - Opacity
    */
   setWatermark(text: string, opacity?: number): this {
     this.watermarkText = text
@@ -124,7 +124,7 @@ export class PageBuilder {
   }
 
   /**
-   * 构建页眉 HTML
+   * Build header HTML
    */
   private buildHeader(): string {
     if (!this.headerConfig) return ''
@@ -149,7 +149,7 @@ export class PageBuilder {
   }
 
   /**
-   * 构建页脚 HTML
+   * Build footer HTML
    */
   private buildFooter(): string {
     if (!this.footerConfig) return ''
@@ -171,7 +171,7 @@ export class PageBuilder {
   }
 
   /**
-   * 构建水印 HTML
+   * Build watermark HTML
    */
   private buildWatermark(): string {
     if (!this.watermarkText) return ''
@@ -181,7 +181,7 @@ export class PageBuilder {
   }
 
   /**
-   * 构建页面类名
+   * Build page class names
    */
   private buildPageClasses(): string {
     return [
@@ -192,8 +192,8 @@ export class PageBuilder {
   }
 
   /**
-   * 构建完整页面 HTML
-   * @returns 完整的 HTML 文档字符串
+   * Build complete page HTML
+   * @returns Complete HTML document string
    */
   build(): string {
     const lang = this.config.lang || 'zh-CN'

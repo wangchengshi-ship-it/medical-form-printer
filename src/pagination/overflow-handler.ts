@@ -1,5 +1,5 @@
 /**
- * @fileoverview 溢出字段分页处理
+ * @fileoverview Overflow field pagination handling
  * @module pagination/overflow-handler
  * @version 1.0.0
  * @author Kiro
@@ -7,48 +7,48 @@
  * @modified 2026-01-03
  *
  * @description
- * 处理长文本字段（如 textarea）的分页逻辑：
- * - 第一页显示截断内容
- * - 续页显示剩余内容
- * - 支持配置每个字段的截断字符数
+ * Handles pagination logic for long text fields (e.g., textarea):
+ * - First page displays truncated content
+ * - Continuation pages display remaining content
+ * - Supports configuring truncation character count per field
  *
- * 参考前端实现：PrintModeForm.vue 第 130-175 行
+ * Reference frontend implementation: PrintModeForm.vue lines 130-175
  *
  * @requirements
- * - 9.1: 根据测量内容高度计算分页点
- * - 9.7: 支持溢出字段分页
+ * - 9.1: Calculate page breaks based on measured content height
+ * - 9.7: Support overflow field pagination
  *
  * @dependencies
- * - ./types.ts - 类型定义
+ * - ./types.ts - Type definitions
  *
  * @usedBy
- * - ./index.ts - 模块入口
- * - ../renderer/paginated-renderer.ts - 分页渲染器（待实现）
+ * - ./index.ts - Module entry
+ * - ../renderer/paginated-renderer.ts - Paginated renderer (to be implemented)
  */
 
 import type { OverflowFieldConfig } from './types'
 import { PAGINATION_DEFAULTS } from './types'
 
-// ==================== 类型定义 ====================
+// ==================== Type Definitions ====================
 
 /**
- * 溢出字段处理结果
+ * Overflow field processing result
  */
 export interface OverflowFieldResult {
-  /** 字段名 */
+  /** Field name */
   fieldName: string
-  /** 第一页显示内容 */
+  /** First page display content */
   firstLine: string
-  /** 续页显示内容 */
+  /** Continuation page display content */
   rest: string
-  /** 是否有溢出内容 */
+  /** Whether there is overflow content */
   hasOverflow: boolean
 }
 
-// ==================== 内部工具函数 ====================
+// ==================== Internal Utility Functions ====================
 
 /**
- * 安全转换为字符串
+ * Safely convert to string
  */
 function toSafeString(value: unknown): string {
   if (value == null) return ''
@@ -56,24 +56,24 @@ function toSafeString(value: unknown): string {
 }
 
 /**
- * 按换行符分割文本
+ * Split text by line breaks
  */
 function splitLines(text: string): string[] {
   return text.split('\n')
 }
 
-// ==================== 核心处理函数 ====================
+// ==================== Core Processing Functions ====================
 
 /**
- * 获取溢出字段的第一页显示内容
- * @requirements 9.7 - 支持溢出字段分页
+ * Get first page display content for overflow field
+ * @requirements 9.7 - Support overflow field pagination
  *
- * @param value - 字段值
- * @param maxChars - 第一页显示的最大字符数
- * @returns 第一页显示的内容
+ * @param value - Field value
+ * @param maxChars - Maximum characters to display on first page
+ * @returns Content to display on first page
  *
  * @example
- * getOverflowFirstLine('这是一段很长的文本...', 60)
+ * getOverflowFirstLine('This is a very long text...', 60)
  */
 export function getOverflowFirstLine(
   value: unknown,
@@ -91,12 +91,12 @@ export function getOverflowFirstLine(
 }
 
 /**
- * 获取溢出字段的续页显示内容
- * @requirements 9.7 - 支持溢出字段分页
+ * Get continuation page display content for overflow field
+ * @requirements 9.7 - Support overflow field pagination
  *
- * @param value - 字段值
- * @param maxChars - 第一页显示的最大字符数
- * @returns 续页显示的内容
+ * @param value - Field value
+ * @param maxChars - Maximum characters to display on first page
+ * @returns Content to display on continuation pages
  */
 export function getOverflowRest(
   value: unknown,
@@ -108,7 +108,7 @@ export function getOverflowRest(
   const lines = splitLines(text)
   const firstLine = lines[0]
 
-  // 第一行超过最大字符数，截取剩余部分
+  // First line exceeds max chars, extract remaining part
   if (firstLine.length > maxChars) {
     const rest = firstLine.substring(maxChars)
     const remainingLines = lines.slice(1)
@@ -117,20 +117,20 @@ export function getOverflowRest(
       : rest
   }
 
-  // 只有一行且未超过最大字符数
+  // Only one line and doesn't exceed max chars
   if (lines.length <= 1) return ''
 
-  // 返回除第一行外的所有内容
+  // Return all content except first line
   return lines.slice(1).join('\n')
 }
 
 /**
- * 判断字段是否有溢出内容
- * @requirements 9.7 - 支持溢出字段分页
+ * Check if field has overflow content
+ * @requirements 9.7 - Support overflow field pagination
  *
- * @param value - 字段值
- * @param maxChars - 第一页显示的最大字符数
- * @returns 是否有溢出内容需要显示在续页
+ * @param value - Field value
+ * @param maxChars - Maximum characters to display on first page
+ * @returns Whether there is overflow content to display on continuation pages
  */
 export function hasOverflowContent(
   value: unknown,
@@ -141,17 +141,17 @@ export function hasOverflowContent(
 
   const lines = splitLines(text)
 
-  // 第一行超过最大字符数 或 有多行内容
+  // First line exceeds max chars or has multiple lines
   return lines[0].length > maxChars || lines.length > 1
 }
 
-// ==================== 配置工厂函数 ====================
+// ==================== Configuration Factory Functions ====================
 
 /**
- * 创建溢出字段配置
- * @param fieldName - 字段名
- * @param maxFirstLineChars - 第一页显示的最大字符数
- * @returns 溢出字段配置
+ * Create overflow field configuration
+ * @param fieldName - Field name
+ * @param maxFirstLineChars - Maximum characters to display on first page
+ * @returns Overflow field configuration
  */
 export function createOverflowFieldConfig(
   fieldName: string,
@@ -161,10 +161,10 @@ export function createOverflowFieldConfig(
 }
 
 /**
- * 从字段名数组创建溢出字段配置列表
- * @param fieldNames - 字段名数组
- * @param defaultMaxChars - 默认最大字符数
- * @returns 溢出字段配置列表
+ * Create overflow field configuration list from field name array
+ * @param fieldNames - Array of field names
+ * @param defaultMaxChars - Default maximum characters
+ * @returns Overflow field configuration list
  */
 export function createOverflowFieldConfigs(
   fieldNames: string[],
@@ -175,13 +175,13 @@ export function createOverflowFieldConfigs(
   )
 }
 
-// ==================== 配置查询函数 ====================
+// ==================== Configuration Query Functions ====================
 
 /**
- * 获取字段的溢出配置
- * @param configs - 溢出字段配置列表
- * @param fieldName - 字段名
- * @returns 溢出字段配置，如果未找到则返回 undefined
+ * Get overflow configuration for a field
+ * @param configs - Overflow field configuration list
+ * @param fieldName - Field name
+ * @returns Overflow field configuration, or undefined if not found
  */
 export function getOverflowFieldConfig(
   configs: OverflowFieldConfig[],
@@ -191,10 +191,10 @@ export function getOverflowFieldConfig(
 }
 
 /**
- * 检查字段是否配置为溢出字段
- * @param configs - 溢出字段配置列表
- * @param fieldName - 字段名
- * @returns 是否为溢出字段
+ * Check if field is configured as overflow field
+ * @param configs - Overflow field configuration list
+ * @param fieldName - Field name
+ * @returns Whether it is an overflow field
  */
 export function isOverflowField(
   configs: OverflowFieldConfig[],
@@ -203,13 +203,13 @@ export function isOverflowField(
   return configs.some((c) => c.fieldName === fieldName)
 }
 
-// ==================== 批量处理函数 ====================
+// ==================== Batch Processing Functions ====================
 
 /**
- * 批量处理溢出字段
- * @param data - 表单数据
- * @param configs - 溢出字段配置列表
- * @returns 溢出字段处理结果列表
+ * Batch process overflow fields
+ * @param data - Form data
+ * @param configs - Overflow field configuration list
+ * @returns Overflow field processing result list
  */
 export function processOverflowFields(
   data: Record<string, unknown>,
@@ -230,10 +230,10 @@ export function processOverflowFields(
 }
 
 /**
- * 检查是否有任何溢出内容需要续页
- * @param data - 表单数据
- * @param configs - 溢出字段配置列表
- * @returns 是否需要续页
+ * Check if any overflow content needs continuation pages
+ * @param data - Form data
+ * @param configs - Overflow field configuration list
+ * @returns Whether continuation pages are needed
  */
 export function hasAnyOverflowContent(
   data: Record<string, unknown>,

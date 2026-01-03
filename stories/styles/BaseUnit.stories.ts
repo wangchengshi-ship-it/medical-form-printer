@@ -8,8 +8,8 @@ const sampleSchema: PrintSchema = {
   pageSize: '16K',
   orientation: 'portrait',
   header: {
-    hospital: '天津中医药大学第二附属医院',
-    department: '国际产后康复中心',
+    hospital: 'Sample Hospital',
+    department: 'Postpartum Care Center',
     title: '基准单位缩放演示',
   },
   sections: [

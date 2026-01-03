@@ -1,5 +1,5 @@
 /**
- * @fileoverview 区块标题渲染策略
+ * @fileoverview Section Title Render Strategy
  * @module renderer/strategies/section-title-strategy
  */
 
@@ -9,7 +9,7 @@ import type { RenderOptions } from '../../types/options'
 import { renderSectionTitle, SectionTitleConfig } from '../section-renderers/section-title'
 
 /**
- * 区块标题渲染策略
+ * Section Title Render Strategy
  */
 export class SectionTitleStrategy implements SectionRenderStrategy {
   readonly type = 'section-title'

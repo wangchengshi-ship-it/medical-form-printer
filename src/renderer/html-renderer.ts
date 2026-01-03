@@ -1,5 +1,5 @@
 /**
- * @fileoverview HTML 渲染核心
+ * @fileoverview HTML Rendering Core
  * @module renderer/html-renderer
  */
 
@@ -10,7 +10,7 @@ import { renderSection } from './section-renderers'
 import { escapeHtml } from '../utils'
 
 /**
- * 渲染页眉
+ * Render header
  */
 function renderHeader(schema: PrintSchema): string {
   const { header } = schema
@@ -34,7 +34,7 @@ ${departmentHtml}
 }
 
 /**
- * 渲染页脚
+ * Render footer
  */
 function renderFooter(schema: PrintSchema): string {
   const { footer } = schema
@@ -57,7 +57,7 @@ ${pageNumberHtml}
 }
 
 /**
- * 渲染所有区块
+ * Render all sections
  */
 function renderSections(
   schema: PrintSchema,
@@ -79,7 +79,7 @@ function renderSections(
 }
 
 /**
- * 渲染水印
+ * Render watermark
  */
 function renderWatermark(text?: string, opacity?: number): string {
   if (!text) return ''
@@ -88,12 +88,12 @@ function renderWatermark(text?: string, opacity?: number): string {
 }
 
 /**
- * 将 PrintSchema 和 FormData 渲染为完整的 HTML 字符串
+ * Render PrintSchema and FormData to complete HTML string
  * 
- * @param schema - 打印布局配置
- * @param data - 表单数据
- * @param options - 渲染选项
- * @returns 完整的 HTML 字符串（包含 CSS）
+ * @param schema - Print layout configuration
+ * @param data - Form data
+ * @param options - Render options
+ * @returns Complete HTML string (including CSS)
  */
 export function renderToHtml(
   schema: PrintSchema,
@@ -103,14 +103,14 @@ export function renderToHtml(
   const theme = mergeTheme(options?.theme)
   const css = generateCss(theme)
   
-  // 页面类名
+  // Page class names
   const pageClasses = [
     'print-page',
     schema.pageSize.toLowerCase(),
     schema.orientation,
   ].join(' ')
   
-  // 渲染各部分
+  // Render each part
   const header = renderHeader(schema)
   const sections = renderSections(schema, data, options)
   const footer = renderFooter(schema)

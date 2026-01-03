@@ -1,68 +1,68 @@
 /**
- * @fileoverview 渲染选项类型定义
+ * @fileoverview Render options type definitions
  * @module types/options
  */
 
 import type { Theme } from './theme'
 
-/** 日期格式化选项 */
+/** Date format options */
 export interface DateFormatOptions {
-  /** 日期格式 */
+  /** Date format */
   dateFormat?: string
-  /** 时间格式 */
+  /** Time format */
   timeFormat?: string
-  /** 日期时间格式 */
+  /** DateTime format */
   dateTimeFormat?: string
 }
 
-/** 渲染选项 */
+/** Render options */
 export interface RenderOptions {
-  /** 主题配置 */
+  /** Theme configuration */
   theme?: Partial<Theme>
-  /** 语言环境 */
+  /** Locale */
   locale?: string
-  /** 日期格式化选项 */
+  /** Date format options */
   dateFormat?: DateFormatOptions
-  /** 空值占位符 */
+  /** Empty value placeholder */
   emptyPlaceholder?: string
-  /** 自定义格式化器 */
+  /** Custom formatters */
   formatters?: Record<string, (value: unknown) => string>
-  /** CSS 类名前缀（用于隔离模式） */
+  /** CSS class name prefix (for isolation mode) */
   classPrefix?: string
 }
 
-/** PDF 生成选项 */
+/** PDF generation options */
 export interface PdfOptions extends RenderOptions {
-  /** 水印文本 */
+  /** Watermark text */
   watermark?: string
-  /** 水印透明度 (0-1) */
+  /** Watermark opacity (0-1) */
   watermarkOpacity?: number
-  /** 是否生成 PDF/A 格式 */
+  /** Whether to generate PDF/A format */
   pdfA?: boolean
 }
 
-/** PDF 合并选项 */
+/** PDF merge options */
 export interface MergeOptions {
-  /** 是否生成目录 */
+  /** Whether to generate table of contents */
   tableOfContents?: boolean
-  /** 分隔页标题 */
+  /** Section divider titles */
   sectionDividers?: boolean
 }
 
-/** 合并文档项 */
+/** Merge document item */
 export interface MergeDocumentItem {
-  /** 打印配置 */
+  /** Print configuration */
   schema: import('./print-schema').PrintSchema
-  /** 表单数据 */
+  /** Form data */
   data: import('./print-schema').FormData
-  /** 文档标题（用于目录） */
+  /** Document title (for table of contents) */
   title?: string
 }
 
 /**
- * 创建类名生成函数
- * @param options - 渲染选项
- * @returns 类名生成函数
+ * Create class name generator function
+ * @param options - Render options
+ * @returns Class name generator function
  */
 export function createClassNameFn(options?: RenderOptions): (name: string) => string {
   const prefix = options?.classPrefix
@@ -70,10 +70,10 @@ export function createClassNameFn(options?: RenderOptions): (name: string) => st
 }
 
 /**
- * 获取类名（支持命名空间）
- * @param name - 原始类名
- * @param options - 渲染选项
- * @returns 处理后的类名
+ * Get class name (with namespace support)
+ * @param name - Original class name
+ * @param options - Render options
+ * @returns Processed class name
  */
 export function cls(name: string, options?: RenderOptions): string {
   const prefix = options?.classPrefix

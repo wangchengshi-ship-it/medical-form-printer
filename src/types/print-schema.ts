@@ -1,17 +1,17 @@
 /**
- * @fileoverview PrintSchema 类型定义
+ * @fileoverview PrintSchema type definitions
  * @module types/print-schema
- * @description 定义打印布局配置的完整类型系统
+ * @description Defines complete type system for print layout configuration
  * @modif 2024-04-07
  */
 
-/** 页面尺寸 */
+/** Page size */
 export type PageSize = 'A4' | 'A5' | '16K'
 
-/** 页面方向 */
+/** Page orientation */
 export type PageOrientation = 'portrait' | 'landscape'
 
-/** 区块类型 */
+/** Section type */
 export type SectionType =
   | 'info-grid'
   | 'table'
@@ -24,7 +24,7 @@ export type SectionType =
   | 'inline-row'
   | 'container'
 
-/** 单元格数据类型 */
+/** Cell data type */
 export type CellType = 
   | 'text' 
   | 'checkbox' 
@@ -36,259 +36,259 @@ export type CellType =
   | 'textarea'
   | 'checkbox-text'
 
-/** 页眉配置 */
+/** Header configuration */
 export interface PrintHeader {
-  /** 医院名称 */
+  /** Hospital name */
   hospital: string
-  /** 科室名称 */
+  /** Department name */
   department?: string
-  /** 表单标题 */
+  /** Form title */
   title: string
-  /** 是否显示 Logo */
+  /** Whether to show logo */
   showLogo?: boolean
   /** Logo URL */
   logoUrl?: string
 }
 
-/** 页脚配置 */
+/** Footer configuration */
 export interface PrintFooter {
-  /** 是否显示页码 */
+  /** Whether to show page number */
   showPageNumber?: boolean
-  /** 备注文本 */
+  /** Notes text */
   notes?: string
 }
 
-/** 信息网格单元格 */
+/** Info grid cell */
 export interface InfoGridCell {
-  /** 标签文本 */
+  /** Label text */
   label: string
-  /** 对应 formData 的字段名 */
+  /** Field name in formData */
   field: string
-  /** 合并单元格数 */
+  /** Cell span */
   span?: number
-  /** 数据类型 */
+  /** Data type */
   type?: CellType
-  /** 后缀（如 '℃', 'kg'） */
+  /** Suffix (e.g., '℃', 'kg') */
   suffix?: string
-  /** 自定义宽度 */
+  /** Custom width */
   width?: string
-  /** checkbox-inline 选项（如 ['无', '有']） */
+  /** checkbox-inline options (e.g., ['No', 'Yes']) */
   inlineOptions?: string[]
-  /** compound 模板格式（如 '{systolic}/{diastolic}mmHg'） */
+  /** compound template format (e.g., '{systolic}/{diastolic}mmHg') */
   compoundFormat?: string
-  /** compound 字段映射（如 { systolic: 'bp_systolic', diastolic: 'bp_diastolic' }） */
+  /** compound field mapping (e.g., { systolic: 'bp_systolic', diastolic: 'bp_diastolic' }) */
   compoundFields?: Record<string, string>
-  /** textarea 最小高度 */
+  /** textarea minimum height */
   minHeight?: string
-  /** checkbox-text 勾选框字段名 */
+  /** checkbox-text checkbox field name */
   checkboxField?: string
-  /** checkbox-text 文本字段名 */
+  /** checkbox-text text field name */
   textField?: string
-  /** checkbox-text 显示文本 */
+  /** checkbox-text display text */
   text?: string
 }
 
-/** 信息网格行 */
+/** Info grid row */
 export interface InfoGridRow {
   cells: InfoGridCell[]
 }
 
-/** 信息网格配置 */
+/** Info grid configuration */
 export interface InfoGridConfig {
-  /** 列数 */
+  /** Number of columns */
   columns: number
-  /** 行配置 */
+  /** Row configuration */
   rows: InfoGridRow[]
 }
 
-/** 表格列配置 */
+/** Table column configuration */
 export interface TableColumn {
-  /** 列标题 */
+  /** Column header */
   header: string
-  /** 对应 formData 的字段名 */
+  /** Field name in formData */
   field: string
-  /** 列宽 */
+  /** Column width */
   width?: string
-  /** 数据类型 */
+  /** Data type */
   type?: CellType
-  /** 选项（select 类型） */
+  /** Options (for select type) */
   options?: string[]
 }
 
-/** 表格配置 */
+/** Table configuration */
 export interface TableConfig {
-  /** 列配置 */
+  /** Column configuration */
   columns: TableColumn[]
-  /** formData 中的数组字段名 */
+  /** Array field name in formData */
   dataField: string
-  /** 是否显示行号 */
+  /** Whether to show row numbers */
   showRowNumber?: boolean
 }
 
-/** 勾选框选项 */
+/** Checkbox option */
 export interface CheckboxOption {
-  /** 选项值 */
+  /** Option value */
   value: string
-  /** 显示标签 */
+  /** Display label */
   label: string
-  /** 是否有附加输入框 */
+  /** Whether has additional input */
   hasInput?: boolean
-  /** 附加输入框字段名 */
+  /** Additional input field name */
   inputField?: string
 }
 
-/** 勾选框项（items 模式） */
+/** Checkbox item (items mode) */
 export interface CheckboxItem {
-  /** 项类型：checkbox 或 text-input */
+  /** Item type: checkbox or text-input */
   type?: 'checkbox' | 'text-input'
-  /** 选项值（checkbox 类型） */
+  /** Option value (for checkbox type) */
   value?: string
-  /** 显示标签 */
+  /** Display label */
   label: string
-  /** 是否有附加输入框（checkbox 类型） */
+  /** Whether has additional input (for checkbox type) */
   hasInput?: boolean
-  /** 附加输入框字段名 */
+  /** Additional input field name */
   inputField?: string
 }
 
-/** 勾选框网格配置 */
+/** Checkbox grid configuration */
 export interface CheckboxGridConfig {
-  /** 对应 formData 的字段名 */
+  /** Field name in formData */
   field: string
-  /** 选项列表（options 模式） */
+  /** Option list (options mode) */
   options?: CheckboxOption[]
-  /** 项列表（items 模式，支持更多类型） */
+  /** Item list (items mode, supports more types) */
   items?: CheckboxItem[]
-  /** 列数 */
+  /** Number of columns */
   columns?: number
-  /** 布局方式 */
+  /** Layout mode */
   layout?: 'grid' | 'flex'
-  /** 前缀标签 */
+  /** Prefix label */
   prefixLabel?: string
 }
 
-/** 签名字段配置 */
+/** Signature field configuration */
 export interface SignatureField {
-  /** 标签文本 */
+  /** Label text */
   label: string
-  /** 对应 formData 的字段名 */
+  /** Field name in formData */
   field: string
-  /** 是否显示日期 */
+  /** Whether to show date */
   showDate?: boolean
 }
 
-/** 签名区域配置 */
+/** Signature area configuration */
 export interface SignatureConfig {
   fields: SignatureField[]
 }
 
-/** 备注配置 */
+/** Notes configuration */
 export interface NotesConfig {
-  /** 静态文本内容 */
+  /** Static text content */
   content: string
-  /** 是否显示边框 */
+  /** Whether to show border */
   showBorder?: boolean
 }
 
-/** 自由文本配置 */
+/** Free text configuration */
 export interface FreeTextConfig {
-  /** 对应 formData 的字段名 */
+  /** Field name in formData */
   field: string
-  /** 最小高度 */
+  /** Minimum height */
   minHeight?: string
 }
 
-/** 区块标题配置 */
+/** Section title configuration */
 export interface SectionTitleConfig {
-  /** 标题文本 */
+  /** Title text */
   text: string
-  /** 对齐方式 */
+  /** Alignment */
   align?: 'left' | 'center' | 'right'
-  /** 字体大小 */
+  /** Font size */
   fontSize?: string
-  /** 是否加粗 */
+  /** Whether bold */
   bold?: boolean
 }
 
-/** 医疗勾选选项配置 */
+/** Medical checkbox option configuration */
 export interface MedicalCheckboxOption {
-  /** 选项值 */
+  /** Option value */
   value: string
-  /** 显示标签 */
+  /** Display label */
   label: string
 }
 
-/** 额外输入项配置 */
+/** Extra input item configuration */
 export interface ExtraInput {
-  /** 输入框标签 */
+  /** Input label */
   label?: string
-  /** 对应 formData 的字段名 */
+  /** Field name in formData */
   field: string
-  /** 后缀文本 */
+  /** Suffix text */
   suffix?: string
 }
 
-/** 医疗勾选行配置 */
+/** Medical checkbox row configuration */
 export interface MedicalCheckboxRowConfig {
-  /** 前缀标签（如"排便情况："） */
+  /** Prefix label (e.g., "Bowel movement:") */
   prefixLabel?: string
-  /** 对应 formData 的字段名（用于选项勾选） */
+  /** Field name in formData (for checkbox selection) */
   field?: string
-  /** 选项列表（□有/□无） */
+  /** Option list (□Yes/□No) */
   options?: MedicalCheckboxOption[]
-  /** 输入框模板格式（如 "{input}次/日"），{input} 会被替换为输入框 */
+  /** Input format template (e.g., "{input} times/day"), {input} will be replaced with input field */
   inputFormat?: string
-  /** 输入框对应的字段名（用于 inputFormat） */
+  /** Input field name (for inputFormat) */
   inputField?: string
-  /** 简单输入框标签（如 "疾病名称"） */
+  /** Simple input label (e.g., "Disease name") */
   inputLabel?: string
-  /** 简单输入框字段名（用于 inputLabel） */
+  /** Simple input field name (for inputLabel) */
   inputLabelField?: string
-  /** 额外输入项列表 */
+  /** Extra input items list */
   extraInputs?: ExtraInput[]
 }
 
-/** 行内分列子元素 */
+/** Inline row child element */
 export interface InlineRowChild {
-  /** 区块类型 */
+  /** Section type */
   type: SectionType
-  /** 区块配置 */
+  /** Section configuration */
   config: SectionConfig
 }
 
-/** 行内分列配置 */
+/** Inline row configuration */
 export interface InlineRowConfig {
-  /** 子元素列表 */
+  /** Child element list */
   children: InlineRowChild[]
-  /** 列比例配置（如 [1, 2, 1] 表示 1:2:1） */
+  /** Column ratio configuration (e.g., [1, 2, 1] means 1:2:1) */
   columns?: number[]
-  /** 间距 */
+  /** Gap */
   gap?: string
 }
 
-/** 容器子元素 */
+/** Container child element */
 export interface ContainerChild {
-  /** 区块类型 */
+  /** Section type */
   type: SectionType
-  /** 区块配置 */
+  /** Section configuration */
   config: SectionConfig
 }
 
-/** 容器配置 */
+/** Container configuration */
 export interface ContainerConfig {
-  /** 子区块列表 */
+  /** Child section list */
   children: ContainerChild[]
-  /** 布局方向 */
+  /** Layout direction */
   direction?: 'row' | 'column'
-  /** 边框配置 */
+  /** Border configuration */
   border?: boolean | string
-  /** 内边距 */
+  /** Padding */
   padding?: string
-  /** 间距 */
+  /** Gap */
   gap?: string
 }
 
-/** 区块配置联合类型 */
+/** Section configuration union type */
 export type SectionConfig =
   | InfoGridConfig
   | TableConfig
@@ -301,29 +301,29 @@ export type SectionConfig =
   | InlineRowConfig
   | ContainerConfig
 
-/** 打印区块 */
+/** Print section */
 export interface PrintSection {
-  /** 区块类型 */
+  /** Section type */
   type: SectionType
-  /** 区块标题 */
+  /** Section title */
   title?: string
-  /** 区块配置 */
+  /** Section configuration */
   config: SectionConfig
 }
 
-/** 打印布局配置 */
+/** Print layout configuration */
 export interface PrintSchema {
-  /** 页面尺寸 */
+  /** Page size */
   pageSize: PageSize
-  /** 页面方向 */
+  /** Page orientation */
   orientation: PageOrientation
-  /** 页眉配置 */
+  /** Header configuration */
   header: PrintHeader
-  /** 区块列表 */
+  /** Section list */
   sections: PrintSection[]
-  /** 页脚配置 */
+  /** Footer configuration */
   footer?: PrintFooter
 }
 
-/** 表单数据类型 */
+/** Form data type */
 export type FormData = Record<string, unknown>

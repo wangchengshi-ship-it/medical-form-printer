@@ -1,18 +1,18 @@
 /**
- * @fileoverview 字体隔离属性测试 - Property-Based Testing
+ * @fileoverview Font isolation property tests - Property-Based Testing
  * @module test/font-isolation-properties
- * @description 使用 fast-check 进行属性测试，验证字体隔离功能的核心不变量
+ * @description Uses fast-check for property testing to verify core invariants of font isolation
  *
- * 测试的属性：
- * - Property 1: Font Enforcement - 字体强制使用
- * - Property 2: CSS Isolation Container - CSS 隔离容器
- * - Property 3: External Font Config Ignored - 外部字体配置被忽略
- * - Property 4: Font Data Embedding - 字体数据嵌入
+ * Properties tested:
+ * - Property 1: Font Enforcement - Font forced usage
+ * - Property 2: CSS Isolation Container - CSS isolation container
+ * - Property 3: External Font Config Ignored - External font config ignored
+ * - Property 4: Font Data Embedding - Font data embedding
  *
  * @dependencies
- * - fast-check - 属性测试库
- * - ../src/renderer - 渲染器模块
- * - ../src/fonts - 字体模块
+ * - fast-check - Property testing library
+ * - ../src/renderer - Renderer module
+ * - ../src/fonts - Font module
  */
 
 import { describe, it, expect } from 'vitest'
@@ -20,6 +20,7 @@ import * as fc from 'fast-check'
 import { renderToIsolatedHtml, renderToIsolatedFragment } from '../src/renderer'
 import { FONT_FAMILY } from '../src/fonts'
 import { CSS_NAMESPACE, ISOLATION_ROOT_CLASS } from '../src/styles'
+import { PLACEHOLDER } from '../src/test-utils/placeholder-data'
 import type {
   PrintSchema,
   InfoGridConfig,
@@ -293,7 +294,7 @@ describe('Property 3: External Font Config Ignored', () => {
     const baseSchema: PrintSchema = {
       pageSize: 'A4',
       orientation: 'portrait',
-      header: { hospital: '测试医院', title: '测试表单' },
+      header: { hospital: PLACEHOLDER.hospital.name, title: 'Test Form' },
       sections: [],
     }
 
@@ -302,11 +303,11 @@ describe('Property 3: External Font Config Ignored', () => {
         const html1 = renderToIsolatedHtml(baseSchema, {}, { theme: { fonts: fontConfig1 } })
         const html2 = renderToIsolatedHtml(baseSchema, {}, { theme: { fonts: fontConfig2 } })
 
-        // 提取两个输出的 @font-face 声明
+        // Extract @font-face declarations from both outputs
         const fontFace1 = html1.match(/@font-face\s*\{[^}]+\}/)?.[0]
         const fontFace2 = html2.match(/@font-face\s*\{[^}]+\}/)?.[0]
 
-        // @font-face 声明应该完全相同
+        // @font-face declarations should be identical
         expect(fontFace1).toBe(fontFace2)
 
         return true
@@ -405,8 +406,8 @@ describe('Property 4: Font Data Embedding', () => {
 // ==================== Property 5: All Class Names Namespaced ====================
 
 /**
- * 生成包含所有区块类型的 PrintSchema
- * 用于全面测试命名空间前缀
+ * Generate PrintSchema with all section types
+ * Used for comprehensive namespace prefix testing
  */
 const comprehensivePrintSchemaArb = fc.record({
   pageSize: fc.constantFrom('A4', 'A5', '16K') as fc.Arbitrary<'A4' | 'A5' | '16K'>,
@@ -419,83 +420,83 @@ const comprehensivePrintSchemaArb = fc.record({
     logoUrl: fc.option(fc.constant('https://example.com/logo.png'), { nil: undefined }),
   }),
   sections: fc.constant([
-    // info-grid 区块
+    // info-grid section
     {
       type: 'info-grid' as const,
-      title: '基本信息',
+      title: 'Basic Information',
       config: {
         columns: 4,
         rows: [
           {
             cells: [
-              { label: '姓名', field: 'name', type: 'text' as const },
-              { label: '年龄', field: 'age', type: 'number' as const, suffix: '岁' },
+              { label: 'Name', field: 'name', type: 'text' as const },
+              { label: 'Age', field: 'age', type: 'number' as const, suffix: 'years' },
             ],
           },
           {
             cells: [
-              { label: '过敏史', field: 'allergy', type: 'checkbox-inline' as const, inlineOptions: ['无', '有'] },
-              { label: '血压', field: 'bp', type: 'compound' as const, compoundFormat: '{systolic}/{diastolic}mmHg', compoundFields: { systolic: 'bpSystolic', diastolic: 'bpDiastolic' } },
+              { label: 'Allergy', field: 'allergy', type: 'checkbox-inline' as const, inlineOptions: ['No', 'Yes'] },
+              { label: 'BP', field: 'bp', type: 'compound' as const, compoundFormat: '{systolic}/{diastolic}mmHg', compoundFields: { systolic: 'bpSystolic', diastolic: 'bpDiastolic' } },
             ],
           },
           {
             cells: [
-              { label: '备注', field: 'notes', type: 'textarea' as const, span: 3, minHeight: '50px' },
+              { label: 'Notes', field: 'notes', type: 'textarea' as const, span: 3, minHeight: '50px' },
             ],
           },
         ],
       } as InfoGridConfig,
     },
-    // table 区块
+    // table section
     {
       type: 'table' as const,
-      title: '记录表',
+      title: 'Records',
       config: {
         columns: [
-          { header: '日期', field: 'date', width: '100px' },
-          { header: '内容', field: 'content' },
-          { header: '操作人', field: 'operator' },
+          { header: 'Date', field: 'date', width: '100px' },
+          { header: 'Content', field: 'content' },
+          { header: 'Operator', field: 'operator' },
         ],
         dataField: 'records',
       } as TableConfig,
     },
-    // checkbox-grid 区块
+    // checkbox-grid section
     {
       type: 'checkbox-grid' as const,
-      title: '症状选择',
+      title: 'Symptoms',
       config: {
         field: 'symptoms',
         columns: 4,
         options: [
-          { value: 'fever', label: '发热' },
-          { value: 'cough', label: '咳嗽' },
-          { value: 'headache', label: '头痛' },
-          { value: 'fatigue', label: '乏力' },
+          { value: 'fever', label: 'Fever' },
+          { value: 'cough', label: 'Cough' },
+          { value: 'headache', label: 'Headache' },
+          { value: 'fatigue', label: 'Fatigue' },
         ],
       } as CheckboxGridConfig,
     },
-    // signature-area 区块
+    // signature-area section
     {
       type: 'signature-area' as const,
       config: {
         fields: [
-          { label: '医生签名', field: 'doctorSignature', showDate: true },
-          { label: '护士签名', field: 'nurseSignature', showDate: true },
+          { label: 'Doctor Signature', field: 'doctorSignature', showDate: true },
+          { label: 'Nurse Signature', field: 'nurseSignature', showDate: true },
         ],
       } as SignatureConfig,
     },
-    // notes 区块
+    // notes section
     {
       type: 'notes' as const,
       config: {
-        content: '注意事项：请仔细核对信息',
+        content: 'Note: Please verify all information carefully',
         showBorder: true,
       } as NotesConfig,
     },
-    // free-text 区块
+    // free-text section
     {
       type: 'free-text' as const,
-      title: '补充说明',
+      title: 'Additional Notes',
       config: {
         field: 'additionalNotes',
         minHeight: '100px',
@@ -503,32 +504,32 @@ const comprehensivePrintSchemaArb = fc.record({
     },
   ]),
   footer: fc.constant({
-    notes: '页脚备注',
+    notes: 'Footer notes',
     showPageNumber: true,
   }),
 })
 
 /**
- * 生成包含数据的 FormData
+ * Generate FormData with data
  */
 const comprehensiveFormDataArb = fc.constant({
-  name: '张三',
+  name: PLACEHOLDER.patient.name,
   age: 30,
   allergy: true,
   bpSystolic: 120,
   bpDiastolic: 80,
-  notes: '无特殊情况',
+  notes: 'No special conditions',
   records: [
-    { date: '2026-01-01', content: '入院检查', operator: '李医生' },
-    { date: '2026-01-02', content: '常规护理', operator: '王护士' },
+    { date: '2026-01-01', content: 'Admission exam', operator: PLACEHOLDER.staff.doctor },
+    { date: '2026-01-02', content: 'Routine care', operator: PLACEHOLDER.staff.nurse },
   ],
   fever: true,
   cough: false,
   headache: false,
   fatigue: true,
-  doctorSignature: '李医生',
-  nurseSignature: '王护士',
-  additionalNotes: '患者状态良好',
+  doctorSignature: PLACEHOLDER.staff.doctor,
+  nurseSignature: PLACEHOLDER.staff.nurse,
+  additionalNotes: 'Patient in good condition',
 })
 
 describe('Property 5: All Class Names Namespaced', () => {

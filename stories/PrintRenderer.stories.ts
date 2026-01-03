@@ -1,15 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/html'
 import { renderToIsolatedHtml } from '../src/renderer'
 import type { PrintSchema, FormData } from '../src/types/print-schema'
+import { PLACEHOLDER, SAMPLE_MATERNAL_DATA } from '../src/test-utils/placeholder-data'
 
-// 产妇入院评估单示例数据
+// Maternal Admission Assessment sample schema
 const maternalAdmissionSchema: PrintSchema = {
   pageSize: '16K',
   orientation: 'portrait',
   header: {
-    hospital: '天津中医药大学第二附属医院',
-    department: '国际产后康复中心',
-    title: '产妇入院评估单',
+    hospital: PLACEHOLDER.hospital.name,
+    department: PLACEHOLDER.hospital.department,
+    title: 'Maternal Admission Assessment',
   },
   sections: [
     {
@@ -19,26 +20,26 @@ const maternalAdmissionSchema: PrintSchema = {
         rows: [
           {
             cells: [
-              { label: '房号', field: 'roomNumber', type: 'text' },
-              { label: '住院号', field: 'hospitalNumber', type: 'text' },
-              { label: '入院时间', field: 'admissionTime', type: 'date' },
-              { label: '姓名', field: 'name', type: 'text' },
+              { label: 'Room No.', field: 'roomNumber', type: 'text' },
+              { label: 'Hospital No.', field: 'hospitalNumber', type: 'text' },
+              { label: 'Admission Time', field: 'admissionTime', type: 'date' },
+              { label: 'Name', field: 'name', type: 'text' },
             ],
           },
           {
             cells: [
-              { label: '年龄', field: 'age', type: 'number' },
-              { label: '血型', field: 'bloodType', type: 'text' },
-              { label: '民族', field: 'ethnicity', type: 'text' },
-              { label: '籍贯', field: 'birthplace', type: 'text' },
+              { label: 'Age', field: 'age', type: 'number' },
+              { label: 'Blood Type', field: 'bloodType', type: 'text' },
+              { label: 'Ethnicity', field: 'ethnicity', type: 'text' },
+              { label: 'Birthplace', field: 'birthplace', type: 'text' },
             ],
           },
           {
             cells: [
-              { label: '分娩医院', field: 'deliveryHospital', type: 'text' },
-              { label: '分娩日期', field: 'deliveryDate', type: 'date' },
-              { label: '分娩方式', field: 'deliveryMethod', type: 'text' },
-              { label: '体温', field: 'temperature', type: 'number' },
+              { label: 'Delivery Hospital', field: 'deliveryHospital', type: 'text' },
+              { label: 'Delivery Date', field: 'deliveryDate', type: 'date' },
+              { label: 'Delivery Method', field: 'deliveryMethod', type: 'text' },
+              { label: 'Temperature', field: 'temperature', type: 'number' },
             ],
           },
         ],
@@ -46,58 +47,44 @@ const maternalAdmissionSchema: PrintSchema = {
     },
     {
       type: 'checkbox-grid',
-      title: '过敏史',
+      title: 'Allergy History',
       config: {
         field: 'allergies',
         columns: 4,
         options: [
-          { value: 'none', label: '无' },
-          { value: 'penicillin', label: '青霉素' },
-          { value: 'sulfa', label: '磺胺类' },
-          { value: 'other', label: '其他', hasInput: true, inputField: 'allergyOther' },
+          { value: 'none', label: 'None' },
+          { value: 'penicillin', label: 'Penicillin' },
+          { value: 'sulfa', label: 'Sulfonamides' },
+          { value: 'other', label: 'Other', hasInput: true, inputField: 'allergyOther' },
         ],
       },
     },
     {
       type: 'signature-area',
       config: {
-        fields: [
-          { label: '评估护士', field: 'nurseSignature', showDate: true },
-        ],
+        fields: [{ label: 'Assessment Nurse', field: 'nurseSignature', showDate: true }],
       },
     },
   ],
   footer: {
     showPageNumber: true,
-    notes: '本表由护士填写，入院24小时内完成',
+    notes: 'This form is completed by the nurse within 24 hours of admission',
   },
 }
 
 const maternalAdmissionData: FormData = {
-  roomNumber: '301',
-  hospitalNumber: '2024010001',
-  admissionTime: '2024-01-15T10:30:00',
-  name: '张三',
-  age: 28,
-  bloodType: 'A型',
-  ethnicity: '汉族',
-  birthplace: '天津',
-  deliveryHospital: '天津市中心妇产科医院',
-  deliveryDate: '2024-01-10',
-  deliveryMethod: '剖宫产',
-  temperature: 36.5,
-  allergies: ['none'],
-  nurseSignature: '李护士',
+  ...SAMPLE_MATERNAL_DATA,
+  ethnicity: 'Not specified',
 }
 
-// 新生儿护理记录单示例数据
+// Newborn Nursing Record sample schema
 const newbornNursingSchema: PrintSchema = {
   pageSize: '16K',
   orientation: 'landscape',
   header: {
-    hospital: '天津中医药大学第二附属医院',
-    department: '国际产后康复中心',
-    title: '新生儿护理记录单',
+    hospital: PLACEHOLDER.hospital.name,
+    department: PLACEHOLDER.hospital.department,
+    title: 'Newborn Nursing Record',
   },
   sections: [
     {
@@ -107,10 +94,10 @@ const newbornNursingSchema: PrintSchema = {
         rows: [
           {
             cells: [
-              { label: '母亲姓名', field: 'motherName', type: 'text' },
-              { label: '房号', field: 'roomNumber', type: 'text' },
-              { label: '性别', field: 'gender', type: 'text' },
-              { label: '出生日期', field: 'birthDate', type: 'date' },
+              { label: 'Mother Name', field: 'motherName', type: 'text' },
+              { label: 'Room No.', field: 'roomNumber', type: 'text' },
+              { label: 'Gender', field: 'gender', type: 'text' },
+              { label: 'Birth Date', field: 'birthDate', type: 'date' },
             ],
           },
         ],
@@ -118,20 +105,20 @@ const newbornNursingSchema: PrintSchema = {
     },
     {
       type: 'table',
-      title: '每日护理记录',
+      title: 'Daily Nursing Records',
       config: {
         dataField: 'dailyRecords',
         showRowNumber: true,
         columns: [
-          { header: '日期', field: 'date', type: 'date', width: '80px' },
-          { header: '出生天数', field: 'daysOld', type: 'number', width: '60px' },
-          { header: '体重(g)', field: 'weight', type: 'number', width: '70px' },
-          { header: '体温(℃)', field: 'temperature', type: 'number', width: '70px' },
-          { header: '脐护', field: 'umbilicalCare', type: 'checkbox', width: '50px' },
-          { header: '洗澡', field: 'bath', type: 'checkbox', width: '50px' },
-          { header: '游泳', field: 'swimming', type: 'checkbox', width: '50px' },
-          { header: '抚触', field: 'massage', type: 'checkbox', width: '50px' },
-          { header: '备注', field: 'notes', type: 'text' },
+          { header: 'Date', field: 'date', type: 'date', width: '80px' },
+          { header: 'Days Old', field: 'daysOld', type: 'number', width: '60px' },
+          { header: 'Weight (g)', field: 'weight', type: 'number', width: '70px' },
+          { header: 'Temp (°C)', field: 'temperature', type: 'number', width: '70px' },
+          { header: 'Umbilical', field: 'umbilicalCare', type: 'checkbox', width: '50px' },
+          { header: 'Bath', field: 'bath', type: 'checkbox', width: '50px' },
+          { header: 'Swimming', field: 'swimming', type: 'checkbox', width: '50px' },
+          { header: 'Massage', field: 'massage', type: 'checkbox', width: '50px' },
+          { header: 'Notes', field: 'notes', type: 'text' },
         ],
       },
     },
@@ -142,25 +129,55 @@ const newbornNursingSchema: PrintSchema = {
 }
 
 const newbornNursingData: FormData = {
-  motherName: '张三',
-  roomNumber: '301',
-  gender: '男',
+  motherName: PLACEHOLDER.patient.name,
+  roomNumber: PLACEHOLDER.form.roomNumber,
+  gender: 'Male',
   birthDate: '2024-01-10',
   dailyRecords: [
-    { date: '2024-01-15', daysOld: 5, weight: 3200, temperature: 36.8, umbilicalCare: true, bath: true, swimming: false, massage: true, notes: '状态良好' },
-    { date: '2024-01-16', daysOld: 6, weight: 3250, temperature: 36.7, umbilicalCare: true, bath: true, swimming: true, massage: true, notes: '' },
-    { date: '2024-01-17', daysOld: 7, weight: 3300, temperature: 36.6, umbilicalCare: true, bath: true, swimming: true, massage: true, notes: '脐带脱落' },
+    {
+      date: '2024-01-15',
+      daysOld: 5,
+      weight: 3200,
+      temperature: 36.8,
+      umbilicalCare: true,
+      bath: true,
+      swimming: false,
+      massage: true,
+      notes: 'Good condition',
+    },
+    {
+      date: '2024-01-16',
+      daysOld: 6,
+      weight: 3250,
+      temperature: 36.7,
+      umbilicalCare: true,
+      bath: true,
+      swimming: true,
+      massage: true,
+      notes: '',
+    },
+    {
+      date: '2024-01-17',
+      daysOld: 7,
+      weight: 3300,
+      temperature: 36.6,
+      umbilicalCare: true,
+      bath: true,
+      swimming: true,
+      massage: true,
+      notes: 'Umbilical cord fell off',
+    },
   ],
 }
 
-// Story 配置
+// Story configuration
 const meta: Meta = {
-  title: 'PrintRenderer/表单渲染',
+  title: 'PrintRenderer/Form Rendering',
   tags: ['autodocs'],
   argTypes: {
     watermark: {
       control: 'text',
-      description: '水印文本',
+      description: 'Watermark text',
     },
   },
 }
@@ -169,15 +186,15 @@ export default meta
 
 type Story = StoryObj
 
-// 创建渲染函数（使用隔离模式，强制使用内嵌思源宋体）
+// Create renderer function (using isolated mode with embedded font)
 const createRenderer = (schema: PrintSchema, data: FormData) => {
   return (args: { watermark?: string }) => {
-    // 使用隔离渲染器，确保字体一致性
+    // Use isolated renderer for consistent font rendering
     const html = renderToIsolatedHtml(schema, data, {
       watermark: args.watermark,
     })
-    
-    // 创建容器
+
+    // Create container
     const container = document.createElement('div')
     container.style.width = '100%'
     container.style.height = '800px'
@@ -185,21 +202,21 @@ const createRenderer = (schema: PrintSchema, data: FormData) => {
     container.style.background = '#f5f5f5'
     container.style.padding = '20px'
     container.style.boxSizing = 'border-box'
-    
-    // 使用 iframe 来完全隔离样式
+
+    // Use iframe for complete style isolation
     const iframe = document.createElement('iframe')
     iframe.style.width = '100%'
     iframe.style.height = '100%'
     iframe.style.border = '1px solid #ccc'
     iframe.style.background = '#fff'
     iframe.srcdoc = html
-    
+
     container.appendChild(iframe)
     return container
   }
 }
 
-// 产妇入院评估单
+// Maternal Admission Assessment
 export const MaternalAdmission: Story = {
   render: createRenderer(maternalAdmissionSchema, maternalAdmissionData),
   args: {
@@ -207,15 +224,15 @@ export const MaternalAdmission: Story = {
   },
 }
 
-// 产妇入院评估单（带水印）
+// Maternal Admission Assessment (with watermark)
 export const MaternalAdmissionWithWatermark: Story = {
   render: createRenderer(maternalAdmissionSchema, maternalAdmissionData),
   args: {
-    watermark: '仅供内部使用',
+    watermark: PLACEHOLDER.watermark.internal,
   },
 }
 
-// 新生儿护理记录单
+// Newborn Nursing Record
 export const NewbornNursing: Story = {
   render: createRenderer(newbornNursingSchema, newbornNursingData),
   args: {
@@ -223,7 +240,7 @@ export const NewbornNursing: Story = {
   },
 }
 
-// 空数据表单
+// Empty form
 export const EmptyForm: Story = {
   render: createRenderer(maternalAdmissionSchema, {}),
   args: {

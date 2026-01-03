@@ -306,7 +306,7 @@ export const MaternalInfo: Story = {
       hasAllergy: false,
       allergyDetail: '',
     },
-    { title: '产妇入院评估单', description: '真实医疗场景：产妇入院信息，下划线填空样式', height: '400px' }
+    { title: 'Maternal Admission Assessment', description: '真实医疗场景：产妇入院信息，下划线填空样式', height: '400px' }
   ),
 }
 

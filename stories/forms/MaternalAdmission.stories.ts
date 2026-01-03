@@ -1,15 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/html'
 import { renderToIsolatedHtml } from '../../src/renderer'
 import type { PrintSchema, FormData } from '../../src/types/print-schema'
+import {
+  PLACEHOLDER,
+  SAMPLE_MATERNAL_DATA,
+} from '../../src/test-utils/placeholder-data'
 
-// 产妇入院评估单 Schema
+// Maternal Admission Assessment Schema
 const maternalAdmissionSchema: PrintSchema = {
   pageSize: '16K',
   orientation: 'portrait',
   header: {
-    hospital: '天津中医药大学第二附属医院',
-    department: '国际产后康复中心',
-    title: '产妇入院评估单',
+    hospital: PLACEHOLDER.hospital.name,
+    department: PLACEHOLDER.hospital.department,
+    title: 'Maternal Admission Assessment',
   },
   sections: [
     {
@@ -19,34 +23,34 @@ const maternalAdmissionSchema: PrintSchema = {
         rows: [
           {
             cells: [
-              { label: '房号', field: 'roomNumber', type: 'text' },
-              { label: '住院号', field: 'hospitalNumber', type: 'text' },
-              { label: '入院时间', field: 'admissionTime', type: 'date' },
-              { label: '姓名', field: 'name', type: 'text' },
+              { label: 'Room No.', field: 'roomNumber', type: 'text' },
+              { label: 'Hospital No.', field: 'hospitalNumber', type: 'text' },
+              { label: 'Admission Time', field: 'admissionTime', type: 'date' },
+              { label: 'Name', field: 'name', type: 'text' },
             ],
           },
           {
             cells: [
-              { label: '年龄', field: 'age', type: 'number' },
-              { label: '血型', field: 'bloodType', type: 'text' },
-              { label: '民族', field: 'ethnicity', type: 'text' },
-              { label: '籍贯', field: 'birthplace', type: 'text' },
+              { label: 'Age', field: 'age', type: 'number' },
+              { label: 'Blood Type', field: 'bloodType', type: 'text' },
+              { label: 'Ethnicity', field: 'ethnicity', type: 'text' },
+              { label: 'Birthplace', field: 'birthplace', type: 'text' },
             ],
           },
           {
             cells: [
-              { label: '分娩医院', field: 'deliveryHospital', type: 'text' },
-              { label: '分娩日期', field: 'deliveryDate', type: 'date' },
-              { label: '分娩方式', field: 'deliveryMethod', type: 'text' },
-              { label: '体温', field: 'temperature', type: 'number' },
+              { label: 'Delivery Hospital', field: 'deliveryHospital', type: 'text' },
+              { label: 'Delivery Date', field: 'deliveryDate', type: 'date' },
+              { label: 'Delivery Method', field: 'deliveryMethod', type: 'text' },
+              { label: 'Temperature', field: 'temperature', type: 'number' },
             ],
           },
           {
             cells: [
-              { label: '脉搏', field: 'pulse', type: 'number' },
-              { label: '呼吸', field: 'respiration', type: 'number' },
-              { label: '血压', field: 'bloodPressure', type: 'text' },
-              { label: '体重', field: 'weight', type: 'number' },
+              { label: 'Pulse', field: 'pulse', type: 'number' },
+              { label: 'Respiration', field: 'respiration', type: 'number' },
+              { label: 'Blood Pressure', field: 'bloodPressure', type: 'text' },
+              { label: 'Weight', field: 'weight', type: 'number' },
             ],
           },
         ],
@@ -54,39 +58,39 @@ const maternalAdmissionSchema: PrintSchema = {
     },
     {
       type: 'checkbox-grid',
-      title: '过敏史',
+      title: 'Allergy History',
       config: {
         field: 'allergies',
         columns: 4,
         options: [
-          { value: 'none', label: '无' },
-          { value: 'penicillin', label: '青霉素' },
-          { value: 'sulfa', label: '磺胺类' },
-          { value: 'other', label: '其他', hasInput: true, inputField: 'allergyOther' },
+          { value: 'none', label: 'None' },
+          { value: 'penicillin', label: 'Penicillin' },
+          { value: 'sulfa', label: 'Sulfonamides' },
+          { value: 'other', label: 'Other', hasInput: true, inputField: 'allergyOther' },
         ],
       },
     },
     {
       type: 'checkbox-grid',
-      title: '既往病史',
+      title: 'Medical History',
       config: {
         field: 'medicalHistory',
         columns: 4,
         options: [
-          { value: 'none', label: '无' },
-          { value: 'hypertension', label: '高血压' },
-          { value: 'diabetes', label: '糖尿病' },
-          { value: 'heart', label: '心脏病' },
-          { value: 'hepatitis', label: '肝炎' },
-          { value: 'tuberculosis', label: '结核' },
-          { value: 'other', label: '其他', hasInput: true, inputField: 'medicalHistoryOther' },
+          { value: 'none', label: 'None' },
+          { value: 'hypertension', label: 'Hypertension' },
+          { value: 'diabetes', label: 'Diabetes' },
+          { value: 'heart', label: 'Heart Disease' },
+          { value: 'hepatitis', label: 'Hepatitis' },
+          { value: 'tuberculosis', label: 'Tuberculosis' },
+          { value: 'other', label: 'Other', hasInput: true, inputField: 'medicalHistoryOther' },
         ],
       },
     },
     {
       type: 'notes',
       config: {
-        content: '入院评估：',
+        content: 'Admission Assessment:',
         showBorder: false,
       },
     },
@@ -101,41 +105,22 @@ const maternalAdmissionSchema: PrintSchema = {
       type: 'signature-area',
       config: {
         fields: [
-          { label: '评估护士', field: 'nurseSignature', showDate: true },
-          { label: '护士长', field: 'headNurseSignature', showDate: true },
+          { label: 'Assessment Nurse', field: 'nurseSignature', showDate: true },
+          { label: 'Head Nurse', field: 'headNurseSignature', showDate: true },
         ],
       },
     },
   ],
   footer: {
     showPageNumber: true,
-    notes: '本表由护士填写，入院24小时内完成',
+    notes: 'This form is completed by the nurse within 24 hours of admission',
   },
 }
 
-// 示例数据
+// Sample data using placeholder constants
 const sampleData: FormData = {
-  roomNumber: '301',
-  hospitalNumber: '2024010001',
-  admissionTime: '2024-01-15T10:30:00',
-  name: '张三',
-  age: 28,
-  bloodType: 'A型',
-  ethnicity: '汉族',
-  birthplace: '天津',
-  deliveryHospital: '天津市中心妇产科医院',
-  deliveryDate: '2024-01-10',
-  deliveryMethod: '剖宫产',
-  temperature: 36.5,
-  pulse: 72,
-  respiration: 18,
-  bloodPressure: '120/80',
-  weight: 55,
-  allergies: ['none'],
-  medicalHistory: ['none'],
-  assessment: '产妇一般情况良好，神志清楚，精神可。剖宫产术后第5天，切口愈合良好，无红肿渗出。乳房胀满，乳汁分泌正常。恶露量少，色淡红。',
-  nurseSignature: '李护士',
-  headNurseSignature: '王护士长',
+  ...SAMPLE_MATERNAL_DATA,
+  ethnicity: 'Not specified',
 }
 
 const meta: Meta = {
@@ -147,53 +132,53 @@ export default meta
 
 type Story = StoryObj
 
-// 创建渲染函数（使用隔离模式，强制使用内嵌思源宋体）
+// Create renderer function (using isolated mode with embedded font)
 const createRenderer = (data: FormData, watermark?: string) => {
   return () => {
     const html = renderToIsolatedHtml(maternalAdmissionSchema, data, { watermark })
-    
+
     const iframe = document.createElement('iframe')
     iframe.style.width = '100%'
     iframe.style.height = '800px'
     iframe.style.border = '1px solid #ccc'
     iframe.style.background = '#fff'
     iframe.srcdoc = html
-    
+
     return iframe
   }
 }
 
-// 完整数据
+// Full data
 export const FullData: Story = {
-  name: '完整数据',
+  name: 'Full Data',
   render: createRenderer(sampleData),
 }
 
-// 空数据
+// Empty data
 export const EmptyData: Story = {
-  name: '空数据',
+  name: 'Empty Data',
   render: createRenderer({}),
 }
 
-// 带水印
+// With watermark
 export const WithWatermark: Story = {
-  name: '带水印',
-  render: createRenderer(sampleData, '仅供内部使用'),
+  name: 'With Watermark',
+  render: createRenderer(sampleData, PLACEHOLDER.watermark.internal),
 }
 
-// 有过敏史
+// With allergies
 export const WithAllergies: Story = {
-  name: '有过敏史',
+  name: 'With Allergies',
   render: createRenderer({
     ...sampleData,
     allergies: ['penicillin', 'other'],
-    allergyOther: '海鲜',
+    allergyOther: 'Seafood',
   }),
 }
 
-// 有既往病史
+// With medical history
 export const WithMedicalHistory: Story = {
-  name: '有既往病史',
+  name: 'With Medical History',
   render: createRenderer({
     ...sampleData,
     medicalHistory: ['hypertension', 'diabetes'],

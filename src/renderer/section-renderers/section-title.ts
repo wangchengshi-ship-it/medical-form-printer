@@ -1,7 +1,7 @@
 /**
- * @fileoverview 区块标题渲染器
+ * @fileoverview Section Title Renderer
  * @module renderer/section-renderers/section-title
- * @description 渲染区块标题，支持 left/center/right 对齐
+ * @description Renders section titles, supports left/center/right alignment
  * @modif 2024-04-07
  */
 
@@ -10,20 +10,20 @@ import type { RenderOptions } from '../../types/options'
 import { cls } from '../../types/options'
 import { escapeHtml } from '../../utils'
 
-/** 区块标题配置 */
+/** Section title configuration */
 export interface SectionTitleConfig {
-  /** 标题文本 */
+  /** Title text */
   text: string
-  /** 对齐方式 */
+  /** Alignment */
   align?: 'left' | 'center' | 'right'
-  /** 字体大小 */
+  /** Font size */
   fontSize?: string
-  /** 是否加粗 */
+  /** Whether to bold */
   bold?: boolean
 }
 
 /**
- * 渲染区块标题
+ * Render section title
  */
 export function renderSectionTitle(
   config: SectionTitleConfig,

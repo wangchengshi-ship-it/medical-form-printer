@@ -44,8 +44,8 @@ function createSchema(pageSize: '16K' | 'A4' | 'A5', orientation: 'portrait' | '
     pageSize,
     orientation,
     header: {
-      hospital: '天津中医药大学第二附属医院',
-      department: '国际产后康复中心',
+      hospital: 'Sample Hospital',
+      department: 'Postpartum Care Center',
       title: `${pageSize} ${orientation === 'landscape' ? '横向' : '纵向'}测试`,
     },
     sections: [

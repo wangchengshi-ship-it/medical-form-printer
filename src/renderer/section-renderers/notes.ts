@@ -1,5 +1,5 @@
 /**
- * @fileoverview 备注区块渲染器
+ * @fileoverview Notes Section Renderer
  * @module renderer/section-renderers/notes
  * @modif 2023-02-02
  */
@@ -10,7 +10,7 @@ import { cls } from '../../types/options'
 import { escapeHtml } from '../../utils'
 
 /**
- * 渲染备注区块
+ * Render notes section
  */
 export function renderNotes(
   config: NotesConfig,

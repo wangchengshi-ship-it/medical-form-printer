@@ -1,5 +1,5 @@
 /**
- * @fileoverview 页面尺寸配置和单位转换
+ * @fileoverview Page dimension configuration and unit conversion
  * @module pagination/page-dimensions
  * @version 1.0.0
  * @author Kiro
@@ -7,37 +7,37 @@
  * @modified 2026-01-03
  *
  * @description
- * 提供页面尺寸预设配置和单位转换函数：
- * - 十六开 (16K): 185mm × 260mm - 医疗表单常用规格
+ * Provides page size presets and unit conversion functions:
+ * - 16K (Sixteen-mo): 185mm × 260mm - Common format for medical forms
  * - A4: 210mm × 297mm
  * - A5: 148mm × 210mm
- * - mm 到 px 的单位转换
- * - 可用高度/宽度计算
+ * - mm to px unit conversion
+ * - Usable height/width calculation
  *
  * @requirements
- * - 3.1: 支持 A4、A5、16K 页面尺寸
- * - 3.6: 使用 16K 作为默认页面尺寸
- * - 9.5: 支持可配置的页面尺寸
+ * - 3.1: Support A4, A5, 16K page sizes
+ * - 3.6: Use 16K as default page size
+ * - 9.5: Support configurable page sizes
  *
  * @dependencies
- * - ./types.ts - 类型定义和常量
+ * - ./types.ts - Type definitions and constants
  *
  * @usedBy
- * - ./index.ts - 模块入口
- * - ./page-break-calculator.ts - 分页算法
- * - ../renderer/paginated-renderer.ts - 分页渲染器（待实现）
+ * - ./index.ts - Module entry
+ * - ./page-break-calculator.ts - Pagination algorithm
+ * - ../renderer/paginated-renderer.ts - Paginated renderer
  */
 
 import type { PageDimensions, PageSizePreset } from './types'
 import { PAGINATION_DEFAULTS } from './types'
 
-// ==================== 页面尺寸预设 ====================
+// ==================== Page Size Presets ====================
 
 /**
- * 十六开纸张配置
- * 尺寸: 185mm × 260mm
- * 医疗表单常用规格
- * @requirements 3.6 - 使用 16K 作为默认页面尺寸
+ * 16K (Sixteen-mo) paper configuration
+ * Size: 185mm × 260mm
+ * Common format for medical forms
+ * @requirements 3.6 - Use 16K as default page size
  */
 export const PAGE_16K: PageDimensions = {
   width: 185,
@@ -49,9 +49,9 @@ export const PAGE_16K: PageDimensions = {
 }
 
 /**
- * A4 纸张配置
- * 尺寸: 210mm × 297mm
- * @requirements 3.1 - 支持 A4 页面尺寸
+ * A4 paper configuration
+ * Size: 210mm × 297mm
+ * @requirements 3.1 - Support A4 page size
  */
 export const PAGE_A4: PageDimensions = {
   width: 210,
@@ -63,9 +63,9 @@ export const PAGE_A4: PageDimensions = {
 }
 
 /**
- * A5 纸张配置
- * 尺寸: 148mm × 210mm
- * @requirements 3.1 - 支持 A5 页面尺寸
+ * A5 paper configuration
+ * Size: 148mm × 210mm
+ * @requirements 3.1 - Support A5 page size
  */
 export const PAGE_A5: PageDimensions = {
   width: 148,
@@ -77,7 +77,7 @@ export const PAGE_A5: PageDimensions = {
 }
 
 /**
- * 页面尺寸预设映射
+ * Page size preset mapping
  */
 export const PAGE_PRESETS: Record<PageSizePreset, PageDimensions> = {
   '16K': PAGE_16K,
@@ -85,13 +85,13 @@ export const PAGE_PRESETS: Record<PageSizePreset, PageDimensions> = {
   A5: PAGE_A5,
 }
 
-// ==================== 单位转换函数 ====================
+// ==================== Unit Conversion Functions ====================
 
 /**
- * 将毫米转换为像素
- * @param mm - 毫米值
- * @param dpi - DPI，默认 96
- * @returns 像素值
+ * Convert millimeters to pixels
+ * @param mm - Millimeter value
+ * @param dpi - DPI, default 96
+ * @returns Pixel value
  *
  * @example
  * mmToPx(185) // => 699.21...
@@ -105,10 +105,10 @@ export function mmToPx(
 }
 
 /**
- * 将像素转换为毫米
- * @param px - 像素值
- * @param dpi - DPI，默认 96
- * @returns 毫米值
+ * Convert pixels to millimeters
+ * @param px - Pixel value
+ * @param dpi - DPI, default 96
+ * @returns Millimeter value
  *
  * @example
  * pxToMm(699.21) // => 185
@@ -121,33 +121,33 @@ export function pxToMm(
 }
 
 /**
- * 将毫米转换为点 (pt)
+ * Convert millimeters to points (pt)
  * 1pt = 1/72 inch
- * @param mm - 毫米值
- * @returns 点值
+ * @param mm - Millimeter value
+ * @returns Point value
  */
 export function mmToPt(mm: number): number {
   return (mm / PAGINATION_DEFAULTS.MM_PER_INCH) * 72
 }
 
 /**
- * 将点 (pt) 转换为毫米
- * @param pt - 点值
- * @returns 毫米值
+ * Convert points (pt) to millimeters
+ * @param pt - Point value
+ * @returns Millimeter value
  */
 export function ptToMm(pt: number): number {
   return (pt / 72) * PAGINATION_DEFAULTS.MM_PER_INCH
 }
 
-// ==================== 页面尺寸计算函数 ====================
+// ==================== Page Size Calculation Functions ====================
 
 /**
- * 计算页面可用内容高度（像素）
- * @requirements 9.5 - 支持可配置的页面尺寸
+ * Calculate usable content height (pixels)
+ * @requirements 9.5 - Support configurable page sizes
  *
- * @param dimensions - 页面尺寸配置
- * @param dpi - DPI，默认 96
- * @returns 可用内容高度（像素）
+ * @param dimensions - Page size configuration
+ * @param dpi - DPI, default 96
+ * @returns Usable content height (pixels)
  */
 export function calculateUsableHeight(
   dimensions: PageDimensions = PAGE_16K,
@@ -159,12 +159,12 @@ export function calculateUsableHeight(
 }
 
 /**
- * 计算页面可用内容宽度（像素）
- * @requirements 9.5 - 支持可配置的页面尺寸
+ * Calculate usable content width (pixels)
+ * @requirements 9.5 - Support configurable page sizes
  *
- * @param dimensions - 页面尺寸配置
- * @param dpi - DPI，默认 96
- * @returns 可用内容宽度（像素）
+ * @param dimensions - Page size configuration
+ * @param dpi - DPI, default 96
+ * @returns Usable content width (pixels)
  */
 export function calculateUsableWidth(
   dimensions: PageDimensions = PAGE_16K,
@@ -176,9 +176,9 @@ export function calculateUsableWidth(
 }
 
 /**
- * 计算页面可用内容高度（毫米）
- * @param dimensions - 页面尺寸配置
- * @returns 可用内容高度（毫米）
+ * Calculate usable content height (millimeters)
+ * @param dimensions - Page size configuration
+ * @returns Usable content height (millimeters)
  */
 export function calculateUsableHeightMm(
   dimensions: PageDimensions = PAGE_16K
@@ -187,9 +187,9 @@ export function calculateUsableHeightMm(
 }
 
 /**
- * 计算页面可用内容宽度（毫米）
- * @param dimensions - 页面尺寸配置
- * @returns 可用内容宽度（毫米）
+ * Calculate usable content width (millimeters)
+ * @param dimensions - Page size configuration
+ * @returns Usable content width (millimeters)
  */
 export function calculateUsableWidthMm(
   dimensions: PageDimensions = PAGE_16K
@@ -198,9 +198,9 @@ export function calculateUsableWidthMm(
 }
 
 /**
- * 根据页面尺寸名称获取预设配置
- * @param pageSize - 页面尺寸名称 ('16K' | 'A4' | 'A5')
- * @returns 页面尺寸配置
+ * Get preset configuration by page size name
+ * @param pageSize - Page size name ('16K' | 'A4' | 'A5')
+ * @returns Page size configuration
  */
 export function getPageDimensions(
   pageSize: PageSizePreset = '16K'
@@ -209,11 +209,11 @@ export function getPageDimensions(
 }
 
 /**
- * 创建自定义页面尺寸配置
- * @param width - 页面宽度 (mm)
- * @param height - 页面高度 (mm)
- * @param margins - 边距配置
- * @returns 页面尺寸配置
+ * Create custom page size configuration
+ * @param width - Page width (mm)
+ * @param height - Page height (mm)
+ * @param margins - Margin configuration
+ * @returns Page size configuration
  */
 export function createPageDimensions(
   width: number,

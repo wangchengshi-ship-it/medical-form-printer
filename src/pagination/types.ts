@@ -1,5 +1,5 @@
 /**
- * @fileoverview 分页相关类型定义
+ * @fileoverview Pagination related type definitions
  * @module pagination/types
  * @version 1.0.0
  * @author Kiro
@@ -7,40 +7,40 @@
  * @modified 2026-01-03
  *
  * @description
- * 定义智能分页模块的所有类型，包括：
- * - 页面尺寸配置
- * - 可测量内容项
- * - 分页结果
- * - 溢出字段配置
- * - 分页配置
+ * Defines all types for the smart pagination module, including:
+ * - Page dimension configuration
+ * - Measurable content items
+ * - Pagination results
+ * - Overflow field configuration
+ * - Pagination configuration
  *
  * @requirements
- * - 9.1: 根据测量内容高度计算分页点
- * - 9.5: 支持可配置的页面尺寸
- * - 9.7: 支持预测量内容高度
+ * - 9.1: Calculate page breaks based on measured content height
+ * - 9.5: Support configurable page sizes
+ * - 9.7: Support pre-measuring content height
  *
  * @usedBy
- * - ./page-dimensions.ts - 页面尺寸配置
- * - ./page-break-calculator.ts - 分页算法核心
- * - ./overflow-handler.ts - 溢出字段处理
- * - ./index.ts - 模块入口
+ * - ./page-dimensions.ts - Page dimension configuration
+ * - ./page-break-calculator.ts - Core pagination algorithm
+ * - ./overflow-handler.ts - Overflow field handling
+ * - ./index.ts - Module entry
  */
 
-// ==================== 默认配置常量 ====================
+// ==================== Default Configuration Constants ====================
 
 /**
- * 分页模块默认配置
+ * Pagination module default configuration
  */
 export const PAGINATION_DEFAULTS = {
-  /** 溢出字段第一页最大字符数 */
+  /** Maximum characters for overflow field first page */
   OVERFLOW_FIRST_LINE_CHARS: 60,
-  /** 表格行最小高度估算 (mm) */
+  /** Minimum table row height estimate (mm) */
   MIN_ROW_HEIGHT: 8,
-  /** 默认 DPI（每英寸像素数），标准屏幕 DPI 为 96 */
+  /** Default DPI (dots per inch), standard screen DPI is 96 */
   DPI: 96,
-  /** 1英寸 = 25.4毫米 */
+  /** 1 inch = 25.4 millimeters */
   MM_PER_INCH: 25.4,
-  /** 默认边距 (mm) */
+  /** Default margins (mm) */
   MARGIN: {
     TOP: 8,
     BOTTOM: 8,
@@ -49,17 +49,17 @@ export const PAGINATION_DEFAULTS = {
   },
 } as const
 
-/** @deprecated 使用 PAGINATION_DEFAULTS.DPI 代替 */
+/** @deprecated Use PAGINATION_DEFAULTS.DPI instead */
 export const DEFAULT_DPI = PAGINATION_DEFAULTS.DPI
 
-/** @deprecated 使用 PAGINATION_DEFAULTS.MM_PER_INCH 代替 */
+/** @deprecated Use PAGINATION_DEFAULTS.MM_PER_INCH instead */
 export const MM_PER_INCH = PAGINATION_DEFAULTS.MM_PER_INCH
 
-// ==================== 可测量内容项类型 ====================
+// ==================== Measurable Content Item Types ====================
 
 /**
- * 可测量的内容项类型枚举
- * @requirements 9.1 - 识别不同类型的内容项
+ * Measurable content item type enum
+ * @requirements 9.1 - Identify different types of content items
  */
 export const MEASURABLE_ITEM_TYPES = {
   HEADER: 'header',
@@ -71,220 +71,220 @@ export const MEASURABLE_ITEM_TYPES = {
 } as const
 
 /**
- * 可测量的内容项类型
- * @requirements 9.1 - 识别不同类型的内容项
+ * Measurable content item type
+ * @requirements 9.1 - Identify different types of content items
  */
 export type MeasurableItemType =
   (typeof MEASURABLE_ITEM_TYPES)[keyof typeof MEASURABLE_ITEM_TYPES]
 
-// ==================== 页面尺寸类型 ====================
+// ==================== Page Dimension Types ====================
 
 /**
- * 页面尺寸配置
- * @requirements 9.5 - 支持可配置的页面尺寸
+ * Page dimension configuration
+ * @requirements 9.5 - Support configurable page sizes
  */
 export interface PageDimensions {
-  /** 页面宽度 (mm) */
+  /** Page width (mm) */
   width: number
-  /** 页面高度 (mm) */
+  /** Page height (mm) */
   height: number
-  /** 上边距 (mm) */
+  /** Top margin (mm) */
   marginTop: number
-  /** 下边距 (mm) */
+  /** Bottom margin (mm) */
   marginBottom: number
-  /** 左边距 (mm) */
+  /** Left margin (mm) */
   marginLeft: number
-  /** 右边距 (mm) */
+  /** Right margin (mm) */
   marginRight: number
 }
 
-// ==================== 可测量内容项接口 ====================
+// ==================== Measurable Content Item Interface ====================
 
 /**
- * 可测量的内容项
- * @requirements 9.7 - 支持预测量内容高度
+ * Measurable content item
+ * @requirements 9.7 - Support pre-measuring content height
  */
 export interface MeasurableItem {
-  /** 唯一标识 */
+  /** Unique identifier */
   id: string
-  /** 内容类型 */
+  /** Content type */
   type: MeasurableItemType
-  /** 测量得到的高度 (px) */
+  /** Measured height (px) */
   height: number
-  /** 所属表格ID（仅 table-header 和 table-row 有值） */
+  /** Parent table ID (only for table-header and table-row) */
   tableId?: string
-  /** 原始数据索引 */
+  /** Original data index */
   dataIndex?: number
 }
 
-// ==================== 分页结果类型 ====================
+// ==================== Pagination Result Types ====================
 
 /**
- * 单页内容
- * @requirements 9.1 - 分页结果包含页面内容列表
+ * Single page content
+ * @requirements 9.1 - Pagination result contains page content list
  */
 export interface PageContent {
-  /** 页码（从1开始） */
+  /** Page number (starting from 1) */
   pageNumber: number
-  /** 是否为续页 */
+  /** Whether this is a continuation page */
   isContinuation: boolean
-  /** 页面包含的内容项ID列表 */
+  /** List of content item IDs on this page */
   items: string[]
-  /** 需要重复的表头ID列表 */
+  /** List of table header IDs to repeat */
   repeatedHeaders: string[]
 }
 
 /**
- * 分页结果
- * @requirements 9.1 - 返回分页后的页面列表
+ * Pagination result
+ * @requirements 9.1 - Return paginated page list
  */
 export interface PageBreakResult {
-  /** 页面列表 */
+  /** Page list */
   pages: PageContent[]
-  /** 总页数 */
+  /** Total page count */
   totalPages: number
 }
 
-// ==================== 溢出字段配置 ====================
+// ==================== Overflow Field Configuration ====================
 
 /**
- * 溢出字段配置
- * 用于指定哪些字段在内容过长时需要分页处理
- * @requirements 9.7 - 支持溢出字段分页
+ * Overflow field configuration
+ * Specifies which fields need pagination handling when content is too long
+ * @requirements 9.7 - Support overflow field pagination
  */
 export interface OverflowFieldConfig {
-  /** 字段名 */
+  /** Field name */
   fieldName: string
-  /** 第一页显示的最大字符数，默认 60 */
+  /** Maximum characters to show on first page, default 60 */
   maxFirstLineChars?: number
 }
 
-// ==================== 分页配置子类型 ====================
+// ==================== Pagination Configuration Subtypes ====================
 
 /**
- * 溢出配置
- * 用于配置字段内容溢出时的分页行为
+ * Overflow configuration
+ * Configures pagination behavior when field content overflows
  */
 export interface OverflowConfig {
-  /** 哪些字段内容溢出时放到下一页 */
+  /** Which fields should overflow to next page */
   fields?: string[]
-  /** 第一页显示的最大字符数，默认 60 */
+  /** Maximum characters to show on first page, default 60 */
   firstLineChars?: number
 }
 
 /**
- * 显示配置
- * 用于配置每页显示的元素
+ * Display configuration
+ * Configures elements to display on each page
  */
 export interface DisplayConfig {
-  /** 是否在每页显示页眉 */
+  /** Whether to show header on each page */
   headerOnEachPage?: boolean
-  /** 是否在每页显示页脚 */
+  /** Whether to show footer on each page */
   footerOnEachPage?: boolean
-  /** 是否在每页底部显示签名区域 */
+  /** Whether to show signature area at bottom of each page */
   signatureOnEachPage?: boolean
-  /** 续页是否重复表头 */
+  /** Whether to repeat table headers on continuation pages */
   repeatTableHeaders?: boolean
 }
 
 /**
- * 页眉配置
- * 用于配置每页页眉的显示
+ * Page header configuration
+ * Configures header display on each page
  */
 export interface PageHeaderConfig {
-  /** 是否在每页显示页眉 */
+  /** Whether to show header on each page */
   showOnEachPage: boolean
-  /** 续页标题后缀，如 "(续)" */
+  /** Continuation page title suffix, e.g., "(continued)" */
   continuationSuffix?: string
 }
 
 /**
- * 页脚配置
- * 用于配置每页页脚的显示
+ * Page footer configuration
+ * Configures footer display on each page
  */
 export interface PageFooterConfig {
-  /** 是否在每页显示页脚 */
+  /** Whether to show footer on each page */
   showOnEachPage: boolean
-  /** 页码格式，如 "第 {current} 页 / 共 {total} 页" */
+  /** Page number format, e.g., "Page {current} of {total}" */
   pageNumberFormat?: string
 }
 
 /**
- * 智能分页配置
- * 用于启用基于测量的智能分页功能
+ * Smart pagination configuration
+ * Enables measurement-based smart pagination
  */
 export interface SmartPaginationConfig {
-  /** 是否启用智能分页 */
+  /** Whether to enable smart pagination */
   enabled: boolean
-  /** 表格行最小高度估算 (mm)，用于预估，默认 8 */
+  /** Minimum table row height estimate (mm), for estimation, default 8 */
   minRowHeight?: number
 }
 
-// ==================== 分页配置主类型 ====================
+// ==================== Main Pagination Configuration Type ====================
 
 /**
- * 分页配置
- * @requirements 9.1, 9.5 - 支持可配置的分页规则
+ * Pagination configuration
+ * @requirements 9.1, 9.5 - Support configurable pagination rules
  */
 export interface PaginationConfig {
-  /** 是否启用分页 */
+  /** Whether to enable pagination */
   enabled: boolean
-  /** 分页模式：auto 自动 | manual 手动指定断点 */
+  /** Pagination mode: auto | manual (specify break points) */
   mode?: 'auto' | 'manual'
-  /** 手动模式下，在哪些 section 索引后分页（从0开始） */
+  /** In manual mode, page break after these section indices (0-based) */
   pageBreaks?: number[]
-  /** 溢出配置 */
+  /** Overflow configuration */
   overflow?: OverflowConfig
-  /** 显示配置 */
+  /** Display configuration */
   display?: DisplayConfig
-  /** 智能分页配置 */
+  /** Smart pagination configuration */
   smartPagination?: SmartPaginationConfig
-  /** 页眉配置 */
+  /** Header configuration */
   headerConfig?: PageHeaderConfig
-  /** 页脚配置 */
+  /** Footer configuration */
   footerConfig?: PageFooterConfig
 
-  // ==================== 兼容性字段（已废弃） ====================
-  /** @deprecated 使用 overflow.fields 代替 */
+  // ==================== Compatibility Fields (Deprecated) ====================
+  /** @deprecated Use overflow.fields instead */
   overflowFields?: string[]
-  /** @deprecated 使用 overflow.firstLineChars 代替 */
+  /** @deprecated Use overflow.firstLineChars instead */
   overflowFirstLineChars?: number
-  /** @deprecated 使用 display.headerOnEachPage 代替 */
+  /** @deprecated Use display.headerOnEachPage instead */
   showHeaderOnEachPage?: boolean
-  /** @deprecated 使用 display.footerOnEachPage 代替 */
+  /** @deprecated Use display.footerOnEachPage instead */
   showFooterOnEachPage?: boolean
-  /** @deprecated 使用 display.signatureOnEachPage 代替 */
+  /** @deprecated Use display.signatureOnEachPage instead */
   showSignatureOnEachPage?: boolean
-  /** @deprecated 使用 display.repeatTableHeaders 代替 */
+  /** @deprecated Use display.repeatTableHeaders instead */
   repeatTableHeaders?: boolean
 }
 
-// ==================== 分页计算参数类型 ====================
+// ==================== Pagination Calculation Parameter Types ====================
 
 /**
- * 分页计算选项
- * 用于 calculatePageBreaks 函数的参数
- * @requirements 9.1 - 分页计算参数
+ * Page break calculation options
+ * Parameters for calculatePageBreaks function
+ * @requirements 9.1 - Pagination calculation parameters
  */
 export interface PageBreakOptions {
-  /** 页面可用高度 (px) */
+  /** Available page height (px) */
   pageHeight: number
-  /** 页眉高度 (px)，默认 0 */
+  /** Header height (px), default 0 */
   headerHeight?: number
-  /** 页脚高度 (px)，默认 0 */
+  /** Footer height (px), default 0 */
   footerHeight?: number
-  /** 是否重复表头，默认 true */
+  /** Whether to repeat table headers, default true */
   repeatTableHeaders?: boolean
 }
 
-// ==================== 工具类型 ====================
+// ==================== Utility Types ====================
 
 /**
- * 页面尺寸预设名称
+ * Page size preset name
  */
 export type PageSizePreset = '16K' | 'A4' | 'A5'
 
 /**
- * 分页模式
+ * Pagination mode
  */
 export type PaginationMode = 'auto' | 'manual'

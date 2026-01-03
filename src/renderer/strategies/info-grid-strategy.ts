@@ -1,5 +1,5 @@
 /**
- * @fileoverview 信息网格渲染策略
+ * @fileoverview Info Grid Render Strategy
  * @module renderer/strategies/info-grid-strategy
  */
 
@@ -9,7 +9,7 @@ import type { RenderOptions } from '../../types/options'
 import { renderInfoGrid } from '../section-renderers/info-grid'
 
 /**
- * 信息网格渲染策略
+ * Info Grid Render Strategy
  */
 export class InfoGridStrategy implements SectionRenderStrategy {
   readonly type = 'info-grid'

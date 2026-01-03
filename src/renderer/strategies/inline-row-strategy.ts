@@ -1,5 +1,5 @@
 /**
- * @fileoverview 行内分列渲染策略
+ * @fileoverview Inline Row Render Strategy
  * @module renderer/strategies/inline-row-strategy
  */
 
@@ -9,7 +9,7 @@ import type { RenderOptions } from '../../types/options'
 import { renderInlineRow } from '../section-renderers/inline-row'
 
 /**
- * 行内分列渲染策略
+ * Inline Row Render Strategy
  */
 export class InlineRowStrategy implements SectionRenderStrategy {
   readonly type = 'inline-row'

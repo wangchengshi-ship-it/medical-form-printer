@@ -7,8 +7,32 @@
 
 ## [Unreleased]
 
+### Added
+
+- 测试工具模块 `src/test-utils/placeholder-data.ts`
+  - `PLACEHOLDER` - 通用占位数据常量（医院、患者、员工、位置、表单、水印）
+  - `SAMPLE_MATERNAL_DATA` - 产妇入院评估示例数据
+  - `SAMPLE_NEWBORN_DATA` - 新生儿护理记录示例数据
+  - `SAMPLE_DAILY_LOG_DATA` - 每日护理记录示例数据
+  - `SAMPLE_DISCHARGE_DATA` - 出院评估示例数据
+  - 用于 Storybook stories 和测试，替代真实敏感数据
+
 ### Changed
 
+- **info-grid 区块国际化**：
+  - 标签后的中文冒号 `：` 改为英文冒号 `:`
+  - 默认 `checkbox-inline` 选项从 `['无', '有']` 改为 `['No', 'Yes']`
+  - 所有中文注释翻译为英文（开源准备）
+- **signature-area 区块国际化**：
+  - 日期标签从 `日期：` 改为 `Date:`
+  - 标签后的中文冒号 `：` 改为英文冒号 `:`
+  - 文件级注释和函数注释翻译为英文（开源准备）
+- **default-theme 模块国际化**：
+  - 文件级注释和函数注释翻译为英文（开源准备）
+  - 移除字体配置中的中文别名（`"宋体"` → 移除，`"黑体"` → 移除），保留 SimSun/SimHei 作为主要字体名
+- **print-schema 类型定义国际化**：
+  - 文件级注释翻译为英文（开源准备）
+  - 类型注释从中文翻译为英文（`页面尺寸` → `Page size`，`页面方向` → `Page orientation` 等）
 - **16K 纸张样式重构**：
   - 同时设置 `height` 和 `min-height` 为相同值，确保页面高度与物理打印尺寸完全匹配
   - 添加 `overflow: hidden` 防止内容溢出导致分页问题

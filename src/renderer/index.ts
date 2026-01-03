@@ -1,5 +1,5 @@
 /**
- * @fileoverview 渲染器模块导出
+ * @fileoverview Renderer module exports
  * @module renderer
  */
 
@@ -13,7 +13,7 @@ export {
 } from './section-renderers'
 export type { SectionRenderer } from './section-renderers'
 
-// Strategy 模式
+// Strategy pattern
 export {
   StrategyContext,
   createDefaultStrategyContext,
@@ -30,7 +30,7 @@ export {
 } from './strategies'
 export type { SectionRenderStrategy } from './strategies'
 
-// Factory 模式
+// Factory pattern
 export {
   SectionRendererFactory,
   getDefaultSectionRendererFactory,
@@ -39,7 +39,7 @@ export {
 } from './factory'
 export type { RendererCreator, Formatter, FormatterConfig } from './factory'
 
-// Builder 模式
+// Builder pattern
 export {
   HtmlElementBuilder,
   PageBuilder,
@@ -60,7 +60,7 @@ export {
 } from './builders'
 export type { PageConfig, HeaderConfig, FooterConfig, ColumnConfig, TableConfig } from './builders'
 
-// Composite 模式
+// Composite pattern
 export {
   LeafSection,
   ContainerSection,
@@ -71,7 +71,7 @@ export {
 } from './composite'
 export type { SectionComponent } from './composite'
 
-// Template Method 模式
+// Template Method pattern
 export {
   AbstractPageRenderer,
   SinglePageRenderer,
@@ -81,7 +81,7 @@ export {
 } from './templates'
 export type { PageRenderContext } from './templates'
 
-// Visitor 模式
+// Visitor pattern
 export {
   FormatVisitor,
   ValidationVisitor,

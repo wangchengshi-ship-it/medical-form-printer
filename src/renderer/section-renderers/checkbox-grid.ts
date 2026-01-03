@@ -1,8 +1,8 @@
 /**
- * @fileoverview 勾选框网格区块渲染器
+ * @fileoverview Checkbox Grid Section Renderer
  * @module renderer/section-renderers/checkbox-grid
- * @description 支持 options 模式和 items 模式，支持 grid/flex 布局
- * @modif 2023-11-20
+ * @description Supports options mode and items mode, supports grid/flex layout
+ * @modified 2023-11-20
  */
 
 import type { CheckboxGridConfig, CheckboxOption, CheckboxItem, FormData } from '../../types/print-schema'
@@ -12,7 +12,7 @@ import { formatBoolean, isChecked } from '../../formatters'
 import { escapeHtml } from '../../utils'
 
 /**
- * 渲染勾选框网格区块
+ * Render checkbox grid section
  */
 export function renderCheckboxGrid(
   config: CheckboxGridConfig,
@@ -23,12 +23,12 @@ export function renderCheckboxGrid(
   const layout = config.layout || 'grid'
   const columns = config.columns || 4
   
-  // 前缀标签
+  // Prefix label
   const prefixHtml = config.prefixLabel 
     ? `<span class="${cls('prefix-label', options)}">${escapeHtml(config.prefixLabel)}</span>` 
     : ''
   
-  // 渲染项目
+  // Render items
   let itemsHtml: string
   if (config.items && config.items.length > 0) {
     itemsHtml = renderItems(config.items, values, data, layout, columns, options)
@@ -46,7 +46,7 @@ ${prefixHtml}${itemsHtml}
 }
 
 /**
- * 渲染 options 模式
+ * Render options mode
  */
 function renderOptions(
   optionsList: CheckboxOption[],
@@ -84,7 +84,7 @@ ${inputHtml}
 }
 
 /**
- * 渲染 items 模式
+ * Render items mode
  */
 function renderItems(
   itemsList: CheckboxItem[],
@@ -102,7 +102,7 @@ function renderItems(
       const styleAttr = layout === 'grid' ? ` style="width: ${columnWidth}"` : ''
       
       if (itemType === 'text-input') {
-        // 纯文本输入项
+        // Pure text input item
         const inputValue = item.inputField ? data[item.inputField] : undefined
         const displayValue = inputValue !== undefined && inputValue !== null && inputValue !== ''
           ? String(inputValue)
@@ -113,7 +113,7 @@ function renderItems(
 <span class="${cls('input-line', options)}">${escapeHtml(displayValue)}</span>
 </div>`
       } else {
-        // checkbox 类型
+        // checkbox type
         const checked = item.value ? isChecked(values, item.value) : false
         const symbol = formatBoolean(checked)
         

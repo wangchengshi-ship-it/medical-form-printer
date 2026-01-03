@@ -1,9 +1,9 @@
 /**
- * @fileoverview 工具模块导出
+ * @fileoverview Utils module exports
  * @module utils
  */
 
-// 水印工具
+// Watermark utilities
 export {
   clamp,
   normalizeOpacity,
@@ -13,16 +13,16 @@ export {
 export type { WatermarkOptions } from './watermark'
 
 export {
-  // HTML 构建器
+  // HTML builder
   HtmlBuilder,
   h,
   fragment,
   when,
   each,
-  // HTML 转义
+  // HTML escaping
   escapeHtml,
   escapeAttr,
-  // 常用标签快捷方法
+  // Common tag shortcut methods
   div,
   span,
   table,

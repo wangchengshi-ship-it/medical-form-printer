@@ -1,5 +1,5 @@
 /**
- * @fileoverview 内容测量器类型定义
+ * @fileoverview Content measurer type definitions
  * @module pagination/measurer-types
  * @version 1.0.0
  * @author Kiro
@@ -7,173 +7,173 @@
  * @modified 2026-01-03
  *
  * @description
- * 定义内容测量器的所有类型，包括：
- * - 测量配置 (MeasureConfig)
- * - 测量结果 (MeasureResult)
- * - 元素测量选项 (MeasureElementOptions)
+ * Defines all types for the content measurer, including:
+ * - Measurement configuration (MeasureConfig)
+ * - Measurement result (MeasureResult)
+ * - Element measurement options (MeasureElementOptions)
  *
- * 内容测量器用于在浏览器环境中测量渲染后元素的实际高度，
- * 以便进行精确的分页计算。
+ * The content measurer is used to measure actual rendered element heights
+ * in browser environment for precise pagination calculation.
  *
  * @requirements
- * - 10.1: 创建隐藏容器匹配打印样式进行测量
+ * - 10.1: Create hidden container matching print styles for measurement
  *
  * @usedBy
- * - ./content-measurer.ts - 内容测量器实现
- * - ./index.ts - 模块入口
+ * - ./content-measurer.ts - Content measurer implementation
+ * - ./index.ts - Module entry
  */
 
 import type { MeasurableItemType } from './types'
 
-// ==================== 测量配置 ====================
+// ==================== Measurement Configuration ====================
 
 /**
- * 测量配置
- * 用于配置测量容器的样式，确保与打印样式一致
- * @requirements 10.1 - 创建隐藏容器匹配打印样式
+ * Measurement configuration
+ * Used to configure measurement container styles to match print styles
+ * @requirements 10.1 - Create hidden container matching print styles
  */
 export interface MeasureConfig {
-  /** 容器宽度 (px)，应与打印宽度一致 */
+  /** Container width (px), should match print width */
   containerWidth: number
-  /** 字体大小，默认 '10pt' */
+  /** Font size, default '10pt' */
   fontSize?: string
-  /** 行高，默认 1.8 */
+  /** Line height, default 1.8 */
   lineHeight?: number
-  /** 字体，默认宋体 */
+  /** Font family, default Song Ti */
   fontFamily?: string
 }
 
 /**
- * 完整的测量配置（所有字段必填）
+ * Complete measurement configuration (all fields required)
  */
 export interface RequiredMeasureConfig {
-  /** 容器宽度 (px) */
+  /** Container width (px) */
   containerWidth: number
-  /** 字体大小 */
+  /** Font size */
   fontSize: string
-  /** 行高 */
+  /** Line height */
   lineHeight: number
-  /** 字体 */
+  /** Font family */
   fontFamily: string
 }
 
-// ==================== 测量结果 ====================
+// ==================== Measurement Result ====================
 
 /**
- * 单个元素的测量结果
- * @requirements 10.2 - 测量实际渲染高度
+ * Single element measurement result
+ * @requirements 10.2 - Measure actual rendered height
  */
 export interface MeasureResult {
-  /** 元素唯一标识 */
+  /** Element unique identifier */
   id: string
-  /** 测量高度 (px) */
+  /** Measured height (px) */
   height: number
 }
 
-// ==================== 元素测量选项 ====================
+// ==================== Element Measurement Options ====================
 
 /**
- * 元素测量选项
- * 用于指定测量元素的元数据
- * @requirements 10.5 - 支持批量测量多个元素
+ * Element measurement options
+ * Used to specify metadata for measured elements
+ * @requirements 10.5 - Support batch measuring multiple elements
  */
 export interface MeasureElementOptions {
-  /** 元素唯一标识 */
+  /** Element unique identifier */
   id: string
-  /** 内容类型 */
+  /** Content type */
   type: MeasurableItemType
-  /** 所属表格ID（仅 table-header 和 table-row 有值） */
+  /** Parent table ID (only for table-header and table-row) */
   tableId?: string
-  /** 原始数据索引 */
+  /** Original data index */
   dataIndex?: number
 }
 
-// ==================== 表格测量选项 ====================
+// ==================== Table Measurement Options ====================
 
 /**
- * 表格测量选项
- * @requirements 10.3 - 支持测量可变高度的表格行
+ * Table measurement options
+ * @requirements 10.3 - Support measuring variable height table rows
  */
 export interface MeasureTableOptions {
-  /** 表格唯一标识 */
+  /** Table unique identifier */
   tableId: string
-  /** 是否包含表头测量，默认 true */
+  /** Whether to include header measurement, default true */
   includeHeader?: boolean
-  /** 是否包含表体行测量，默认 true */
+  /** Whether to include body row measurement, default true */
   includeRows?: boolean
 }
 
-// ==================== 文本估算选项 ====================
+// ==================== Text Estimation Options ====================
 
 /**
- * 文本高度估算选项
- * 用于无 DOM 环境的降级方案
- * @requirements 10.4 - 处理文本换行估算
+ * Text height estimation options
+ * Fallback for non-DOM environments
+ * @requirements 10.4 - Handle text wrapping estimation
  */
 export interface TextEstimateOptions {
-  /** 容器宽度 (px) */
+  /** Container width (px) */
   containerWidth: number
-  /** 字体大小 (px)，默认 13.33 (10pt ≈ 13.33px) */
+  /** Font size (px), default 13.33 (10pt ≈ 13.33px) */
   fontSize?: number
-  /** 行高，默认 1.8 */
+  /** Line height, default 1.8 */
   lineHeight?: number
-  /** 是否为中文文本，默认 true（影响字符宽度估算） */
+  /** Whether text is Chinese, default true (affects character width estimation) */
   isChinese?: boolean
 }
 
-// ==================== 测量容器选项 ====================
+// ==================== Measurement Container Options ====================
 
 /**
- * 测量容器创建选项
- * @requirements 10.1 - 创建隐藏容器
+ * Measurement container creation options
+ * @requirements 10.1 - Create hidden container
  */
 export interface MeasureContainerOptions {
-  /** 容器 CSS 类名，默认 'print-measure-container' */
+  /** Container CSS class name, default 'print-measure-container' */
   className?: string
-  /** 是否添加到 document.body，默认 true */
+  /** Whether to append to document.body, default true */
   appendToBody?: boolean
-  /** 自定义样式 */
+  /** Custom styles */
   customStyles?: Partial<CSSStyleDeclaration>
 }
 
-// ==================== 批量测量选项 ====================
+// ==================== Batch Measurement Options ====================
 
 /**
- * 批量测量选项
- * @requirements 10.5 - 支持批量测量多个元素
+ * Batch measurement options
+ * @requirements 10.5 - Support batch measuring multiple elements
  */
 export interface MeasureAllOptions {
-  /** 是否测量页眉，默认 true */
+  /** Whether to measure header, default true */
   measureHeader?: boolean
-  /** 是否测量页脚，默认 true */
+  /** Whether to measure footer, default true */
   measureFooter?: boolean
-  /** 是否测量签名区域，默认 true */
+  /** Whether to measure signature area, default true */
   measureSignature?: boolean
-  /** 是否测量表格，默认 true */
+  /** Whether to measure tables, default true */
   measureTables?: boolean
-  /** 是否测量区块，默认 true */
+  /** Whether to measure sections, default true */
   measureSections?: boolean
 }
 
-// ==================== 默认配置常量 ====================
+// ==================== Default Configuration Constants ====================
 
 /**
- * 默认测量配置
+ * Default measurement configuration
  */
 export const DEFAULT_MEASURE_CONFIG: RequiredMeasureConfig = {
-  containerWidth: 624, // 约 165mm @ 96dpi (16K 纸张可用宽度)
+  containerWidth: 624, // Approximately 165mm @ 96dpi (16K paper usable width)
   fontSize: '10pt',
   lineHeight: 1.8,
-  fontFamily: "'Source Han Serif SC', 'SimSun', '宋体', serif",
+  fontFamily: "'Source Han Serif SC', 'SimSun', 'Song Ti', serif",
 }
 
 /**
- * 测量容器的默认 CSS 类名
+ * Default CSS class name for measurement container
  */
 export const MEASURE_CONTAINER_CLASS = 'print-measure-container'
 
 /**
- * 默认文本估算配置
+ * Default text estimation configuration
  */
 export const DEFAULT_TEXT_ESTIMATE_OPTIONS: Required<TextEstimateOptions> = {
   containerWidth: 624,
@@ -182,43 +182,43 @@ export const DEFAULT_TEXT_ESTIMATE_OPTIONS: Required<TextEstimateOptions> = {
   isChinese: true,
 }
 
-// ==================== CSS 选择器常量 ====================
+// ==================== CSS Selector Constants ====================
 
 /**
- * 内容测量器使用的 CSS 选择器
- * 用于在 DOM 中查找各类可测量元素
+ * CSS selectors used by content measurer
+ * Used to find various measurable elements in DOM
  */
 export const MEASURE_SELECTORS = {
-  /** 页眉选择器 */
+  /** Header selector */
   HEADER: ':scope > .print-header',
-  /** 页面主体选择器 */
+  /** Page body selector */
   BODY: ':scope > .print-body',
-  /** 区块标题选择器 */
+  /** Section title selector */
   SECTION_TITLE: ':scope > .section-title-block',
-  /** 信息网格包装选择器 */
+  /** Info grid wrapper selector */
   INFO_GRID_WRAPPER: ':scope > .info-grid-wrapper[data-section-id]',
-  /** 数据表格包装选择器 */
+  /** Data table wrapper selector */
   TABLE_WRAPPER: ':scope > .data-table-wrapper[data-section-id]',
-  /** 勾选框网格包装选择器 */
+  /** Checkbox grid wrapper selector */
   CHECKBOX_GRID_WRAPPER: ':scope > .checkbox-grid-wrapper[data-section-id]',
-  /** 医疗勾选行包装选择器 */
+  /** Medical checkbox row wrapper selector */
   MEDICAL_CHECKBOX_ROW_WRAPPER: ':scope > .medical-checkbox-row-wrapper[data-section-id]',
-  /** 备注选择器 */
+  /** Notes selector */
   NOTES: ':scope > .notes-text',
-  /** 签名区域选择器 */
+  /** Signature area selector */
   SIGNATURE: ':scope > .signature-area',
-  /** 表头选择器 */
+  /** Table header selector */
   TABLE_HEADER: 'thead',
-  /** 表格行选择器 */
+  /** Table rows selector */
   TABLE_ROWS: 'tbody tr',
 } as const
 
-// ==================== 类型守卫 ====================
+// ==================== Type Guards ====================
 
 /**
- * 检查是否为有效的测量配置
- * @param config - 待检查的配置
- * @returns 是否为有效配置
+ * Check if valid measurement configuration
+ * @param config - Configuration to check
+ * @returns Whether configuration is valid
  */
 export function isValidMeasureConfig(config: unknown): config is MeasureConfig {
   if (typeof config !== 'object' || config === null) {
@@ -235,9 +235,9 @@ export function isValidMeasureConfig(config: unknown): config is MeasureConfig {
 }
 
 /**
- * 检查是否为有效的测量结果
- * @param result - 待检查的结果
- * @returns 是否为有效结果
+ * Check if valid measurement result
+ * @param result - Result to check
+ * @returns Whether result is valid
  */
 export function isValidMeasureResult(result: unknown): result is MeasureResult {
   if (typeof result !== 'object' || result === null) {

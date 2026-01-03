@@ -1,10 +1,10 @@
 /**
- * @fileoverview 区块渲染器工厂
+ * @fileoverview Section Renderer Factory
  * @module renderer/factory/section-renderer-factory
  * 
  * @description
- * 使用 Factory 模式创建区块渲染器实例。
- * 支持注册自定义渲染器，实现渲染器的解耦和扩展。
+ * Uses Factory pattern to create section renderer instances.
+ * Supports registering custom renderers for decoupling and extensibility.
  */
 
 import type { SectionConfig, FormData } from '../../types/print-schema'
@@ -23,12 +23,12 @@ import {
   ContainerStrategy,
 } from '../strategies'
 
-/** 渲染器创建函数类型 */
+/** Renderer creator function type */
 export type RendererCreator = () => SectionRenderStrategy
 
 /**
- * 区块渲染器工厂
- * 负责创建和管理区块渲染器实例
+ * Section Renderer Factory
+ * Responsible for creating and managing section renderer instances
  */
 export class SectionRendererFactory {
   private creators: Map<string, RendererCreator> = new Map()
@@ -36,8 +36,8 @@ export class SectionRendererFactory {
   private useCache: boolean
 
   /**
-   * 创建工厂实例
-   * @param useCache - 是否缓存渲染器实例（默认 true）
+   * Create factory instance
+   * @param useCache - Whether to cache renderer instances (default true)
    */
   constructor(useCache: boolean = true) {
     this.useCache = useCache
@@ -45,7 +45,7 @@ export class SectionRendererFactory {
   }
 
   /**
-   * 注册内置渲染器
+   * Register built-in renderers
    */
   private registerBuiltInRenderers(): void {
     this.register('info-grid', () => new InfoGridStrategy())
@@ -61,19 +61,19 @@ export class SectionRendererFactory {
   }
 
   /**
-   * 注册渲染器创建函数
-   * @param type - 区块类型
-   * @param creator - 创建函数
+   * Register renderer creator function
+   * @param type - Section type
+   * @param creator - Creator function
    */
   register(type: string, creator: RendererCreator): void {
     this.creators.set(type, creator)
-    // 清除缓存的实例
+    // Clear cached instance
     this.instances.delete(type)
   }
 
   /**
-   * 注册自定义渲染器实例
-   * @param renderer - 渲染器实例
+   * Register custom renderer instance
+   * @param renderer - Renderer instance
    */
   registerInstance(renderer: SectionRenderStrategy): void {
     this.register(renderer.type, () => renderer)
@@ -83,12 +83,12 @@ export class SectionRendererFactory {
   }
 
   /**
-   * 创建渲染器实例
-   * @param type - 区块类型
-   * @returns 渲染器实例，如果类型不存在则返回 undefined
+   * Create renderer instance
+   * @param type - Section type
+   * @returns Renderer instance, or undefined if type doesn't exist
    */
   create(type: string): SectionRenderStrategy | undefined {
-    // 检查缓存
+    // Check cache
     if (this.useCache && this.instances.has(type)) {
       return this.instances.get(type)
     }
@@ -100,7 +100,7 @@ export class SectionRendererFactory {
 
     const instance = creator()
     
-    // 缓存实例
+    // Cache instance
     if (this.useCache) {
       this.instances.set(type, instance)
     }
@@ -109,29 +109,29 @@ export class SectionRendererFactory {
   }
 
   /**
-   * 检查是否支持指定类型
-   * @param type - 区块类型
-   * @returns 是否支持
+   * Check if specified type is supported
+   * @param type - Section type
+   * @returns Whether supported
    */
   hasRenderer(type: string): boolean {
     return this.creators.has(type)
   }
 
   /**
-   * 获取所有已注册的类型
-   * @returns 类型数组
+   * Get all registered types
+   * @returns Type array
    */
   getRegisteredTypes(): string[] {
     return Array.from(this.creators.keys())
   }
 
   /**
-   * 渲染区块
-   * @param type - 区块类型
-   * @param config - 区块配置
-   * @param data - 表单数据
-   * @param options - 渲染选项
-   * @returns HTML 字符串
+   * Render section
+   * @param type - Section type
+   * @param config - Section configuration
+   * @param data - Form data
+   * @param options - Render options
+   * @returns HTML string
    */
   render(
     type: string,
@@ -148,19 +148,19 @@ export class SectionRendererFactory {
   }
 
   /**
-   * 清除缓存的实例
+   * Clear cached instances
    */
   clearCache(): void {
     this.instances.clear()
   }
 }
 
-/** 默认工厂实例 */
+/** Default factory instance */
 let defaultFactory: SectionRendererFactory | null = null
 
 /**
- * 获取默认工厂实例（单例）
- * @returns 默认工厂实例
+ * Get default factory instance (singleton)
+ * @returns Default factory instance
  */
 export function getDefaultSectionRendererFactory(): SectionRendererFactory {
   if (!defaultFactory) {

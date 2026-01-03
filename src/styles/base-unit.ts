@@ -1,100 +1,100 @@
 /**
- * @fileoverview 基准单位系统
+ * @fileoverview Base Unit System
  * @module styles/base-unit
  * @modifys 2021-06-01
  *
  * @description
- * 定义打印渲染的基准单位常量和单位转换函数。
- * 所有尺寸值都是 BASE_UNIT 的倍数，通过修改 BASE_UNIT 可实现整体放大/缩小。
+ * Defines base unit constants and unit conversion functions for print rendering.
+ * All size values are multiples of BASE_UNIT, allowing overall scaling by modifying BASE_UNIT.
  *
- * 设计原则：
- * - 基准单位默认为 1mm
- * - 所有尺寸通过倍数系统定义，保持比例关系
- * - 支持 mm、pt、px 单位输出
+ * Design Principles:
+ * - Default base unit is 1mm
+ * - All sizes are defined through a multiplier system to maintain proportional relationships
+ * - Supports mm, pt, px unit output
  */
 
-/** 支持的单位类型 */
+/** Supported unit types */
 export type Unit = 'mm' | 'pt' | 'px'
 
-/** 默认基准单位值（毫米） */
+/** Default base unit value (millimeters) */
 export const DEFAULT_BASE_UNIT = 1
 
 /**
- * 单位转换常量
+ * Unit conversion constants
  * - 1mm ≈ 2.835pt (72pt / 25.4mm)
  * - 1mm ≈ 3.78px (96px / 25.4mm at 96dpi)
  */
 export const UNIT_CONVERSIONS = {
-  /** 毫米到点的转换系数 */
+  /** Millimeters to points conversion factor */
   MM_TO_PT: 72 / 25.4, // ≈ 2.835
-  /** 毫米到像素的转换系数（96dpi） */
+  /** Millimeters to pixels conversion factor (96dpi) */
   MM_TO_PX: 96 / 25.4, // ≈ 3.78
-  /** 点到毫米的转换系数 */
+  /** Points to millimeters conversion factor */
   PT_TO_MM: 25.4 / 72,
-  /** 像素到毫米的转换系数（96dpi） */
+  /** Pixels to millimeters conversion factor (96dpi) */
   PX_TO_MM: 25.4 / 96,
 } as const
 
 /**
- * 尺寸倍数配置
- * 定义各种尺寸相对于基准单位的倍数
+ * Size multiplier configuration
+ * Defines multipliers for various sizes relative to the base unit
  */
 export const SIZE_MULTIPLIERS = {
-  /** 字号倍数 */
+  /** Font size multipliers */
   fontSize: {
-    /** 正文字号 - 3.5mm ≈ 10pt */
+    /** Body font size - 3.5mm ≈ 10pt */
     body: 3.5,
-    /** 小字号 - 3mm ≈ 8.5pt */
+    /** Small font size - 3mm ≈ 8.5pt */
     small: 3,
-    /** 区块标题 - 4.2mm ≈ 12pt */
+    /** Section title - 4.2mm ≈ 12pt */
     sectionTitle: 4.2,
-    /** 医院名称 - 5mm ≈ 14pt */
+    /** Hospital name - 5mm ≈ 14pt */
     hospitalName: 5,
-    /** 表单标题 - 5.6mm ≈ 16pt */
+    /** Form title - 5.6mm ≈ 16pt */
     formTitle: 5.6,
   },
-  /** 行高倍数（相对于字号） */
+  /** Line height multiplier (relative to font size) */
   lineHeight: 1.5,
-  /** 间距倍数 */
+  /** Spacing multipliers */
   spacing: {
-    /** 页面边距 - 与 Vue 组件一致使用 8mm 10mm，这里用 10mm 作为基准 */
+    /** Page margin - Using 8mm 10mm consistent with Vue component, using 10mm as base */
     pageMargin: 10,
-    /** 区块间距 - 5mm */
+    /** Section gap - 5mm */
     sectionGap: 5,
-    /** 单元格水平内边距 - 3mm */
+    /** Cell horizontal padding - 3mm */
     cellPaddingX: 3,
-    /** 单元格垂直内边距 - 2mm */
+    /** Cell vertical padding - 2mm */
     cellPaddingY: 2,
-    /** 页眉底部间距 - 10mm */
+    /** Header bottom margin - 10mm */
     headerMarginBottom: 10,
-    /** 科室名称顶部间距 - 2mm */
+    /** Department name top margin - 2mm */
     departmentMarginTop: 2,
-    /** 表单标题顶部间距 - 5mm */
+    /** Form title top margin - 5mm */
     titleMarginTop: 5,
-    /** 签名区域间距 - 20mm */
+    /** Signature area gap - 20mm */
     signatureGap: 20,
-    /** 签名区域顶部间距 - 10mm */
+    /** Signature area top margin - 10mm */
     signatureMarginTop: 10,
-    /** 签名线最小宽度 - 30mm */
+    /** Signature line minimum width - 30mm */
     signatureLineWidth: 30,
-    /** 自由文本最小高度 - 20mm */
+    /** Free text minimum height - 20mm */
     freeTextMinHeight: 20,
-    /** 页脚顶部间距 - 10mm */
+    /** Footer top margin - 10mm */
     footerMarginTop: 10,
-    /** 小间距 - 2mm */
+    /** Extra small spacing - 2mm */
     xs: 2,
-    /** 中间距 - 3mm */
+    /** Small spacing - 3mm */
     sm: 3,
   },
-  /** 边框宽度倍数 - 0.35mm ≈ 1px */
+  /** Border width multiplier - 0.35mm ≈ 1px */
   borderWidth: 0.35,
 } as const
 
 /**
- * 将毫米值转换为指定单位
- * @param mm - 毫米值
- * @param unit - 目标单位
- * @returns 转换后的数值
+ * Convert millimeter value to specified unit
+ * @param mm - Millimeter value
+ * @param unit - Target unit
+ * @returns Converted numeric value
  */
 export function convertFromMm(mm: number, unit: Unit): number {
   switch (unit) {
@@ -108,10 +108,10 @@ export function convertFromMm(mm: number, unit: Unit): number {
 }
 
 /**
- * 将指定单位的值转换为毫米
- * @param value - 数值
- * @param unit - 源单位
- * @returns 毫米值
+ * Convert value from specified unit to millimeters
+ * @param value - Numeric value
+ * @param unit - Source unit
+ * @returns Millimeter value
  */
 export function convertToMm(value: number, unit: Unit): number {
   switch (unit) {
@@ -125,35 +125,35 @@ export function convertToMm(value: number, unit: Unit): number {
 }
 
 /**
- * 计算缩放后的值
- * @param multiplier - 倍数
- * @param baseUnit - 基准单位值（毫米）
- * @returns 缩放后的毫米值
+ * Calculate scaled value
+ * @param multiplier - Multiplier
+ * @param baseUnit - Base unit value (millimeters)
+ * @returns Scaled millimeter value
  */
 export function scaleValue(multiplier: number, baseUnit: number = DEFAULT_BASE_UNIT): number {
   return multiplier * baseUnit
 }
 
 /**
- * 格式化尺寸值为 CSS 字符串
- * @param mm - 毫米值
- * @param unit - 输出单位
- * @param precision - 小数精度
- * @returns CSS 尺寸字符串（如 "10mm", "28.35pt"）
+ * Format size value as CSS string
+ * @param mm - Millimeter value
+ * @param unit - Output unit
+ * @param precision - Decimal precision
+ * @returns CSS size string (e.g., "10mm", "28.35pt")
  */
 export function formatSize(mm: number, unit: Unit = 'mm', precision: number = 2): string {
   const value = convertFromMm(mm, unit)
-  // 对于整数值，不显示小数点
+  // For integer values, don't show decimal point
   const formatted = Number.isInteger(value) ? value.toString() : value.toFixed(precision)
   return `${formatted}${unit}`
 }
 
 /**
- * 格式化内边距值为 CSS 字符串
- * @param vertical - 垂直内边距（毫米）
- * @param horizontal - 水平内边距（毫米）
- * @param unit - 输出单位
- * @returns CSS 内边距字符串（如 "2mm 3mm"）
+ * Format padding value as CSS string
+ * @param vertical - Vertical padding (millimeters)
+ * @param horizontal - Horizontal padding (millimeters)
+ * @param unit - Output unit
+ * @returns CSS padding string (e.g., "2mm 3mm")
  */
 export function formatPadding(vertical: number, horizontal: number, unit: Unit = 'mm'): string {
   return `${formatSize(vertical, unit)} ${formatSize(horizontal, unit)}`

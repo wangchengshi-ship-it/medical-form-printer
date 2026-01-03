@@ -1,5 +1,5 @@
 /**
- * @fileoverview 隔离模式 HTML 渲染器
+ * @fileoverview Isolated Mode HTML Renderer
  * @module renderer/isolated-html-renderer
  * @version 1.1.0
  * @author Kiro
@@ -7,20 +7,20 @@
  * @modified 2026-01-03
  *
  * @description
- * 生成带 CSS 隔离的 HTML 输出，确保：
- * 1. 所有类名带 mpr- 前缀
- * 2. 样式完全隔离，不受外部影响
- * 3. 字体强制使用思源宋体 SC
+ * Generates HTML output with CSS isolation, ensuring:
+ * 1. All class names have mpr- prefix
+ * 2. Styles are completely isolated from external influence
+ * 3. Font is forced to use Source Han Serif SC
  *
  * @dependencies
- * - ../types/print-schema - 打印配置类型
- * - ../types/options - 渲染选项类型
- * - ../styles - 样式系统
- * - ./section-renderers - 区块渲染器
- * - ../utils - 工具函数
+ * - ../types/print-schema - Print configuration types
+ * - ../types/options - Render options types
+ * - ../styles - Style system
+ * - ./section-renderers - Section renderers
+ * - ../utils - Utility functions
  *
  * @usedBy
- * - ../index.ts - 库主入口
+ * - ../index.ts - Library main entry
  */
 
 import type { PrintSchema, FormData } from '../types/print-schema'
@@ -29,20 +29,20 @@ import { generateIsolatedCss, ISOLATION_ROOT_CLASS, CSS_NAMESPACE } from '../sty
 import { renderSection } from './section-renderers'
 import { escapeHtml, renderWatermarkHtml } from '../utils'
 
-// ==================== 类型定义 ====================
+// ==================== Type Definitions ====================
 
 /**
- * 隔离渲染选项
+ * Isolated render options
  */
 export interface IsolatedRenderOptions extends RenderOptions {
-  /** 水印文本 */
+  /** Watermark text */
   watermark?: string
-  /** 水印透明度 (0-1)，超出范围会被自动 clamp */
+  /** Watermark opacity (0-1), values outside range will be clamped */
   watermarkOpacity?: number
 }
 
 /**
- * 渲染上下文（内部使用）
+ * Render context (internal use)
  */
 interface RenderContext {
   css: string
@@ -53,15 +53,15 @@ interface RenderContext {
   watermark: string
 }
 
-// ==================== 常量 ====================
+// ==================== Constants ====================
 
-/** 命名空间前缀 */
+/** Namespace prefix */
 const ns = CSS_NAMESPACE
 
-// ==================== 内部渲染函数 ====================
+// ==================== Internal Render Functions ====================
 
 /**
- * 渲染页眉
+ * Render header
  */
 function renderHeader(schema: PrintSchema): string {
   const { header } = schema
@@ -81,7 +81,7 @@ ${logo}
 }
 
 /**
- * 渲染页脚
+ * Render footer
  */
 function renderFooter(schema: PrintSchema): string {
   const { footer } = schema
@@ -102,19 +102,19 @@ ${pageNumber}
 }
 
 /**
- * 渲染区块标题
+ * Render section title
  */
 function renderSectionTitle(title: string | undefined): string {
   return title ? `<div class="${ns}-section-title">${escapeHtml(title)}</div>` : ''
 }
 
 /**
- * 渲染所有区块
- * @description 在隔离模式下，自动为所有区块渲染器传递 classPrefix: 'mpr'，
- * 确保生成的 HTML 类名与 CSS 规则匹配。
+ * Render all sections
+ * @description In isolated mode, automatically passes classPrefix: 'mpr' to all section renderers,
+ * ensuring generated HTML class names match CSS rules.
  */
 function renderSections(schema: PrintSchema, data: FormData, options?: RenderOptions): string {
-  // 在隔离模式下，强制使用 mpr 前缀
+  // In isolated mode, force use of mpr prefix
   const isolatedOptions: RenderOptions = {
     ...options,
     classPrefix: CSS_NAMESPACE,
@@ -130,9 +130,9 @@ function renderSections(schema: PrintSchema, data: FormData, options?: RenderOpt
 }
 
 /**
- * 渲染水印
- * @param text - 水印文本
- * @param opacity - 透明度 (0-1)，超出范围会被 clamp
+ * Render watermark
+ * @param text - Watermark text
+ * @param opacity - Opacity (0-1), values outside range will be clamped
  */
 function renderWatermark(text?: string, opacity?: number): string {
   return renderWatermarkHtml({
@@ -143,7 +143,7 @@ function renderWatermark(text?: string, opacity?: number): string {
 }
 
 /**
- * 获取页面类名
+ * Get page class names
  */
 function getPageClasses(schema: PrintSchema): string {
   return [
@@ -153,11 +153,11 @@ function getPageClasses(schema: PrintSchema): string {
   ].filter(Boolean).join(' ')
 }
 
-// ==================== 核心渲染逻辑 ====================
+// ==================== Core Render Logic ====================
 
 /**
- * 创建渲染上下文
- * 提取公共渲染逻辑，避免重复代码
+ * Create render context
+ * Extracts common render logic to avoid code duplication
  */
 function createRenderContext(
   schema: PrintSchema,
@@ -175,7 +175,7 @@ function createRenderContext(
 }
 
 /**
- * 渲染隔离容器内容
+ * Render isolated container content
  */
 function renderIsolatedContent(ctx: RenderContext): string {
   return `<div class="${ISOLATION_ROOT_CLASS}">
@@ -193,27 +193,27 @@ ${ctx.footer}
 </div>`
 }
 
-// ==================== 公共 API ====================
+// ==================== Public API ====================
 
 /**
- * 将 PrintSchema 和 FormData 渲染为隔离的 HTML 字符串
+ * Render PrintSchema and FormData to isolated HTML string
  *
- * @param schema - 打印布局配置
- * @param data - 表单数据
- * @param options - 渲染选项（字体配置将被忽略）
- * @returns 完整的隔离 HTML 文档
+ * @param schema - Print layout configuration
+ * @param data - Form data
+ * @param options - Render options (font configuration will be ignored)
+ * @returns Complete isolated HTML document
  *
  * @description
- * 生成的 HTML 具有以下特点：
- * 1. 所有内容包裹在 .mpr-root 隔离容器中
- * 2. CSS 内嵌在隔离容器内的 <style> 标签中
- * 3. 所有类名带 mpr- 前缀
- * 4. 字体强制使用内嵌的思源宋体 SC
+ * Generated HTML has the following characteristics:
+ * 1. All content wrapped in .mpr-root isolation container
+ * 2. CSS embedded in <style> tag within isolation container
+ * 3. All class names have mpr- prefix
+ * 4. Font forced to use embedded Source Han Serif SC
  *
  * @example
  * ```typescript
  * const html = renderToIsolatedHtml(schema, data)
- * // 输出的 HTML 样式完全隔离，可安全嵌入任何页面
+ * // Output HTML styles are completely isolated, safe to embed in any page
  * ```
  */
 export function renderToIsolatedHtml(
@@ -237,13 +237,13 @@ ${renderIsolatedContent(ctx)}
 }
 
 /**
- * 渲染隔离的 HTML 片段（不包含 DOCTYPE 和 html/head/body 标签）
- * 适用于嵌入到现有页面中
+ * Render isolated HTML fragment (without DOCTYPE and html/head/body tags)
+ * Suitable for embedding into existing pages
  *
- * @param schema - 打印布局配置
- * @param data - 表单数据
- * @param options - 渲染选项
- * @returns 隔离的 HTML 片段
+ * @param schema - Print layout configuration
+ * @param data - Form data
+ * @param options - Render options
+ * @returns Isolated HTML fragment
  */
 export function renderToIsolatedFragment(
   schema: PrintSchema,

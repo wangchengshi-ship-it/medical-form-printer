@@ -1,29 +1,29 @@
 /**
- * @fileoverview CSS 隔离模块
+ * @fileoverview CSS Isolation Module
  * @module styles/isolation
  * @version 1.0.0
  * @author Kiro
  * @created 2026-01-03
  *
  * @description
- * 提供 CSS 命名空间和隔离容器样式生成功能。
- * 确保组件样式与外部样式完全隔离，防止样式污染。
+ * Provides CSS namespace and isolation container style generation.
+ * Ensures component styles are completely isolated from external styles, preventing style pollution.
  *
  * @usedBy
- * - ./css-generator.ts - CSS 生成器
- * - ../renderer/html-renderer.ts - HTML 渲染器
+ * - ./css-generator.ts - CSS generator
+ * - ../renderer/html-renderer.ts - HTML renderer
  */
 
-/** CSS 命名空间前缀 */
+/** CSS namespace prefix */
 export const CSS_NAMESPACE = 'mpr'
 
-/** 隔离容器根类名 */
+/** Isolation container root class name */
 export const ISOLATION_ROOT_CLASS = `${CSS_NAMESPACE}-root`
 
 /**
- * 为类名添加命名空间前缀
- * @param className - 原始类名
- * @returns 带前缀的类名
+ * Add namespace prefix to class name
+ * @param className - Original class name
+ * @returns Class name with prefix
  *
  * @example
  * ```typescript
@@ -32,7 +32,7 @@ export const ISOLATION_ROOT_CLASS = `${CSS_NAMESPACE}-root`
  * ```
  */
 export function namespaceClass(className: string): string {
-  // 如果已经有前缀，不重复添加
+  // Don't add prefix if already present
   if (className.startsWith(`${CSS_NAMESPACE}-`)) {
     return className
   }
@@ -40,9 +40,9 @@ export function namespaceClass(className: string): string {
 }
 
 /**
- * 批量转换类名
- * @param classNames - 原始类名数组
- * @returns 带前缀的类名数组
+ * Batch convert class names
+ * @param classNames - Original class name array
+ * @returns Class name array with prefix
  *
  * @example
  * ```typescript
@@ -55,40 +55,40 @@ export function namespaceClasses(classNames: string[]): string[] {
 }
 
 /**
- * 生成隔离容器样式
- * 使用多层防护确保样式完全隔离
- * @returns 隔离容器的 CSS 规则
+ * Generate isolation container styles
+ * Uses multiple layers of protection to ensure complete style isolation
+ * @returns CSS rules for isolation container
  */
 export function generateIsolationCss(): string {
-  return `/* CSS 隔离容器 */
+  return `/* CSS Isolation Container */
 .${ISOLATION_ROOT_CLASS} {
-  /* 样式隔离 - 创建新的堆叠上下文 */
+  /* Style isolation - create new stacking context */
   isolation: isolate;
   
-  /* 布局隔离 - 使用 layout 而非 strict，避免高度塌陷 */
+  /* Layout isolation - use layout instead of strict to avoid height collapse */
   contain: layout style;
   
-  /* 确保块级显示 */
+  /* Ensure block display */
   display: block;
   
-  /* 重置基础样式 */
+  /* Reset base styles */
   box-sizing: border-box;
   margin: 0;
   padding: 0;
   
-  /* 确保文本方向 */
+  /* Ensure text direction */
   direction: ltr;
   text-align: left;
   
-  /* 确保可见性 */
+  /* Ensure visibility */
   visibility: visible;
   opacity: 1;
   
-  /* 确保高度自适应 */
+  /* Ensure auto height */
   height: auto;
   min-height: 0;
   
-  /* 重置继承的文本样式 */
+  /* Reset inherited text styles */
   font-style: normal;
   font-variant: normal;
   font-weight: normal;
@@ -100,7 +100,7 @@ export function generateIsolationCss(): string {
   word-spacing: normal;
 }
 
-/* 防止外部样式通过通配符选择器影响内部 */
+/* Prevent external styles from affecting internal elements via wildcard selectors */
 .${ISOLATION_ROOT_CLASS} *,
 .${ISOLATION_ROOT_CLASS} *::before,
 .${ISOLATION_ROOT_CLASS} *::after {
@@ -109,25 +109,25 @@ export function generateIsolationCss(): string {
 }
 
 /**
- * 类名映射表：原始类名 -> 命名空间类名
- * 用于渲染器中的类名转换
+ * Class name mapping table: original class name -> namespaced class name
+ * Used for class name conversion in renderers
  */
 export const CLASS_NAME_MAP: Record<string, string> = {
-  // 页面布局
+  // Page layout
   'print-page': namespaceClass('print-page'),
   'print-header': namespaceClass('print-header'),
   'print-content': namespaceClass('print-content'),
   'print-footer': namespaceClass('print-footer'),
   'print-section': namespaceClass('print-section'),
   
-  // 页眉元素
+  // Header elements
   'header-row': namespaceClass('header-row'),
   'hospital-name': namespaceClass('hospital-name'),
   'department-name': namespaceClass('department-name'),
   'form-title': namespaceClass('form-title'),
   'header-logo': namespaceClass('header-logo'),
   
-  // 区块
+  // Sections
   'section-title': namespaceClass('section-title'),
   'info-grid': namespaceClass('info-grid'),
   'data-table': namespaceClass('data-table'),
@@ -135,7 +135,7 @@ export const CLASS_NAME_MAP: Record<string, string> = {
   'checkbox-item': namespaceClass('checkbox-item'),
   'checkbox-symbol': namespaceClass('checkbox-symbol'),
   
-  // 信息网格 - 下划线填空样式
+  // Info grid - underline fill-in style
   'info-row': namespaceClass('info-row'),
   'info-item': namespaceClass('info-item'),
   'label': namespaceClass('label'),
@@ -151,45 +151,45 @@ export const CLASS_NAME_MAP: Record<string, string> = {
   'textarea-item': namespaceClass('textarea-item'),
   'textarea-content': namespaceClass('textarea-content'),
   
-  // 单元格（旧表格样式，保留兼容）
+  // Cells (legacy table style, kept for compatibility)
   'label-cell': namespaceClass('label-cell'),
   'value-cell': namespaceClass('value-cell'),
   
-  // 签名
+  // Signature
   'signature-area': namespaceClass('signature-area'),
   'signature-item': namespaceClass('signature-item'),
   'signature-label': namespaceClass('signature-label'),
   'signature-line': namespaceClass('signature-line'),
   
-  // 备注和自由文本
+  // Notes and free text
   'notes-section': namespaceClass('notes-section'),
   'free-text': namespaceClass('free-text'),
   
-  // 页脚
+  // Footer
   'footer-notes': namespaceClass('footer-notes'),
   'page-number': namespaceClass('page-number'),
   
-  // 水印
+  // Watermark
   'watermark': namespaceClass('watermark'),
   
-  // 分页控制
+  // Pagination control
   'page-break-before': namespaceClass('page-break-before'),
   'page-break-after': namespaceClass('page-break-after'),
   'no-page-break': namespaceClass('no-page-break'),
   
-  // 页面尺寸修饰符
+  // Page size modifiers
   'landscape': namespaceClass('landscape'),
   'a5': namespaceClass('a5'),
   '16k': namespaceClass('16k'),
   
-  // 修饰符
+  // Modifiers
   'bordered': namespaceClass('bordered'),
 }
 
 /**
- * 获取命名空间类名
- * @param className - 原始类名
- * @returns 命名空间类名，如果不在映射表中则添加前缀
+ * Get namespaced class name
+ * @param className - Original class name
+ * @returns Namespaced class name, adds prefix if not in mapping table
  */
 export function getNamespacedClass(className: string): string {
   return CLASS_NAME_MAP[className] ?? namespaceClass(className)

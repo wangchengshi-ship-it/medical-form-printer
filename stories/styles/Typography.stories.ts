@@ -30,7 +30,7 @@ export const FontFamily: Story = {
           <div style="margin-bottom: 24px;">
             <h4>正文字体 (body)</h4>
             <p style="font-size: 14px;">
-              天津中医药大学第二附属医院 - 国际产后康复中心
+              Sample Hospital - Postpartum Care Center
             </p>
             <p style="font-size: 14px;">
               The quick brown fox jumps over the lazy dog. 0123456789
@@ -41,7 +41,7 @@ export const FontFamily: Story = {
           <div style="margin-bottom: 24px;">
             <h4>标题字体 (heading)</h4>
             <p style="font-size: 18px; font-weight: bold;">
-              产妇入院评估单
+              Maternal Admission Assessment
             </p>
             <code style="font-size: 12px; color: #666;">Source Han Serif SC (内嵌思源宋体)</code>
           </div>

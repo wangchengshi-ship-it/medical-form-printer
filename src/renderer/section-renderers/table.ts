@@ -1,5 +1,5 @@
 /**
- * @fileoverview 数据表格区块渲染器
+ * @fileoverview Data Table Section Renderer
  * @module renderer/section-renderers/table
  * @modif 2023-11-02
  */
@@ -11,14 +11,14 @@ import { formatValue } from '../../formatters'
 import { escapeHtml } from '../../utils'
 
 /**
- * 渲染数据表格区块
+ * Render data table section
  */
 export function renderTable(
   config: TableConfig,
   data: FormData,
   options?: RenderOptions
 ): string {
-  // 表头
+  // Header
   const headers = config.columns
     .map((col) => {
       const width = col.width ? ` style="width: ${col.width}"` : ''
@@ -26,10 +26,10 @@ export function renderTable(
     })
     .join('\n')
   
-  // 获取数据数组
+  // Get data array
   const rows = (data[config.dataField] as Record<string, unknown>[]) || []
   
-  // 表体
+  // Body
   const body = rows
     .map((row, index) => {
       const cells = config.columns
@@ -51,8 +51,8 @@ export function renderTable(
     })
     .join('\n')
   
-  // 行号表头
-  const rowNumberHeader = config.showRowNumber ? '<th>序号</th>\n' : ''
+  // Row number header
+  const rowNumberHeader = config.showRowNumber ? '<th>No.</th>\n' : ''
   
   return `<div class="${cls('print-section', options)} ${cls('data-table', options)}">
 <table>

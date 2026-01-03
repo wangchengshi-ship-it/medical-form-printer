@@ -1,10 +1,10 @@
 /**
- * @fileoverview 默认主题配置
+ * @fileoverview Default Theme Configuration
  * @module styles/default-theme
  *
  * @description
- * 定义默认主题配置，使用基准单位系统实现可缩放的尺寸。
- * 所有尺寸值都是基准单位的倍数，通过修改基准单位可实现整体放大/缩小。
+ * Defines default theme configuration using base unit system for scalable sizes.
+ * All size values are multiples of the base unit, allowing overall scaling by modifying the base unit.
  */
 
 import type { Theme, FontConfig, ColorConfig, SizeMultipliers, ScaledThemeConfig } from '../types/theme'
@@ -16,14 +16,14 @@ import {
   formatPadding,
 } from './base-unit'
 
-/** 默认字体配置 */
+/** Default font configuration */
 export const defaultFonts: FontConfig = {
-  body: '"SimSun", "宋体", "Songti SC", serif',
-  heading: '"SimHei", "黑体", "Heiti SC", sans-serif',
+  body: '"SimSun", "Songti SC", serif',
+  heading: '"SimHei", "Heiti SC", sans-serif',
   mono: '"Courier New", monospace',
 }
 
-/** 默认颜色配置 */
+/** Default color configuration */
 export const defaultColors: ColorConfig = {
   primary: '#000000',
   border: '#000000',
@@ -33,10 +33,10 @@ export const defaultColors: ColorConfig = {
   textSecondary: '#666666',
 }
 
-/** 默认尺寸倍数配置 */
+/** Default size multiplier configuration */
 export const defaultMultipliers: SizeMultipliers = SIZE_MULTIPLIERS
 
-/** 默认缩放主题配置 */
+/** Default scaled theme configuration */
 export const defaultScaledConfig: ScaledThemeConfig = {
   baseUnit: DEFAULT_BASE_UNIT,
   multipliers: defaultMultipliers,
@@ -45,15 +45,15 @@ export const defaultScaledConfig: ScaledThemeConfig = {
 }
 
 /**
- * 根据基准单位和倍数配置生成完整主题
- * @param config - 缩放主题配置
- * @returns 完整的主题对象
+ * Generate complete theme from base unit and multiplier configuration
+ * @param config - Scaled theme configuration
+ * @returns Complete theme object
  */
 export function createScaledTheme(config: ScaledThemeConfig = defaultScaledConfig): Theme {
   const { baseUnit, multipliers, fonts, colors } = config
   const s = multipliers.spacing
 
-  // 计算各尺寸的毫米值
+  // Calculate millimeter values for each size
   const fontSizeMm = {
     body: scaleValue(multipliers.fontSize.body, baseUnit),
     small: scaleValue(multipliers.fontSize.small, baseUnit),
@@ -64,7 +64,7 @@ export function createScaledTheme(config: ScaledThemeConfig = defaultScaledConfi
 
   const borderWidthMm = scaleValue(multipliers.borderWidth, baseUnit)
 
-  // 生成主题对象，使用 pt 作为字号单位（更适合打印）
+  // Generate theme object, using pt as font size unit (more suitable for printing)
   return {
     fonts,
     colors,
@@ -99,9 +99,9 @@ export function createScaledTheme(config: ScaledThemeConfig = defaultScaledConfi
 }
 
 /**
- * 根据基准单位值快速创建缩放主题
- * @param baseUnit - 基准单位值（毫米），默认为 1
- * @returns 完整的主题对象
+ * Quickly create scaled theme from base unit value
+ * @param baseUnit - Base unit value (millimeters), default is 1
+ * @returns Complete theme object
  */
 export function createThemeWithBaseUnit(baseUnit: number = DEFAULT_BASE_UNIT): Theme {
   return createScaledTheme({
@@ -110,5 +110,5 @@ export function createThemeWithBaseUnit(baseUnit: number = DEFAULT_BASE_UNIT): T
   })
 }
 
-/** 默认主题 - 标准医疗表单样式（基准单位 = 1mm） */
+/** Default theme - Standard medical form style (base unit = 1mm) */
 export const defaultTheme: Theme = createScaledTheme(defaultScaledConfig)

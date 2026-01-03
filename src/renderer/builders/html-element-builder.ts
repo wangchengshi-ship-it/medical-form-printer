@@ -1,29 +1,29 @@
 /**
- * @fileoverview HTML 元素构建器
+ * @fileoverview HTML Element Builder
  * @module renderer/builders/html-element-builder
  * 
  * @description
- * 使用 Builder 模式链式构建 HTML 元素。
- * 支持 fluent API：builder.tag('div').class('foo').child(...).build()
+ * Uses Builder pattern to chain-build HTML elements.
+ * Supports fluent API: builder.tag('div').class('foo').child(...).build()
  */
 
 import { escapeHtml, escapeAttr } from '../../utils'
 
-/** HTML 空元素（自闭合标签） */
+/** HTML void elements (self-closing tags) */
 const VOID_ELEMENTS = new Set([
   'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
   'link', 'meta', 'param', 'source', 'track', 'wbr'
 ])
 
-/** 属性值类型 */
+/** Attribute value type */
 type AttributeValue = string | number | boolean | undefined | null
 
-/** 子元素类型 */
+/** Child element type */
 type ChildElement = string | HtmlElementBuilder | undefined | null | false
 
 /**
- * HTML 元素构建器
- * 提供链式 API 构建 HTML 元素
+ * HTML Element Builder
+ * Provides fluent API for building HTML elements
  */
 export class HtmlElementBuilder {
   private tagName: string
@@ -34,26 +34,26 @@ export class HtmlElementBuilder {
   private rawContent: string | null = null
 
   /**
-   * 创建构建器实例
-   * @param tag - 标签名
+   * Create builder instance
+   * @param tag - Tag name
    */
   constructor(tag: string) {
     this.tagName = tag
   }
 
   /**
-   * 创建新的构建器实例
-   * @param tag - 标签名
-   * @returns 新的构建器实例
+   * Create new builder instance
+   * @param tag - Tag name
+   * @returns New builder instance
    */
   static tag(tag: string): HtmlElementBuilder {
     return new HtmlElementBuilder(tag)
   }
 
   /**
-   * 设置属性
-   * @param name - 属性名
-   * @param value - 属性值
+   * Set attribute
+   * @param name - Attribute name
+   * @param value - Attribute value
    */
   attr(name: string, value: AttributeValue): this {
     if (value === undefined || value === null || value === false) {
@@ -68,8 +68,8 @@ export class HtmlElementBuilder {
   }
 
   /**
-   * 批量设置属性
-   * @param attrs - 属性对象
+   * Set multiple attributes
+   * @param attrs - Attributes object
    */
   attrs(attrs: Record<string, AttributeValue>): this {
     for (const [name, value] of Object.entries(attrs)) {
@@ -79,8 +79,8 @@ export class HtmlElementBuilder {
   }
 
   /**
-   * 添加 CSS 类名
-   * @param names - 类名
+   * Add CSS class names
+   * @param names - Class names
    */
   class(...names: (string | undefined | null | false)[]): this {
     for (const name of names) {
@@ -92,17 +92,17 @@ export class HtmlElementBuilder {
   }
 
   /**
-   * 设置 ID
-   * @param id - 元素 ID
+   * Set ID
+   * @param id - Element ID
    */
   id(id: string): this {
     return this.attr('id', id)
   }
 
   /**
-   * 设置单个样式
-   * @param property - CSS 属性名
-   * @param value - CSS 属性值
+   * Set single style
+   * @param property - CSS property name
+   * @param value - CSS property value
    */
   style(property: string, value: string | undefined | null): this {
     if (value !== undefined && value !== null && value !== '') {
@@ -112,8 +112,8 @@ export class HtmlElementBuilder {
   }
 
   /**
-   * 批量设置样式
-   * @param styles - 样式对象
+   * Set multiple styles
+   * @param styles - Styles object
    */
   css(styles: Record<string, string | undefined | null>): this {
     for (const [property, value] of Object.entries(styles)) {
@@ -123,8 +123,8 @@ export class HtmlElementBuilder {
   }
 
   /**
-   * 添加子元素
-   * @param children - 子元素
+   * Add child elements
+   * @param children - Child elements
    */
   child(...children: ChildElement[]): this {
     this.children.push(...children)
@@ -132,8 +132,8 @@ export class HtmlElementBuilder {
   }
 
   /**
-   * 添加文本内容（自动转义）
-   * @param text - 文本内容
+   * Add text content (auto-escaped)
+   * @param text - Text content
    */
   text(text: string | number | undefined | null): this {
     if (text !== undefined && text !== null) {
@@ -143,8 +143,8 @@ export class HtmlElementBuilder {
   }
 
   /**
-   * 添加原始 HTML（不转义）
-   * @param html - 原始 HTML 字符串
+   * Add raw HTML (not escaped)
+   * @param html - Raw HTML string
    */
   raw(html: string): this {
     this.rawContent = html
@@ -152,9 +152,9 @@ export class HtmlElementBuilder {
   }
 
   /**
-   * 条件渲染
-   * @param condition - 条件
-   * @param builder - 条件为真时执行的构建函数
+   * Conditional rendering
+   * @param condition - Condition
+   * @param builder - Builder function to execute when condition is true
    */
   when(condition: boolean, builder: (b: this) => void): this {
     if (condition) {
@@ -164,21 +164,21 @@ export class HtmlElementBuilder {
   }
 
   /**
-   * 构建 HTML 字符串
-   * @returns HTML 字符串
+   * Build HTML string
+   * @returns HTML string
    */
   build(): string {
     const parts: string[] = []
     
-    // 开始标签
+    // Opening tag
     parts.push(`<${this.tagName}`)
     
-    // 类名
+    // Class names
     if (this.classNames.length > 0) {
       parts.push(` class="${escapeAttr(this.classNames.join(' '))}"`)
     }
     
-    // 样式
+    // Styles
     if (this.styles.size > 0) {
       const styleStr = Array.from(this.styles.entries())
         .map(([prop, val]) => `${prop}: ${val}`)
@@ -186,7 +186,7 @@ export class HtmlElementBuilder {
       parts.push(` style="${escapeAttr(styleStr)}"`)
     }
     
-    // 其他属性
+    // Other attributes
     for (const [name, value] of this.attributes) {
       if (name === value) {
         parts.push(` ${name}`)
@@ -195,7 +195,7 @@ export class HtmlElementBuilder {
       }
     }
     
-    // 空元素
+    // Void elements
     if (VOID_ELEMENTS.has(this.tagName)) {
       parts.push(' />')
       return parts.join('')
@@ -203,7 +203,7 @@ export class HtmlElementBuilder {
     
     parts.push('>')
     
-    // 内容
+    // Content
     if (this.rawContent !== null) {
       parts.push(this.rawContent)
     } else {
@@ -219,21 +219,21 @@ export class HtmlElementBuilder {
       }
     }
     
-    // 结束标签
+    // Closing tag
     parts.push(`</${this.tagName}>`)
     
     return parts.join('')
   }
 
   /**
-   * 转换为字符串
+   * Convert to string
    */
   toString(): string {
     return this.build()
   }
 }
 
-// 快捷方法
+// Shortcut methods
 export const div = () => new HtmlElementBuilder('div')
 export const span = () => new HtmlElementBuilder('span')
 export const table = () => new HtmlElementBuilder('table')

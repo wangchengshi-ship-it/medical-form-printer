@@ -1,40 +1,40 @@
 /**
- * @fileoverview 字体 CSS 生成器
+ * @fileoverview Font CSS generator
  * @module fonts/font-css
  * @version 1.0.0
  * @author Kiro
  * @created 2026-01-03
  *
  * @description
- * 生成 @font-face CSS 声明，使用内嵌的 Base64 字体数据。
- * 强制使用思源宋体 SC，禁止字体合成。
+ * Generates @font-face CSS declarations using embedded Base64 font data.
+ * Enforces Source Han Serif SC font and disables font synthesis.
  *
  * @dependencies
- * - ./font-data - Base64 编码的字体数据
+ * - ./font-data - Base64 encoded font data
  */
 
 import { FONT_DATA_URL } from './font-data'
 
-/** 字体家族名称（不可修改） */
+/** Font family name (immutable) */
 export const FONT_FAMILY = 'Source Han Serif SC'
 
-/** 字体粗细 */
+/** Font weight */
 export const FONT_WEIGHT = 400
 
-/** 字体样式 */
+/** Font style */
 export const FONT_STYLE = 'normal'
 
 /**
- * 获取字体 Data URL
- * @returns woff2 格式的 data URL
+ * Get font Data URL
+ * @returns woff2 format data URL
  */
 export function getFontDataUrl(): string {
   return FONT_DATA_URL
 }
 
 /**
- * 生成 @font-face CSS 声明
- * @returns @font-face CSS 字符串
+ * Generate @font-face CSS declaration
+ * @returns @font-face CSS string
  */
 export function generateFontFace(): string {
   return `@font-face {
@@ -47,12 +47,12 @@ export function generateFontFace(): string {
 }
 
 /**
- * 生成字体强制覆盖 CSS
- * 确保所有文本元素使用指定字体，禁止字体合成
- * @returns 字体强制覆盖 CSS 字符串
+ * Generate font override CSS
+ * Ensures all text elements use the specified font, disables font synthesis
+ * @returns Font override CSS string
  */
 export function generateFontOverrideCss(): string {
-  return `/* 字体强制覆盖 - 禁止外部修改 */
+  return `/* Font override - prevent external modification */
 .mpr-root,
 .mpr-root * {
   font-family: '${FONT_FAMILY}', serif !important;
@@ -63,8 +63,8 @@ export function generateFontOverrideCss(): string {
 }
 
 /**
- * 获取完整的字体 CSS（包含 @font-face 和强制覆盖规则）
- * @returns 完整的字体 CSS 字符串
+ * Get complete font CSS (includes @font-face and override rules)
+ * @returns Complete font CSS string
  */
 export function getFontCss(): string {
   return `${generateFontFace()}

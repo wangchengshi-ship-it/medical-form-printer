@@ -1,5 +1,5 @@
 /**
- * @fileoverview 数据表格渲染策略
+ * @fileoverview Data Table Render Strategy
  * @module renderer/strategies/table-strategy
  */
 
@@ -9,7 +9,7 @@ import type { RenderOptions } from '../../types/options'
 import { renderTable } from '../section-renderers/table'
 
 /**
- * 数据表格渲染策略
+ * Data Table Render Strategy
  */
 export class TableStrategy implements SectionRenderStrategy {
   readonly type = 'table'

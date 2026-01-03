@@ -1,5 +1,5 @@
 /**
- * @fileoverview 备注区域渲染策略
+ * @fileoverview Notes Area Render Strategy
  * @module renderer/strategies/notes-strategy
  */
 
@@ -9,7 +9,7 @@ import type { RenderOptions } from '../../types/options'
 import { renderNotes } from '../section-renderers/notes'
 
 /**
- * 备注区域渲染策略
+ * Notes Area Render Strategy
  */
 export class NotesStrategy implements SectionRenderStrategy {
   readonly type = 'notes'

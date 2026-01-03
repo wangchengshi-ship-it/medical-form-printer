@@ -1,5 +1,5 @@
 /**
- * @fileoverview 自由文本渲染策略
+ * @fileoverview Free Text Render Strategy
  * @module renderer/strategies/free-text-strategy
  */
 
@@ -9,7 +9,7 @@ import type { RenderOptions } from '../../types/options'
 import { renderFreeText } from '../section-renderers/free-text'
 
 /**
- * 自由文本渲染策略
+ * Free Text Render Strategy
  */
 export class FreeTextStrategy implements SectionRenderStrategy {
   readonly type = 'free-text'

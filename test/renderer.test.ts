@@ -19,7 +19,7 @@ describe('renderToHtml', () => {
   }
 
   const basicData: FormData = {
-    name: '张三',
+    name: 'Jane Doe',
     age: 30,
   }
 
@@ -86,7 +86,7 @@ describe('renderToHtml', () => {
     
     expect(html).toContain('class="print-section info-grid"')
     expect(html).toContain('姓名')
-    expect(html).toContain('张三')
+    expect(html).toContain('Jane Doe')
     expect(html).toContain('年龄')
     expect(html).toContain('30')
   })

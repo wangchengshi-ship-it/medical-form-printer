@@ -28,9 +28,9 @@ import type { RenderOptions, PdfOptions } from '../../types/options'
 import { renderSection } from '../section-renderers'
 import { escapeHtml, renderWatermarkHtml, extractWatermarkOptions } from '../../utils'
 
-// ==================== CSS 类名常量 ====================
+// ==================== CSS Class Constants ====================
 
-/** CSS 类名常量，避免魔法字符串 */
+/** CSS class constants to avoid magic strings */
 const CSS = {
   PRINT_PAGE: 'print-page',
   PRINT_HEADER: 'print-header',
@@ -43,27 +43,27 @@ const CSS = {
   PAGE_NUMBER: 'page-number',
 } as const
 
-// ==================== 工具函数 ====================
+// ==================== Utility Functions ====================
 
 /**
- * 格式化页码显示
- * @param current - 当前页码
- * @param total - 总页数
- * @param format - 格式模板，默认 "第 {current} 页 / 共 {total} 页"
+ * Format page number display
+ * @param current - Current page number
+ * @param total - Total pages
+ * @param format - Format template, default "Page {current} of {total}"
  */
 function formatPageNumber(
   current: number,
   total: number,
-  format = '第 {current} 页 / 共 {total} 页'
+  format = 'Page {current} of {total}'
 ): string {
   return format.replace('{current}', String(current)).replace('{total}', String(total))
 }
 
-// ==================== 类型定义 ====================
+// ==================== Type Definitions ====================
 
 /**
- * 页面渲染上下文（基础）
- * 包含渲染过程中需要的所有数据
+ * Page render context (base)
+ * Contains all data needed during rendering
  */
 export interface PageRenderContext {
   schema: PrintSchema
@@ -74,8 +74,8 @@ export interface PageRenderContext {
 }
 
 /**
- * 分页渲染上下文（类型安全）
- * pageNumber 和 totalPages 为必填，消除非空断言
+ * Paginated render context (type-safe)
+ * pageNumber and totalPages are required, eliminating non-null assertions
  */
 export interface PaginatedPageContext extends PageRenderContext {
   pageNumber: number
@@ -83,7 +83,7 @@ export interface PaginatedPageContext extends PageRenderContext {
 }
 
 /**
- * 水印选项类型守卫
+ * Watermark options type guard
  */
 function hasWatermarkOptions(
   options?: RenderOptions | PdfOptions
@@ -91,18 +91,18 @@ function hasWatermarkOptions(
   return options !== undefined && 'watermark' in options
 }
 
-// ==================== 抽象基类 ====================
+// ==================== Abstract Base Class ====================
 
 /**
- * 抽象页面渲染器（Template Method 模式的 AbstractClass）
- * 定义页面渲染的骨架流程，子类实现具体步骤
+ * Abstract page renderer (Template Method pattern's AbstractClass)
+ * Defines page rendering skeleton, subclasses implement specific steps
  */
 export abstract class AbstractPageRenderer {
   /**
-   * 渲染页面（Template Method）
-   * 定义渲染流程：renderHeader → renderBody → renderFooter
-   * @param context - 渲染上下文
-   * @returns HTML 字符串
+   * Render page (Template Method)
+   * Defines rendering flow: renderHeader → renderBody → renderFooter
+   * @param context - Render context
+   * @returns HTML string
    */
   render(context: PageRenderContext): string {
     const parts: string[] = [
@@ -116,43 +116,43 @@ export abstract class AbstractPageRenderer {
   }
 
   /**
-   * 渲染页面开始标签
-   * @param _context - 渲染上下文（保留用于子类覆盖）
+   * Render page start tag
+   * @param _context - Render context (reserved for subclass override)
    */
   protected renderPageStart(_context: PageRenderContext): string {
     return `<div class="${CSS.PRINT_PAGE}">`
   }
 
   /**
-   * 渲染页面结束标签
-   * @param _context - 渲染上下文（保留用于子类覆盖）
+   * Render page end tag
+   * @param _context - Render context (reserved for subclass override)
    */
   protected renderPageEnd(_context: PageRenderContext): string {
     return '</div>'
   }
 
   /**
-   * 渲染页眉（抽象方法，子类必须实现）
-   * @param context - 渲染上下文
+   * Render header (abstract method, subclass must implement)
+   * @param context - Render context
    */
   protected abstract renderHeader(context: PageRenderContext): string
 
   /**
-   * 渲染主体内容（抽象方法，子类必须实现）
-   * @param context - 渲染上下文
+   * Render body content (abstract method, subclass must implement)
+   * @param context - Render context
    */
   protected abstract renderBody(context: PageRenderContext): string
 
   /**
-   * 渲染页脚（抽象方法，子类必须实现）
-   * @param context - 渲染上下文
+   * Render footer (abstract method, subclass must implement)
+   * @param context - Render context
    */
   protected abstract renderFooter(context: PageRenderContext): string
 
   /**
-   * 渲染水印（钩子方法，子类可选覆盖）
-   * 使用类型守卫确保类型安全
-   * @param context - 渲染上下文
+   * Render watermark (hook method, subclass can optionally override)
+   * Uses type guard for type safety
+   * @param context - Render context
    */
   protected renderWatermark(context: PageRenderContext): string {
     const { options } = context
@@ -161,10 +161,10 @@ export abstract class AbstractPageRenderer {
   }
 
   /**
-   * 渲染区块列表
-   * @param sections - 区块配置数组
-   * @param data - 表单数据
-   * @param options - 渲染选项
+   * Render section list
+   * @param sections - Section configuration array
+   * @param data - Form data
+   * @param options - Render options
    */
   protected renderSections(
     sections: PrintSection[],
@@ -177,10 +177,10 @@ export abstract class AbstractPageRenderer {
   }
 
   /**
-   * 渲染页眉内容（公共逻辑，供子类复用）
-   * @param schema - 打印配置
-   * @param titleSuffix - 标题后缀（如续页的 "(续)"）
-   * @returns 页眉内容 HTML 数组
+   * Render header content (common logic for subclass reuse)
+   * @param schema - Print configuration
+   * @param titleSuffix - Title suffix (e.g., "(continued)" for continuation pages)
+   * @returns Header content HTML array
    */
   protected renderHeaderContent(schema: PrintSchema, titleSuffix = ''): string[] {
     const parts: string[] = []
@@ -199,10 +199,10 @@ export abstract class AbstractPageRenderer {
   }
 
   /**
-   * 渲染主体内容包装（公共逻辑，供子类复用）
-   * @param context - 渲染上下文
-   * @param sections - 要渲染的区块
-   * @returns 主体 HTML
+   * Render body content wrapper (common logic for subclass reuse)
+   * @param context - Render context
+   * @param sections - Sections to render
+   * @returns Body HTML
    */
   protected renderBodyWrapper(context: PageRenderContext, sections: PrintSection[]): string {
     const { data, options } = context
@@ -223,8 +223,8 @@ export abstract class AbstractPageRenderer {
 // ==================== 单页渲染器 ====================
 
 /**
- * 单页渲染器
- * 将所有内容渲染到单个页面
+ * Single page renderer
+ * Renders all content to a single page
  */
 export class SinglePageRenderer extends AbstractPageRenderer {
   protected renderHeader(context: PageRenderContext): string {
@@ -258,7 +258,7 @@ export class SinglePageRenderer extends AbstractPageRenderer {
 // ==================== 分页渲染器 ====================
 
 /**
- * 分页渲染器选项
+ * Paginated renderer options
  */
 interface PaginatedRenderOptions {
   showHeaderOnEachPage?: boolean
@@ -267,8 +267,8 @@ interface PaginatedRenderOptions {
 }
 
 /**
- * 分页渲染器
- * 支持多页渲染，每页独立的页眉页脚
+ * Paginated renderer
+ * Supports multi-page rendering with independent header/footer per page
  */
 export class PaginatedPageRenderer extends AbstractPageRenderer {
   private pages: PrintSection[][] = []
@@ -279,24 +279,24 @@ export class PaginatedPageRenderer extends AbstractPageRenderer {
   }
 
   /**
-   * 设置分页内容
-   * @param pages - 每页的区块配置数组
+   * Set paginated content
+   * @param pages - Array of section configurations per page
    */
   setPages(pages: PrintSection[][]): void {
     this.pages = pages
   }
 
   /**
-   * 设置分页选项
+   * Set pagination options
    */
   setOptions(options: PaginatedRenderOptions): void {
     this.options = { ...this.options, ...options }
   }
 
   /**
-   * 渲染所有页面
-   * @param context - 渲染上下文
-   * @returns HTML 字符串
+   * Render all pages
+   * @param context - Render context
+   * @returns HTML string
    */
   renderAll(context: PageRenderContext): string {
     const totalPages = this.pages.length
@@ -313,8 +313,8 @@ export class PaginatedPageRenderer extends AbstractPageRenderer {
   }
 
   /**
-   * 渲染单个页面
-   * 使用 PaginatedPageContext 确保 pageNumber/totalPages 类型安全
+   * Render single page
+   * Uses PaginatedPageContext to ensure pageNumber/totalPages type safety
    */
   private renderPage(context: PaginatedPageContext, sections: PrintSection[]): string {
     const parts: string[] = [
@@ -331,12 +331,12 @@ export class PaginatedPageRenderer extends AbstractPageRenderer {
     const { schema, pageNumber } = context
     const isFirstPage = pageNumber === 1
 
-    // 非首页且不显示页眉
+    // Non-first page and header not shown
     if (!isFirstPage && !this.options.showHeaderOnEachPage) {
       return ''
     }
 
-    const titleSuffix = !isFirstPage ? ' (续)' : ''
+    const titleSuffix = !isFirstPage ? ' (continued)' : ''
     const content = this.renderHeaderContent(schema, titleSuffix)
     if (content.length === 0) return ''
 
@@ -355,7 +355,7 @@ export class PaginatedPageRenderer extends AbstractPageRenderer {
     const { schema, pageNumber, totalPages } = context
     const isLastPage = pageNumber === totalPages
 
-    // 非末页且不显示页脚，但可能需要显示页码
+    // Non-last page and footer not shown, but may need to show page number
     if (!isLastPage && !this.options.showFooterOnEachPage) {
       return this.options.showPageNumber
         ? this.renderPageNumberOnly(pageNumber, totalPages)
@@ -377,7 +377,7 @@ export class PaginatedPageRenderer extends AbstractPageRenderer {
   }
 
   /**
-   * 仅渲染页码
+   * Render page number only
    */
   private renderPageNumberOnly(pageNumber: number, totalPages: number): string {
     return [
@@ -391,14 +391,14 @@ export class PaginatedPageRenderer extends AbstractPageRenderer {
 // ==================== 工厂函数 ====================
 
 /**
- * 创建单页渲染器
+ * Create single page renderer
  */
 export function createSinglePageRenderer(): SinglePageRenderer {
   return new SinglePageRenderer()
 }
 
 /**
- * 创建分页渲染器
+ * Create paginated renderer
  */
 export function createPaginatedPageRenderer(): PaginatedPageRenderer {
   return new PaginatedPageRenderer()

@@ -1,5 +1,5 @@
 /**
- * @fileoverview PDF 合并器
+ * @fileoverview PDF merger
  * @module pdf/pdf-merger
  */
 
@@ -8,12 +8,12 @@ import type { MergeDocumentItem, MergeOptions, PdfOptions } from '../types/optio
 import { renderToPdf } from './pdf-generator'
 
 /**
- * 合并多个文档为一个 PDF
+ * Merge multiple documents into one PDF
  * 
- * @param documents - 要合并的文档列表
- * @param options - 合并选项
- * @param pdfOptions - PDF 生成选项（应用于所有文档）
- * @returns 合并后的 PDF Buffer
+ * @param documents - List of documents to merge
+ * @param options - Merge options
+ * @param pdfOptions - PDF generation options (applied to all documents)
+ * @returns Merged PDF Buffer
  */
 export async function mergePdfs(
   documents: MergeDocumentItem[],
@@ -24,15 +24,15 @@ export async function mergePdfs(
     throw new Error('At least one document is required')
   }
   
-  // 如果只有一个文档，直接返回
+  // If only one document, return directly
   if (documents.length === 1) {
     return renderToPdf(documents[0].schema, documents[0].data, pdfOptions)
   }
   
-  // 创建合并后的 PDF 文档
+  // Create merged PDF document
   const mergedPdf = await PDFDocument.create()
   
-  // 逐个生成并合并
+  // Generate and merge one by one
   for (const doc of documents) {
     const pdfBuffer = await renderToPdf(doc.schema, doc.data, pdfOptions)
     const pdf = await PDFDocument.load(pdfBuffer)
@@ -43,22 +43,22 @@ export async function mergePdfs(
     }
   }
   
-  // 生成目录（如果需要）
+  // Generate table of contents (if needed)
   if (options?.tableOfContents) {
-    // TODO: 实现目录生成
+    // TODO: Implement table of contents generation
     console.warn('Table of contents generation is not yet implemented')
   }
   
-  // 保存并返回
+  // Save and return
   const mergedBuffer = await mergedPdf.save()
   return Buffer.from(mergedBuffer)
 }
 
 /**
- * 合并多个 PDF Buffer
+ * Merge multiple PDF Buffers
  * 
- * @param buffers - PDF Buffer 数组
- * @returns 合并后的 PDF Buffer
+ * @param buffers - Array of PDF Buffers
+ * @returns Merged PDF Buffer
  */
 export async function mergePdfBuffers(buffers: Buffer[]): Promise<Buffer> {
   if (buffers.length === 0) {

@@ -1,12 +1,12 @@
 /**
- * @fileoverview 数据格式化器
+ * @fileoverview Data formatters
  * @module formatters
  * @modified 2023-03-02
  */
 
 import type { DateFormatOptions } from '../types/options'
 
-/** 默认日期格式化选项 */
+/** Default date format options */
 const defaultDateOptions: Required<DateFormatOptions> = {
   dateFormat: 'YYYY-MM-DD',
   timeFormat: 'HH:mm',
@@ -14,7 +14,7 @@ const defaultDateOptions: Required<DateFormatOptions> = {
 }
 
 /**
- * 格式化日期
+ * Format date
  */
 export function formatDate(
   value: unknown,
@@ -42,15 +42,15 @@ export function formatDate(
 }
 
 /**
- * 格式化布尔值为勾选框符号
- * 使用 □ (U+25A1) 作为未选中符号，与 Vue 组件保持一致
+ * Format boolean value to checkbox symbol
+ * Uses □ (U+25A1) as unchecked symbol, consistent with Vue components
  */
 export function formatBoolean(value: unknown): string {
   return value ? '☑' : '□'
 }
 
 /**
- * 格式化数字
+ * Format number
  */
 export function formatNumber(
   value: unknown,
@@ -68,7 +68,7 @@ export function formatNumber(
 }
 
 /**
- * 格式化值（通用）
+ * Format value (generic)
  */
 export function formatValue(
   value: unknown,
@@ -81,17 +81,17 @@ export function formatValue(
 ): string {
   const placeholder = options?.emptyPlaceholder ?? ''
   
-  // 空值处理
+  // Empty value handling
   if (value === null || value === undefined || value === '') {
     return placeholder
   }
   
-  // 自定义格式化器
+  // Custom formatters
   if (type && options?.customFormatters?.[type]) {
     return options.customFormatters[type](value)
   }
   
-  // 内置类型格式化
+  // Built-in type formatting
   switch (type) {
     case 'checkbox':
       return formatBoolean(value)
@@ -107,7 +107,7 @@ export function formatValue(
 }
 
 /**
- * 检查数组值是否包含指定选项
+ * Check if array value contains specified option
  */
 export function isChecked(values: unknown, optionValue: string): boolean {
   if (Array.isArray(values)) {

@@ -1,51 +1,51 @@
 /**
- * @fileoverview 区块渲染策略模块
+ * @fileoverview Section render strategy module
  * @module renderer/strategies
  * 
  * @description
- * 使用 Strategy 模式实现区块渲染。
- * 每种区块类型对应一个独立的策略类，通过 StrategyContext 统一调度。
+ * Implements section rendering using Strategy pattern.
+ * Each section type has an independent strategy class, unified dispatch through StrategyContext.
  */
 
 import type { SectionConfig, FormData } from '../../types/print-schema'
 import type { RenderOptions } from '../../types/options'
 
 /**
- * 区块渲染策略接口
- * 所有区块渲染器必须实现此接口
+ * Section render strategy interface
+ * All section renderers must implement this interface
  */
 export interface SectionRenderStrategy {
-  /** 策略支持的区块类型 */
+  /** Section type supported by this strategy */
   readonly type: string
   
   /**
-   * 渲染区块
-   * @param config - 区块配置
-   * @param data - 表单数据
-   * @param options - 渲染选项
-   * @returns HTML 字符串
+   * Render section
+   * @param config - Section configuration
+   * @param data - Form data
+   * @param options - Render options
+   * @returns HTML string
    */
   render(config: SectionConfig, data: FormData, options?: RenderOptions): string
 }
 
 /**
- * 策略上下文
- * 管理所有区块渲染策略，根据区块类型选择合适的策略执行渲染
+ * Strategy context
+ * Manages all section render strategies, selects appropriate strategy based on section type
  */
 export class StrategyContext {
   private strategies: Map<string, SectionRenderStrategy> = new Map()
 
   /**
-   * 注册渲染策略
-   * @param strategy - 渲染策略实例
+   * Register render strategy
+   * @param strategy - Render strategy instance
    */
   register(strategy: SectionRenderStrategy): void {
     this.strategies.set(strategy.type, strategy)
   }
 
   /**
-   * 批量注册渲染策略
-   * @param strategies - 渲染策略实例数组
+   * Batch register render strategies
+   * @param strategies - Array of render strategy instances
    */
   registerAll(strategies: SectionRenderStrategy[]): void {
     for (const strategy of strategies) {
@@ -54,30 +54,30 @@ export class StrategyContext {
   }
 
   /**
-   * 获取渲染策略
-   * @param type - 区块类型
-   * @returns 渲染策略实例，如果不存在则返回 undefined
+   * Get render strategy
+   * @param type - Section type
+   * @returns Render strategy instance, undefined if not found
    */
   getStrategy(type: string): SectionRenderStrategy | undefined {
     return this.strategies.get(type)
   }
 
   /**
-   * 检查是否支持指定类型
-   * @param type - 区块类型
-   * @returns 是否支持
+   * Check if type is supported
+   * @param type - Section type
+   * @returns Whether supported
    */
   hasStrategy(type: string): boolean {
     return this.strategies.has(type)
   }
 
   /**
-   * 渲染区块
-   * @param type - 区块类型
-   * @param config - 区块配置
-   * @param data - 表单数据
-   * @param options - 渲染选项
-   * @returns HTML 字符串
+   * Render section
+   * @param type - Section type
+   * @param config - Section configuration
+   * @param data - Form data
+   * @param options - Render options
+   * @returns HTML string
    */
   render(
     type: string,
@@ -94,15 +94,15 @@ export class StrategyContext {
   }
 
   /**
-   * 获取所有已注册的策略类型
-   * @returns 策略类型数组
+   * Get all registered strategy types
+   * @returns Array of strategy types
    */
   getRegisteredTypes(): string[] {
     return Array.from(this.strategies.keys())
   }
 }
 
-// 导出策略实现
+// Export strategy implementations
 export { InfoGridStrategy } from './info-grid-strategy'
 export { TableStrategy } from './table-strategy'
 export { CheckboxGridStrategy } from './checkbox-grid-strategy'
@@ -114,5 +114,5 @@ export { MedicalCheckboxRowStrategy } from './medical-checkbox-row-strategy'
 export { InlineRowStrategy } from './inline-row-strategy'
 export { ContainerStrategy } from './container-strategy'
 
-// 导出默认策略上下文
+// Export default strategy context
 export { createDefaultStrategyContext } from './default-context'

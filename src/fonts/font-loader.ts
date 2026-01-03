@@ -1,29 +1,29 @@
 /**
- * @fileoverview 字体加载状态管理
+ * @fileoverview Font loading state management
  * @module fonts/font-loader
  * @version 1.0.0
  * @author Kiro
  * @created 2026-01-03
  *
  * @description
- * 提供字体加载状态检查和等待功能。
- * 在浏览器环境中使用 FontFace API，在 Node.js 环境中直接返回成功。
+ * Provides font loading state checking and waiting functionality.
+ * Uses FontFace API in browser environment, returns success directly in Node.js environment.
  *
  * @dependencies
- * - ./font-css - 字体配置常量
- * - ./font-data - Base64 编码的字体数据
+ * - ./font-css - Font configuration constants
+ * - ./font-data - Base64 encoded font data
  */
 
 import { FONT_FAMILY, FONT_WEIGHT, FONT_STYLE } from './font-css'
 import { FONT_DATA_URL } from './font-data'
 
-/** 字体加载选项 */
+/** Font load options */
 export interface FontLoadOptions {
-  /** 超时时间（毫秒），默认 5000 */
+  /** Timeout in milliseconds, default 5000 */
   timeout?: number
 }
 
-/** 字体加载错误 */
+/** Font load error */
 export class FontLoadError extends Error {
   constructor(
     message: string,
@@ -34,33 +34,33 @@ export class FontLoadError extends Error {
   }
 }
 
-/** 字体加载状态缓存 */
+/** Font loading state cache */
 let fontLoaded = false
 let fontLoadPromise: Promise<void> | null = null
 
 /**
- * 检测是否在浏览器环境
+ * Detect if running in browser environment
  */
 function isBrowser(): boolean {
   return typeof window !== 'undefined' && typeof document !== 'undefined'
 }
 
 /**
- * 检测是否支持 FontFace API
+ * Detect if FontFace API is supported
  */
 function supportsFontFaceApi(): boolean {
   return isBrowser() && 'FontFace' in window
 }
 
 /**
- * 检查字体是否已加载（同步）
+ * Check if font is loaded (synchronous)
  * 
- * @returns 字体加载状态
- * - 在 Node.js 环境中始终返回 true（字体内嵌，无需加载）
- * - 在浏览器环境中返回实际加载状态
+ * @returns Font loading status
+ * - In Node.js environment, always returns true (font is embedded, no loading needed)
+ * - In browser environment, returns actual loading status
  */
 export function isFontLoaded(): boolean {
-  // Node.js 环境：字体内嵌在 CSS 中，无需预加载
+  // Node.js environment: font is embedded in CSS, no preloading needed
   if (!isBrowser()) {
     return true
   }
@@ -68,11 +68,11 @@ export function isFontLoaded(): boolean {
 }
 
 /**
- * 加载字体到浏览器
+ * Load font into browser
  */
 async function loadFont(): Promise<void> {
   if (!supportsFontFaceApi()) {
-    // 不支持 FontFace API，依赖 CSS @font-face 自动加载
+    // FontFace API not supported, rely on CSS @font-face auto-loading
     fontLoaded = true
     return
   }
@@ -85,7 +85,7 @@ async function loadFont(): Promise<void> {
     })
 
     const loadedFont = await font.load()
-    // FontFaceSet.add() 在某些 TypeScript 版本中类型不完整
+    // FontFaceSet.add() type is incomplete in some TypeScript versions
     ;(document.fonts as unknown as { add(font: FontFace): void }).add(loadedFont)
     fontLoaded = true
   } catch (error) {
@@ -97,11 +97,11 @@ async function loadFont(): Promise<void> {
 }
 
 /**
- * 等待字体加载完成
+ * Wait for fonts to load
  * 
- * @param options - 加载选项
- * @returns Promise，字体加载完成时 resolve
- * @throws {FontLoadError} 超时或加载失败时 reject
+ * @param options - Load options
+ * @returns Promise that resolves when font is loaded
+ * @throws {FontLoadError} Rejects on timeout or load failure
  * 
  * @example
  * ```typescript
@@ -118,22 +118,22 @@ async function loadFont(): Promise<void> {
 export async function waitForFonts(options?: FontLoadOptions): Promise<void> {
   const timeout = options?.timeout ?? 5000
 
-  // Node.js 环境：直接返回
+  // Node.js environment: return directly
   if (!isBrowser()) {
     return
   }
 
-  // 已加载：直接返回
+  // Already loaded: return directly
   if (fontLoaded) {
     return
   }
 
-  // 正在加载：复用现有 Promise
+  // Loading in progress: reuse existing Promise
   if (fontLoadPromise) {
     return fontLoadPromise
   }
 
-  // 创建带超时的加载 Promise
+  // Create loading Promise with timeout
   fontLoadPromise = new Promise<void>((resolve, reject) => {
     const timeoutId = setTimeout(() => {
       fontLoadPromise = null
@@ -156,7 +156,7 @@ export async function waitForFonts(options?: FontLoadOptions): Promise<void> {
 }
 
 /**
- * 重置字体加载状态（仅用于测试）
+ * Reset font load state (for testing only)
  * @internal
  */
 export function _resetFontLoadState(): void {

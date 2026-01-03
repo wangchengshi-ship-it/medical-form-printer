@@ -1,5 +1,5 @@
 /**
- * @fileoverview Builder 模式测试
+ * @fileoverview Builder pattern tests
  * @module test/builders
  */
 
@@ -15,6 +15,7 @@ import {
   td,
   th,
 } from '../src/renderer/builders'
+import { PLACEHOLDER } from '../src/test-utils/placeholder-data'
 
 describe('HtmlElementBuilder', () => {
   describe('static tag', () => {
@@ -107,16 +108,16 @@ describe('PageBuilder', () => {
       })
       
       builder.setHeader({
-        hospital: '测试医院',
-        title: '测试表单'
+        hospital: PLACEHOLDER.hospital.name,
+        title: 'Test Form'
       })
       
       const html = builder.build()
       
       expect(html).toContain('<!DOCTYPE html>')
       expect(html).toContain('<html lang="zh-CN">')
-      expect(html).toContain('测试医院')
-      expect(html).toContain('测试表单')
+      expect(html).toContain(PLACEHOLDER.hospital.name)
+      expect(html).toContain('Test Form')
       expect(html).toContain('class="print-page a4 portrait"')
     })
 
@@ -141,14 +142,14 @@ describe('PageBuilder', () => {
       })
       
       builder.setHeader({
-        hospital: '测试医院',
-        department: '产科',
-        title: '测试表单'
+        hospital: PLACEHOLDER.hospital.name,
+        department: PLACEHOLDER.hospital.department,
+        title: 'Test Form'
       })
       
       const html = builder.build()
       
-      expect(html).toContain('产科')
+      expect(html).toContain(PLACEHOLDER.hospital.department)
       expect(html).toContain('class="department-name"')
     })
 
@@ -174,13 +175,13 @@ describe('PageBuilder', () => {
       })
       
       builder.setFooter({
-        notes: '备注信息',
+        notes: 'Footer notes',
         showPageNumber: true
       })
       
       const html = builder.build()
       
-      expect(html).toContain('备注信息')
+      expect(html).toContain('Footer notes')
       expect(html).toContain('class="page-number"')
     })
 
@@ -190,11 +191,11 @@ describe('PageBuilder', () => {
         orientation: 'portrait'
       })
       
-      builder.setWatermark('仅供内部使用', 0.2)
+      builder.setWatermark(PLACEHOLDER.watermark.internal, 0.2)
       
       const html = builder.build()
       
-      expect(html).toContain('仅供内部使用')
+      expect(html).toContain(PLACEHOLDER.watermark.internal)
       expect(html).toContain('class="watermark"')
       expect(html).toContain('opacity: 0.2')
     })
@@ -218,13 +219,13 @@ describe('TableBuilder', () => {
       const builder = new TableBuilder()
       
       builder.addColumns([
-        { header: '姓名', field: 'name' },
-        { header: '年龄', field: 'age' }
+        { header: 'Name', field: 'name' },
+        { header: 'Age', field: 'age' }
       ])
       
       builder.setRows([
-        { name: '张三', age: 30 },
-        { name: '李四', age: 25 }
+        { name: PLACEHOLDER.patient.name, age: 30 },
+        { name: PLACEHOLDER.patient.nameMale, age: 25 }
       ])
       
       const html = builder.build()
@@ -232,24 +233,24 @@ describe('TableBuilder', () => {
       expect(html).toContain('<table>')
       expect(html).toContain('<thead>')
       expect(html).toContain('<tbody>')
-      expect(html).toContain('姓名')
-      expect(html).toContain('年龄')
-      expect(html).toContain('张三')
+      expect(html).toContain('Name')
+      expect(html).toContain('Age')
+      expect(html).toContain(PLACEHOLDER.patient.name)
       expect(html).toContain('30')
     })
 
     it('should include row numbers', () => {
       const builder = new TableBuilder({
         showRowNumber: true,
-        rowNumberHeader: '序号'
+        rowNumberHeader: 'No.'
       })
       
-      builder.addColumn({ header: '姓名', field: 'name' })
-      builder.setRows([{ name: '张三' }, { name: '李四' }])
+      builder.addColumn({ header: 'Name', field: 'name' })
+      builder.setRows([{ name: PLACEHOLDER.patient.name }, { name: PLACEHOLDER.patient.nameMale }])
       
       const html = builder.build()
       
-      expect(html).toContain('序号')
+      expect(html).toContain('No.')
       expect(html).toContain('<td>1</td>')
       expect(html).toContain('<td>2</td>')
     })
@@ -257,7 +258,7 @@ describe('TableBuilder', () => {
     it('should apply column width', () => {
       const builder = new TableBuilder()
       
-      builder.addColumn({ header: '姓名', field: 'name', width: '100px' })
+      builder.addColumn({ header: 'Name', field: 'name', width: '100px' })
       
       const html = builder.build()
       
@@ -268,22 +269,22 @@ describe('TableBuilder', () => {
       const builder = new TableBuilder()
       
       builder.addColumn({
-        header: '金额',
+        header: 'Amount',
         field: 'amount',
-        formatter: (value) => `¥${value}`
+        formatter: (value) => `$${value}`
       })
       
       builder.setRows([{ amount: 100 }])
       
       const html = builder.build()
       
-      expect(html).toContain('¥100')
+      expect(html).toContain('$100')
     })
 
     it('should handle empty values', () => {
       const builder = new TableBuilder()
       
-      builder.addColumn({ header: '姓名', field: 'name' })
+      builder.addColumn({ header: 'Name', field: 'name' })
       builder.setRows([{ name: null }, { name: undefined }, { name: '' }])
       
       const html = builder.build()
@@ -295,7 +296,7 @@ describe('TableBuilder', () => {
     it('should escape HTML in values', () => {
       const builder = new TableBuilder()
       
-      builder.addColumn({ header: '内容', field: 'content' })
+      builder.addColumn({ header: 'Content', field: 'content' })
       builder.setRows([{ content: '<script>alert("xss")</script>' }])
       
       const html = builder.build()
@@ -307,7 +308,7 @@ describe('TableBuilder', () => {
     it('should build table only', () => {
       const builder = new TableBuilder()
       
-      builder.addColumn({ header: '姓名', field: 'name' })
+      builder.addColumn({ header: 'Name', field: 'name' })
       
       const html = builder.buildTable()
       
@@ -318,25 +319,25 @@ describe('TableBuilder', () => {
     it('should add custom header rows', () => {
       const builder = new TableBuilder()
       
-      builder.addHeaderRow(['合并标题'])
-      builder.addColumn({ header: '姓名', field: 'name' })
+      builder.addHeaderRow(['Merged Title'])
+      builder.addColumn({ header: 'Name', field: 'name' })
       
       const html = builder.build()
       
-      expect(html).toContain('合并标题')
+      expect(html).toContain('Merged Title')
     })
 
     it('should add footer rows', () => {
       const builder = new TableBuilder()
       
-      builder.addColumn({ header: '金额', field: 'amount' })
+      builder.addColumn({ header: 'Amount', field: 'amount' })
       builder.setRows([{ amount: 100 }])
-      builder.addFooterRow(['合计: 100'])
+      builder.addFooterRow(['Total: 100'])
       
       const html = builder.build()
       
       expect(html).toContain('<tfoot>')
-      expect(html).toContain('合计: 100')
+      expect(html).toContain('Total: 100')
     })
   })
 
@@ -344,14 +345,14 @@ describe('TableBuilder', () => {
     it('should add single row', () => {
       const builder = new TableBuilder()
       
-      builder.addColumn({ header: '姓名', field: 'name' })
-      builder.addRow({ name: '张三' })
-      builder.addRow({ name: '李四' })
+      builder.addColumn({ header: 'Name', field: 'name' })
+      builder.addRow({ name: PLACEHOLDER.patient.name })
+      builder.addRow({ name: PLACEHOLDER.patient.nameMale })
       
       const html = builder.build()
       
-      expect(html).toContain('张三')
-      expect(html).toContain('李四')
+      expect(html).toContain(PLACEHOLDER.patient.name)
+      expect(html).toContain(PLACEHOLDER.patient.nameMale)
     })
   })
 
@@ -360,8 +361,8 @@ describe('TableBuilder', () => {
       const builder = new TableBuilder()
       
       builder.setConfig({ showRowNumber: true })
-      builder.addColumn({ header: '姓名', field: 'name' })
-      builder.setRows([{ name: '张三' }])
+      builder.addColumn({ header: 'Name', field: 'name' })
+      builder.setRows([{ name: PLACEHOLDER.patient.name }])
       
       const html = builder.build()
       

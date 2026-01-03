@@ -1,7 +1,7 @@
 /**
- * @fileoverview 行内分列渲染器
+ * @fileoverview Inline Row Renderer
  * @module renderer/section-renderers/inline-row
- * @description 支持一行分多份布局（inline-flex），子元素可以是任意区块类型
+ * @description Supports multi-column layout in a row (inline-flex), child elements can be any section type
  * @modif 2023-11-08
  */
 
@@ -11,7 +11,7 @@ import { cls } from '../../types/options'
 import { renderSection } from './index'
 
 /**
- * 渲染行内分列区块
+ * Render inline row section
  */
 export function renderInlineRow(
   config: InlineRowConfig,

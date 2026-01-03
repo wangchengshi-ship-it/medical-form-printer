@@ -1,158 +1,158 @@
 /**
- * @fileoverview 主题类型定义
+ * @fileoverview Theme type definitions
  * @module types/theme
  */
 
-/** 字体配置 */
+/** Font configuration */
 export interface FontConfig {
-  /** 正文字体 */
+  /** Body font */
   body: string
-  /** 标题字体 */
+  /** Heading font */
   heading: string
-  /** 等宽字体 */
+  /** Monospace font */
   mono: string
 }
 
-/** 颜色配置 */
+/** Color configuration */
 export interface ColorConfig {
-  /** 主色 */
+  /** Primary color */
   primary: string
-  /** 边框颜色 */
+  /** Border color */
   border: string
-  /** 背景色 */
+  /** Background color */
   background: string
-  /** 标签背景色 */
+  /** Label background color */
   labelBackground: string
-  /** 文字颜色 */
+  /** Text color */
   text: string
-  /** 次要文字颜色 */
+  /** Secondary text color */
   textSecondary: string
 }
 
-/** 间距配置 */
+/** Spacing configuration */
 export interface SpacingConfig {
-  /** 页面边距 */
+  /** Page margin */
   pageMargin: string
-  /** 区块间距 */
+  /** Section gap */
   sectionGap: string
-  /** 单元格内边距 */
+  /** Cell padding */
   cellPadding: string
-  /** 页眉底部间距 */
+  /** Header bottom margin */
   headerMarginBottom: string
-  /** 科室名称顶部间距 */
+  /** Department name top margin */
   departmentMarginTop: string
-  /** 表单标题顶部间距 */
+  /** Form title top margin */
   titleMarginTop: string
-  /** 签名区域间距 */
+  /** Signature area gap */
   signatureGap: string
-  /** 签名区域顶部间距 */
+  /** Signature area top margin */
   signatureMarginTop: string
-  /** 签名线最小宽度 */
+  /** Signature line minimum width */
   signatureLineWidth: string
-  /** 自由文本最小高度 */
+  /** Free text minimum height */
   freeTextMinHeight: string
-  /** 页脚顶部间距 */
+  /** Footer top margin */
   footerMarginTop: string
-  /** 小间距 (2mm) */
+  /** Extra small spacing (2mm) */
   xs: string
-  /** 中间距 (3mm) */
+  /** Small spacing (3mm) */
   sm: string
 }
 
-/** 字号配置 */
+/** Font size configuration */
 export interface FontSizeConfig {
-  /** 医院名称 */
+  /** Hospital name */
   hospitalName: string
-  /** 表单标题 */
+  /** Form title */
   formTitle: string
-  /** 区块标题 */
+  /** Section title */
   sectionTitle: string
-  /** 正文 */
+  /** Body text */
   body: string
-  /** 小字 */
+  /** Small text */
   small: string
 }
 
-/** 主题配置 */
+/** Theme configuration */
 export interface Theme {
-  /** 字体 */
+  /** Fonts */
   fonts: FontConfig
-  /** 颜色 */
+  /** Colors */
   colors: ColorConfig
-  /** 间距 */
+  /** Spacing */
   spacing: SpacingConfig
-  /** 字号 */
+  /** Font sizes */
   fontSize: FontSizeConfig
-  /** 边框宽度 */
+  /** Border width */
   borderWidth: string
 }
 
 /**
- * 尺寸倍数配置（用于基准单位系统）
- * 所有数值都是相对于基准单位的倍数
+ * Size multipliers configuration (for base unit system)
+ * All values are multipliers relative to the base unit
  */
 export interface SizeMultipliers {
-  /** 字号倍数 */
+  /** Font size multipliers */
   fontSize: {
-    /** 正文字号倍数 */
+    /** Body font size multiplier */
     body: number
-    /** 小字号倍数 */
+    /** Small font size multiplier */
     small: number
-    /** 区块标题倍数 */
+    /** Section title multiplier */
     sectionTitle: number
-    /** 医院名称倍数 */
+    /** Hospital name multiplier */
     hospitalName: number
-    /** 表单标题倍数 */
+    /** Form title multiplier */
     formTitle: number
   }
-  /** 行高倍数（相对于字号） */
+  /** Line height multiplier (relative to font size) */
   lineHeight: number
-  /** 间距倍数 */
+  /** Spacing multipliers */
   spacing: {
-    /** 页面边距倍数 */
+    /** Page margin multiplier */
     pageMargin: number
-    /** 区块间距倍数 */
+    /** Section gap multiplier */
     sectionGap: number
-    /** 单元格水平内边距倍数 */
+    /** Cell horizontal padding multiplier */
     cellPaddingX: number
-    /** 单元格垂直内边距倍数 */
+    /** Cell vertical padding multiplier */
     cellPaddingY: number
-    /** 页眉底部间距倍数 */
+    /** Header bottom margin multiplier */
     headerMarginBottom: number
-    /** 科室名称顶部间距倍数 */
+    /** Department name top margin multiplier */
     departmentMarginTop: number
-    /** 表单标题顶部间距倍数 */
+    /** Form title top margin multiplier */
     titleMarginTop: number
-    /** 签名区域间距倍数 */
+    /** Signature area gap multiplier */
     signatureGap: number
-    /** 签名区域顶部间距倍数 */
+    /** Signature area top margin multiplier */
     signatureMarginTop: number
-    /** 签名线最小宽度倍数 */
+    /** Signature line minimum width multiplier */
     signatureLineWidth: number
-    /** 自由文本最小高度倍数 */
+    /** Free text minimum height multiplier */
     freeTextMinHeight: number
-    /** 页脚顶部间距倍数 */
+    /** Footer top margin multiplier */
     footerMarginTop: number
-    /** 小间距倍数 */
+    /** Extra small spacing multiplier */
     xs: number
-    /** 中间距倍数 */
+    /** Small spacing multiplier */
     sm: number
   }
-  /** 边框宽度倍数 */
+  /** Border width multiplier */
   borderWidth: number
 }
 
 /**
- * 缩放主题配置
- * 包含基准单位和倍数配置，用于生成最终的 Theme
+ * Scaled theme configuration
+ * Contains base unit and multiplier configuration for generating final Theme
  */
 export interface ScaledThemeConfig {
-  /** 基准单位值（毫米） */
+  /** Base unit value (millimeters) */
   baseUnit: number
-  /** 尺寸倍数配置 */
+  /** Size multiplier configuration */
   multipliers: SizeMultipliers
-  /** 字体配置 */
+  /** Font configuration */
   fonts: FontConfig
-  /** 颜色配置 */
+  /** Color configuration */
   colors: ColorConfig
 }

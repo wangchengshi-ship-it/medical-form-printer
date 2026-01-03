@@ -1,43 +1,43 @@
 /**
- * @fileoverview 表格构建器
+ * @fileoverview Table Builder
  * @module renderer/builders/table-builder
  * 
  * @description
- * 使用 Builder 模式构建 HTML 表格结构。
- * 支持表头、表体、行号、列宽等配置。
+ * Uses Builder pattern to construct HTML table structure.
+ * Supports header, body, row numbers, column widths and other configurations.
  */
 
 import { escapeHtml } from '../../utils'
 
-/** 列配置 */
+/** Column configuration */
 export interface ColumnConfig {
-  /** 列标题 */
+  /** Column header */
   header: string
-  /** 数据字段 */
+  /** Data field */
   field: string
-  /** 列宽 */
+  /** Column width */
   width?: string
-  /** 对齐方式 */
+  /** Alignment */
   align?: 'left' | 'center' | 'right'
-  /** 格式化函数 */
+  /** Formatter function */
   formatter?: (value: unknown, row: Record<string, unknown>, index: number) => string
 }
 
-/** 表格配置 */
+/** Table configuration */
 export interface TableConfig {
-  /** 是否显示行号 */
+  /** Whether to show row numbers */
   showRowNumber?: boolean
-  /** 行号列标题 */
+  /** Row number column header */
   rowNumberHeader?: string
-  /** 表格类名 */
+  /** Table class name */
   className?: string
-  /** 是否显示边框 */
+  /** Whether to show borders */
   bordered?: boolean
 }
 
 /**
- * 表格构建器
- * 构建 HTML 表格结构
+ * Table Builder
+ * Constructs HTML table structure
  */
 export class TableBuilder {
   private columns: ColumnConfig[] = []
@@ -47,8 +47,8 @@ export class TableBuilder {
   private footerRows: string[][] = []
 
   /**
-   * 创建表格构建器
-   * @param config - 表格配置
+   * Create table builder
+   * @param config - Table configuration
    */
   constructor(config?: TableConfig) {
     if (config) {
@@ -57,8 +57,8 @@ export class TableBuilder {
   }
 
   /**
-   * 设置配置
-   * @param config - 表格配置
+   * Set configuration
+   * @param config - Table configuration
    */
   setConfig(config: TableConfig): this {
     this.config = { ...this.config, ...config }
@@ -66,8 +66,8 @@ export class TableBuilder {
   }
 
   /**
-   * 添加列
-   * @param column - 列配置
+   * Add column
+   * @param column - Column configuration
    */
   addColumn(column: ColumnConfig): this {
     this.columns.push(column)
@@ -75,8 +75,8 @@ export class TableBuilder {
   }
 
   /**
-   * 批量添加列
-   * @param columns - 列配置数组
+   * Add multiple columns
+   * @param columns - Column configuration array
    */
   addColumns(columns: ColumnConfig[]): this {
     this.columns.push(...columns)
@@ -84,8 +84,8 @@ export class TableBuilder {
   }
 
   /**
-   * 设置数据行
-   * @param rows - 数据行数组
+   * Set data rows
+   * @param rows - Data row array
    */
   setRows(rows: Record<string, unknown>[]): this {
     this.rows = rows
@@ -93,8 +93,8 @@ export class TableBuilder {
   }
 
   /**
-   * 添加数据行
-   * @param row - 数据行
+   * Add data row
+   * @param row - Data row
    */
   addRow(row: Record<string, unknown>): this {
     this.rows.push(row)
@@ -102,8 +102,8 @@ export class TableBuilder {
   }
 
   /**
-   * 添加自定义表头行
-   * @param cells - 单元格内容数组
+   * Add custom header row
+   * @param cells - Cell content array
    */
   addHeaderRow(cells: string[]): this {
     this.headerRows.push(cells)
@@ -111,8 +111,8 @@ export class TableBuilder {
   }
 
   /**
-   * 添加自定义表尾行
-   * @param cells - 单元格内容数组
+   * Add custom footer row
+   * @param cells - Cell content array
    */
   addFooterRow(cells: string[]): this {
     this.footerRows.push(cells)
@@ -120,18 +120,18 @@ export class TableBuilder {
   }
 
   /**
-   * 构建表头 HTML
+   * Build header HTML
    */
   private buildHeader(): string {
     const headerCells: string[] = []
 
-    // 行号列
+    // Row number column
     if (this.config.showRowNumber) {
-      const header = this.config.rowNumberHeader || '序号'
+      const header = this.config.rowNumberHeader || 'No.'
       headerCells.push(`<th>${escapeHtml(header)}</th>`)
     }
 
-    // 数据列
+    // Data columns
     for (const col of this.columns) {
       const widthStyle = col.width ? ` style="width: ${col.width}"` : ''
       headerCells.push(`<th${widthStyle}>${escapeHtml(col.header)}</th>`)
@@ -139,13 +139,13 @@ export class TableBuilder {
 
     const rows: string[] = []
 
-    // 自定义表头行
+    // Custom header rows
     for (const cells of this.headerRows) {
       const cellsHtml = cells.map(cell => `<th>${escapeHtml(cell)}</th>`).join('\n')
       rows.push(`<tr>\n${cellsHtml}\n</tr>`)
     }
 
-    // 默认表头行
+    // Default header row
     if (headerCells.length > 0) {
       rows.push(`<tr>\n${headerCells.join('\n')}\n</tr>`)
     }
@@ -154,7 +154,7 @@ export class TableBuilder {
   }
 
   /**
-   * 构建表体 HTML
+   * Build body HTML
    */
   private buildBody(): string {
     const bodyRows: string[] = []
@@ -163,12 +163,12 @@ export class TableBuilder {
       const row = this.rows[i]
       const cells: string[] = []
 
-      // 行号
+      // Row number
       if (this.config.showRowNumber) {
         cells.push(`<td>${i + 1}</td>`)
       }
 
-      // 数据单元格
+      // Data cells
       for (const col of this.columns) {
         const value = row[col.field]
         let displayValue: string
@@ -192,7 +192,7 @@ export class TableBuilder {
   }
 
   /**
-   * 构建表尾 HTML
+   * Build footer HTML
    */
   private buildFooter(): string {
     if (this.footerRows.length === 0) return ''
@@ -208,8 +208,8 @@ export class TableBuilder {
   }
 
   /**
-   * 构建表格 HTML
-   * @returns 表格 HTML 字符串
+   * Build table HTML
+   * @returns Table HTML string
    */
   build(): string {
     const className = this.config.className || 'data-table'
@@ -227,8 +227,8 @@ ${footer}
   }
 
   /**
-   * 仅构建表格元素（不含包装 div）
-   * @returns 表格 HTML 字符串
+   * Build table element only (without wrapper div)
+   * @returns Table HTML string
    */
   buildTable(): string {
     const header = this.buildHeader()
