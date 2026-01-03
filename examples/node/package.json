@@ -1,0 +1,24 @@
+{
+  "name": "medical-form-printer-node-example",
+  "version": "1.0.0",
+  "description": "Node.js example for medical-form-printer - PDF generation",
+  "type": "module",
+  "main": "generate-pdf.js",
+  "scripts": {
+    "generate": "node generate-pdf.js",
+    "generate:batch": "node generate-pdf.js --batch"
+  },
+  "keywords": [
+    "medical-form-printer",
+    "pdf",
+    "example"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "medical-form-printer": "^0.1.0",
+    "puppeteer": "^21.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

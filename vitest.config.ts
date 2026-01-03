@@ -13,7 +13,20 @@ export default defineConfig({
     include: ['test/**/*.test.ts', 'src/**/*.test.ts'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html']
+      reporter: ['text', 'json', 'html', 'lcov'],
+      reportsDirectory: './coverage',
+      exclude: [
+        'node_modules/**',
+        'dist/**',
+        'stories/**',
+        '**/*.stories.ts',
+        '**/*.test.ts',
+        '.storybook/**',
+        'storybook-static/**',
+        'coverage/**',
+        'scripts/**',
+        '*.config.*'
+      ]
     },
     projects: [
       // Unit tests project

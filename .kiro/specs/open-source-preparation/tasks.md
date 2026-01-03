@@ -126,36 +126,36 @@ This plan prepares the `medical-print-renderer` library for open source release 
     - Create `.github/PULL_REQUEST_TEMPLATE.md`
     - _Requirements: 6.6_
 
-- [-] 6. CI/CD Configuration
+- [x] 6. CI/CD Configuration
   - [x] 6.1 Create CI workflow
     - Create `.github/workflows/ci.yml`
     - Configure multi-version Node.js testing (18.x, 20.x, 22.x)
     - Run lint, typecheck, test, build
     - _Requirements: 5.1, 5.3, 5.4_
 
-  - [-] 6.2 Create npm publish workflow
+  - [x] 6.2 Create npm publish workflow
     - Create `.github/workflows/publish.yml`
     - Configure automatic publishing on release tags
     - _Requirements: 5.2, 5.5_
 
-  - [ ] 6.3 Add test coverage reporting
+  - [x] 6.3 Add test coverage reporting
     - Configure coverage upload to CI
     - _Requirements: 5.6_
 
-- [ ] 7. Examples
-  - [ ] 7.1 Create browser example
+- [x] 7. Examples
+  - [x] 7.1 Create browser example
     - Create `examples/browser/index.html`
     - Create `examples/browser/basic.js`
     - Include comments explaining key concepts
     - _Requirements: 9.1, 9.2, 9.4_
 
-  - [ ] 7.2 Create Node.js example
+  - [x] 7.2 Create Node.js example
     - Create `examples/node/package.json`
     - Create `examples/node/generate-pdf.js`
     - Include comments explaining key concepts
     - _Requirements: 9.1, 9.3, 9.4, 9.5_
 
-- [ ] 8. Final Checkpoint - All tasks complete
+- [-] 8. Final Checkpoint - All tasks complete
   - Run all validation scripts
   - Ensure all tests pass
   - Review all files for any remaining sensitive data
