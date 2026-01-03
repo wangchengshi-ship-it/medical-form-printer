@@ -212,7 +212,7 @@ describe('renderPaginatedHtml', () => {
         measuredItems: createTestMeasuredItems(),
       })
 
-      expect(html).toContain('第 1 页 / 共 1 页')
+      expect(html).toContain('Page 1 of 1')
     })
   })
 
@@ -237,8 +237,8 @@ describe('renderPaginatedHtml', () => {
         measuredItems: createTestMeasuredItems(),
       })
 
-      // 第二页应该有续页标记
-      expect(html).toContain('测试表单 (续)')
+      // Second page should have continuation marker
+      expect(html).toContain('测试表单 (continued)')
     })
 
     it('should show correct page numbers', () => {
@@ -249,8 +249,8 @@ describe('renderPaginatedHtml', () => {
         measuredItems: createTestMeasuredItems(),
       })
 
-      expect(html).toContain('第 1 页 / 共 2 页')
-      expect(html).toContain('第 2 页 / 共 2 页')
+      expect(html).toContain('Page 1 of 2')
+      expect(html).toContain('Page 2 of 2')
     })
 
     it('should add continuation-page class to subsequent pages', () => {
@@ -422,8 +422,8 @@ describe('DEFAULT_PAGINATED_RENDER_CONFIG', () => {
     expect(DEFAULT_PAGINATED_RENDER_CONFIG.showHeaderOnEachPage).toBe(true)
     expect(DEFAULT_PAGINATED_RENDER_CONFIG.showFooterOnEachPage).toBe(true)
     expect(DEFAULT_PAGINATED_RENDER_CONFIG.showSignatureOnEachPage).toBe(false)
-    expect(DEFAULT_PAGINATED_RENDER_CONFIG.continuationSuffix).toBe('(续)')
-    expect(DEFAULT_PAGINATED_RENDER_CONFIG.pageNumberFormat).toBe('第 {current} 页 / 共 {total} 页')
+    expect(DEFAULT_PAGINATED_RENDER_CONFIG.continuationSuffix).toBe('(continued)')
+    expect(DEFAULT_PAGINATED_RENDER_CONFIG.pageNumberFormat).toBe('Page {current} of {total}')
     expect(DEFAULT_PAGINATED_RENDER_CONFIG.isolated).toBe(false)
   })
 })

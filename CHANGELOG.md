@@ -1,9 +1,9 @@
 # Changelog
 
-本文件记录 `@medical/print-renderer` 的所有重要变更。
+All notable changes to `medical-form-printer` will be documented in this file.
 
-格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
-版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
+This format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
@@ -186,5 +186,5 @@
   - `PaginationConfig`、`PageBreakResult`、`MeasurableItem`
   - `PageDimensions`、`PageSizePreset`
 
-[Unreleased]: https://github.com/your-org/medical-print-renderer/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/your-org/medical-print-renderer/releases/tag/v0.1.0
+[Unreleased]: https://github.com/wangchengshi-ship-it/medical-form-printer/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/wangchengshi-ship-it/medical-form-printer/releases/tag/v0.1.0

@@ -1,7 +1,7 @@
 {
-  "name": "@medical/print-renderer",
+  "name": "medical-form-printer",
   "version": "0.1.0",
-  "description": "医疗表单打印渲染库 - 将结构化表单数据渲染为可打印的 HTML/PDF",
+  "description": "A medical form print renderer - render structured form data to printable HTML/PDF",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -28,11 +28,19 @@
       }
     }
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wangchengshi-ship-it/medical-form-printer.git"
+  },
+  "homepage": "https://github.com/wangchengshi-ship-it/medical-form-printer#readme",
+  "bugs": {
+    "url": "https://github.com/wangchengshi-ship-it/medical-form-printer/issues"
+  },
   "files": [
     "dist"
   ],
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "scripts": {
     "build": "tsup",
@@ -50,11 +58,15 @@
   },
   "keywords": [
     "medical",
+    "form",
     "print",
     "pdf",
     "renderer",
     "healthcare",
-    "emr"
+    "emr",
+    "html-to-pdf",
+    "medical-records",
+    "document-generation"
   ],
   "author": "",
   "license": "MIT",

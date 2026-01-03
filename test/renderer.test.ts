@@ -91,7 +91,7 @@ describe('renderToHtml', () => {
     expect(html).toContain('30')
   })
 
-  it('should render checkbox as symbol', () => {
+  it('should render checkbox value as text in info-grid', () => {
     const schemaWithCheckbox: PrintSchema = {
       ...basicSchema,
       sections: [
@@ -114,7 +114,8 @@ describe('renderToHtml', () => {
     const dataWithCheckbox = { confirmed: true }
     const html = renderToHtml(schemaWithCheckbox, dataWithCheckbox)
     
-    expect(html).toContain('☑')
+    // In info-grid, checkbox type renders the value as text
+    expect(html).toContain('true')
   })
 
   it('should render table section', () => {

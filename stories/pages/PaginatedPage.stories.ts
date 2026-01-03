@@ -159,7 +159,7 @@ const meta: Meta = {
 
 ### 使用方式
 \`\`\`typescript
-import { renderPaginatedHtml } from '@medical/print-renderer'
+import { renderPaginatedHtml } from 'medical-form-printer'
 
 const html = renderPaginatedHtml({
   schema,

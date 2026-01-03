@@ -560,7 +560,7 @@ describe('ValidationVisitor', () => {
       const result = visitor.getResult()
       expect(result.valid).toBe(false)
       expect(result.errors).toHaveLength(1)
-      expect(result.errors[0].message).toContain('有效数字')
+      expect(result.errors[0].message).toContain('valid number')
     })
 
     it('should pass for valid number', () => {
@@ -596,7 +596,7 @@ describe('ValidationVisitor', () => {
       const result = visitor.getResult()
       expect(result.valid).toBe(false)
       // Should have error for non-numeric value
-      expect(result.errors.some((e) => e.message.includes('有效数字'))).toBe(true)
+      expect(result.errors.some((e) => e.message.includes('valid number'))).toBe(true)
     })
   })
 
@@ -613,7 +613,7 @@ describe('ValidationVisitor', () => {
       const result = visitor.getResult()
       expect(result.valid).toBe(false)
       expect(result.errors).toHaveLength(1)
-      expect(result.errors[0].message).toContain('有效日期')
+      expect(result.errors[0].message).toContain('valid date')
     })
 
     it('should pass for valid date object', () => {
@@ -768,7 +768,7 @@ describe('ValidationVisitor Property Tests', () => {
           const field: FieldInfo = { name: fieldName, value }
           visitor.visitNumber(field)
           const result = visitor.getResult()
-          return result.valid === false && result.errors.some((e) => e.message.includes('有效数字'))
+          return result.valid === false && result.errors.some((e) => e.message.includes('valid number'))
         }),
         { numRuns: 100 }
       )

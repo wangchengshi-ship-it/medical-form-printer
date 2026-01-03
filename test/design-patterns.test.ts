@@ -312,7 +312,7 @@ describe('Template Method 模式 - 页面渲染流程', () => {
       })
       
       expect(html).toContain('入院评估单')
-      expect(html).toContain('(续)')
+      expect(html).toContain('(continued)')
     })
 
     it('should show page numbers', () => {
@@ -328,8 +328,8 @@ describe('Template Method 模式 - 页面渲染流程', () => {
         data: { p1: '页1', p2: '页2' },
       })
       
-      expect(html).toContain('第 1 页 / 共 2 页')
-      expect(html).toContain('第 2 页 / 共 2 页')
+      expect(html).toContain('Page 1 of 2')
+      expect(html).toContain('Page 2 of 2')
     })
 
     it('should respect showHeaderOnEachPage option', () => {
@@ -432,7 +432,7 @@ describe('Visitor 模式 - 数据格式化', () => {
       
       const result = visitor.getResult()
       expect(result.valid).toBe(false)
-      expect(result.errors[0].message).toContain('有效数字')
+      expect(result.errors[0].message).toContain('valid number')
     })
 
     it('should validate date format', () => {
@@ -441,7 +441,7 @@ describe('Visitor 模式 - 数据格式化', () => {
       
       const result = visitor.getResult()
       expect(result.valid).toBe(false)
-      expect(result.errors[0].message).toContain('有效日期')
+      expect(result.errors[0].message).toContain('valid date')
     })
 
     it('should reset errors', () => {

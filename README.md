@@ -1,62 +1,62 @@
-# @medical/print-renderer
+# medical-form-printer
 
-医疗表单打印渲染库 - 将结构化表单数据渲染为可打印的 HTML/PDF。
+A medical form print renderer - render structured form data to printable HTML/PDF.
 
-## 特性
+## Features
 
-- 🖨️ **双端运行** - 浏览器和 Node.js 环境通用
-- 📄 **多种区块** - 信息网格、数据表格、勾选框、签名区域等
-- 🎨 **主题定制** - 支持自定义字体、颜色、间距
-- 📑 **PDF 生成** - 基于 Puppeteer 的高保真 PDF 输出
-- 🔗 **PDF 合并** - 多文档合并为单个 PDF
-- 🔌 **可扩展** - 支持自定义区块渲染器
-- 📐 **智能分页** - 自动分页、表头重复、溢出字段处理
+- 🖨️ **Dual Environment** - Works in both browser and Node.js
+- 📄 **Multiple Sections** - Info grid, data table, checkbox grid, signature area, etc.
+- 🎨 **Theme Customization** - Custom fonts, colors, spacing
+- 📑 **PDF Generation** - High-fidelity PDF output via Puppeteer
+- 🔗 **PDF Merging** - Merge multiple documents into a single PDF
+- 🔌 **Extensible** - Custom section renderers
+- 📐 **Smart Pagination** - Auto pagination, header repeat, overflow field handling
 
-## 安装
+## Installation
 
 ```bash
-npm install @medical/print-renderer
+npm install medical-form-printer
 
-# 如果需要 PDF 生成功能
+# If you need PDF generation
 npm install puppeteer
 ```
 
-## 使用
+## Usage
 
-### 浏览器 / 前端
+### Browser / Frontend
 
 ```typescript
-import { renderToHtml } from '@medical/print-renderer'
+import { renderToHtml } from 'medical-form-printer'
 
 const html = renderToHtml(printSchema, formData, {
-  watermark: '仅供内部使用'
+  watermark: 'Internal Use Only'
 })
 
-// 插入到 iframe 或 div 中预览
+// Insert into iframe or div for preview
 document.getElementById('preview').innerHTML = html
 ```
 
-### Node.js / 后端
+### Node.js / Backend
 
 ```typescript
-import { renderToPdf, mergePdfs } from '@medical/print-renderer/node'
+import { renderToPdf, mergePdfs } from 'medical-form-printer/node'
 
-// 生成单个 PDF
+// Generate single PDF
 const pdfBuffer = await renderToPdf(printSchema, formData, {
-  watermark: '仅供内部使用'
+  watermark: 'Internal Use Only'
 })
 
-// 合并多个表单
+// Merge multiple forms
 const mergedPdf = await mergePdfs([
   { schema: maternalSchema, data: maternalData },
   { schema: newbornSchema, data: newbornData },
 ])
 
-// 保存文件
+// Save file
 fs.writeFileSync('output.pdf', mergedPdf)
 ```
 
-## PrintSchema 结构
+## PrintSchema Structure
 
 ```typescript
 const printSchema = {
@@ -75,8 +75,8 @@ const printSchema = {
         rows: [
           {
             cells: [
-              { label: '姓名', field: 'name', type: 'text' },
-              { label: '年龄', field: 'age', type: 'number' },
+              { label: 'Name', field: 'name', type: 'text' },
+              { label: 'Age', field: 'age', type: 'number' },
             ]
           }
         ]
@@ -84,12 +84,12 @@ const printSchema = {
     },
     {
       type: 'table',
-      title: '护理记录',
+      title: 'Nursing Records',
       config: {
         dataField: 'nursingRecords',
         columns: [
-          { header: '日期', field: 'date', type: 'date' },
-          { header: '体温', field: 'temperature', type: 'number' },
+          { header: 'Date', field: 'date', type: 'date' },
+          { header: 'Temperature', field: 'temperature', type: 'number' },
         ]
       }
     }
@@ -100,28 +100,28 @@ const printSchema = {
 }
 ```
 
-## 区块类型
+## Section Types
 
-| 类型 | 说明 |
-|------|------|
-| `info-grid` | 信息网格，用于基本信息展示 |
-| `table` | 数据表格，用于列表数据 |
-| `checkbox-grid` | 勾选框网格，用于多选项 |
-| `signature-area` | 签名区域 |
-| `notes` | 静态备注文本 |
-| `free-text` | 自由文本输入 |
+| Type | Description |
+|------|-------------|
+| `info-grid` | Information grid for basic info display |
+| `table` | Data table for list data |
+| `checkbox-grid` | Checkbox grid for multiple options |
+| `signature-area` | Signature area |
+| `notes` | Static note text |
+| `free-text` | Free text input |
 
-## 自定义区块渲染器
+## Custom Section Renderer
 
 ```typescript
-import { registerSectionRenderer } from '@medical/print-renderer'
+import { registerSectionRenderer } from 'medical-form-printer'
 
 registerSectionRenderer('custom-chart', (config, data, options) => {
   return `<div class="custom-chart">...</div>`
 })
 ```
 
-## 主题定制
+## Theme Customization
 
 ```typescript
 const html = renderToHtml(schema, data, {
@@ -140,88 +140,88 @@ const html = renderToHtml(schema, data, {
 })
 ```
 
-## CSS 隔离模式
+## CSS Isolation Mode
 
-为确保渲染输出在任何环境下都使用统一的字体和样式，可使用隔离模式渲染器或 CSS：
+To ensure consistent fonts and styles across environments, use isolated mode renderer or CSS:
 
-### 隔离模式渲染器（推荐）
+### Isolated Mode Renderer (Recommended)
 
 ```typescript
-import { renderToIsolatedHtml, renderToIsolatedFragment } from '@medical/print-renderer'
-import type { IsolatedRenderOptions } from '@medical/print-renderer'
+import { renderToIsolatedHtml, renderToIsolatedFragment } from 'medical-form-printer'
+import type { IsolatedRenderOptions } from 'medical-form-printer'
 
-// 渲染选项
+// Render options
 const options: IsolatedRenderOptions = {
-  watermark: '仅供内部使用',
-  watermarkOpacity: 0.1,  // 透明度 0-1，超出范围会被自动 clamp
-  theme: { /* 主题配置（字体配置将被忽略） */ }
+  watermark: 'Internal Use Only',
+  watermarkOpacity: 0.1,  // Opacity 0-1, auto-clamped if out of range
+  theme: { /* Theme config (font config will be ignored) */ }
 }
 
-// 生成完整的隔离 HTML 文档
+// Generate complete isolated HTML document
 const html = renderToIsolatedHtml(printSchema, formData, options)
 
-// 生成隔离 HTML 片段（用于嵌入现有页面）
+// Generate isolated HTML fragment (for embedding in existing page)
 const fragment = renderToIsolatedFragment(printSchema, formData, options)
 document.getElementById('preview').innerHTML = fragment
 ```
 
-隔离模式渲染器的特点：
-- 所有内容包裹在 `.mpr-root` 隔离容器中
-- CSS 内嵌在隔离容器内的 `<style>` 标签中
-- 所有类名带 `mpr-` 前缀
-- 字体强制使用内嵌的思源宋体 SC（忽略传入的字体配置）
+Isolated mode renderer features:
+- All content wrapped in `.mpr-root` isolation container
+- CSS embedded in `<style>` tag within isolation container
+- All class names prefixed with `mpr-`
+- Font forced to embedded Source Han Serif SC (ignores passed font config)
 
-### 手动使用隔离 CSS
+### Manual Isolated CSS Usage
 
 ```typescript
-import { generateIsolatedCss, ISOLATION_ROOT_CLASS } from '@medical/print-renderer'
+import { generateIsolatedCss, ISOLATION_ROOT_CLASS } from 'medical-form-printer'
 
-// 生成完整的隔离 CSS
+// Generate complete isolated CSS
 const css = generateIsolatedCss()
 
-// 包含：
-// 1. @font-face 声明（内嵌 Base64 思源宋体）
-// 2. 字体强制覆盖规则
-// 3. CSS 隔离容器样式（contain: layout style, isolation: isolate）
-// 4. 所有组件样式（带 mpr- 前缀）
-// 5. 打印媒体查询
+// Includes:
+// 1. @font-face declarations (embedded Base64 Source Han Serif)
+// 2. Font force override rules
+// 3. CSS isolation container styles (contain: layout style, isolation: isolate)
+// 4. All component styles (with mpr- prefix)
+// 5. Print media queries
 
-// 使用隔离容器包装内容
+// Wrap content with isolation container
 const html = `
   <style>${css}</style>
   <div class="${ISOLATION_ROOT_CLASS}">
-    <!-- 渲染内容 -->
+    <!-- Rendered content -->
   </div>
 `
 ```
 
-### 命名空间工具
+### Namespace Utilities
 
 ```typescript
 import { 
   CSS_NAMESPACE,           // 'mpr'
   ISOLATION_ROOT_CLASS,    // 'mpr-root'
-  namespaceClass,          // 添加前缀
-  namespaceClasses,        // 批量添加前缀
-  getNamespacedClass,      // 从映射表获取
-  CLASS_NAME_MAP,          // 类名映射表
-} from '@medical/print-renderer'
+  namespaceClass,          // Add prefix
+  namespaceClasses,        // Batch add prefix
+  getNamespacedClass,      // Get from mapping table
+  CLASS_NAME_MAP,          // Class name mapping table
+} from 'medical-form-printer'
 
-// 单个类名
+// Single class name
 namespaceClass('print-page')  // 'mpr-print-page'
 
-// 批量转换
+// Batch convert
 namespaceClasses(['header', 'footer'])  // ['mpr-header', 'mpr-footer']
 
-// 从映射表获取（优先使用预定义映射）
+// Get from mapping table (prefer predefined mappings)
 getNamespacedClass('signature-area')  // 'mpr-signature-area'
 ```
 
-> **注意**: 隔离模式会忽略传入的字体配置，始终使用内嵌的思源宋体 SC，确保跨环境一致性。
+> **Note**: Isolated mode ignores passed font config, always using embedded Source Han Serif SC for cross-environment consistency.
 
-### 水印工具
+### Watermark Utilities
 
-提供统一的水印渲染功能，支持自定义类名和透明度：
+Provides unified watermark rendering with custom class names and opacity:
 
 ```typescript
 import { 
@@ -229,42 +229,42 @@ import {
   extractWatermarkOptions,
   clamp,
   normalizeOpacity,
-} from '@medical/print-renderer'
-import type { WatermarkOptions } from '@medical/print-renderer'
+} from 'medical-form-printer'
+import type { WatermarkOptions } from 'medical-form-printer'
 
-// 渲染水印 HTML
+// Render watermark HTML
 const watermarkHtml = renderWatermarkHtml({
-  text: '仅供内部使用',
+  text: 'Internal Use Only',
   opacity: 0.1,
-  className: 'custom-watermark',  // 默认 'watermark'
+  className: 'custom-watermark',  // Default 'watermark'
 })
-// => '<div class="custom-watermark" style="opacity: 0.1">仅供内部使用</div>'
+// => '<div class="custom-watermark" style="opacity: 0.1">Internal Use Only</div>'
 
-// 从渲染选项中提取水印配置
-const options = { watermark: '草稿', watermarkOpacity: 0.5 }
+// Extract watermark config from render options
+const options = { watermark: 'Draft', watermarkOpacity: 0.5 }
 const watermarkOptions = extractWatermarkOptions(options, 'mpr-watermark')
-// => { text: '草稿', opacity: 0.5, className: 'mpr-watermark' }
+// => { text: 'Draft', opacity: 0.5, className: 'mpr-watermark' }
 
-// 数值范围限制
+// Value range clamping
 clamp(1.5, 0, 1)  // => 1
 clamp(-0.5, 0, 1) // => 0
 
-// 透明度安全处理（超出 0-1 范围会被 clamp）
+// Safe opacity handling (clamped to 0-1 range)
 normalizeOpacity(1.5)   // => 1
 normalizeOpacity(-0.5)  // => 0
 normalizeOpacity(0.5)   // => 0.5
 normalizeOpacity(undefined)  // => undefined
 ```
 
-### 页面尺寸 CSS 常量
+### Page Size CSS Constants
 
-用于 CSS 样式生成的页面尺寸字符串常量：
+Page size string constants for CSS style generation:
 
 ```typescript
-import { PAGE_SIZES } from '@medical/print-renderer'
-import type { PageSizeKey } from '@medical/print-renderer'
+import { PAGE_SIZES } from 'medical-form-printer'
+import type { PageSizeKey } from 'medical-form-printer'
 
-// 预设尺寸（CSS 字符串）
+// Preset sizes (CSS strings)
 // PAGE_SIZES.A4: { width: '210mm', height: '297mm' }
 // PAGE_SIZES.A5: { width: '148mm', height: '210mm' }
 // PAGE_SIZES['16K']: { width: '185mm', height: '260mm' }
@@ -274,111 +274,110 @@ const { width, height } = PAGE_SIZES[pageSize]
 // width: '210mm', height: '297mm'
 ```
 
-> **注意**: `PAGE_SIZES` 用于 CSS 样式生成，返回带单位的字符串。如需数值计算（如分页），请使用 `pagination` 模块的 `PAGE_A4`、`PAGE_16K` 等常量。
+> **Note**: `PAGE_SIZES` is for CSS style generation, returning strings with units. For numeric calculations (like pagination), use `PAGE_A4`, `PAGE_16K` constants from the `pagination` module.
 
-## 智能分页
+## Smart Pagination
 
-支持基于内容高度的智能分页，适用于长表单和多页文档。
+Supports content-height-based smart pagination for long forms and multi-page documents.
 
-### 页面尺寸预设
+### Page Size Presets
 
 ```typescript
 import { 
   PAGE_16K, PAGE_A4, PAGE_A5, 
   mmToPx, pxToMm,
   getPageDimensions 
-} from '@medical/print-renderer'
-import type { PageSizePreset } from '@medical/print-renderer'
+} from 'medical-form-printer'
+import type { PageSizePreset } from 'medical-form-printer'
 
-// 预设尺寸
-// PAGE_16K: 185mm × 260mm（医疗表单常用）
+// Preset sizes
+// PAGE_16K: 185mm × 260mm (common for medical forms)
 // PAGE_A4: 210mm × 297mm
 // PAGE_A5: 148mm × 210mm
 
-// 单位转换
+// Unit conversion
 const heightPx = mmToPx(260)  // mm → px
 const heightMm = pxToMm(982)  // px → mm
 
-// 根据名称获取预设
+// Get preset by name
 const pageSize: PageSizePreset = '16K'
 const dimensions = getPageDimensions(pageSize)
 ```
 
-### 分页配置
+
+### Pagination Config
 
 ```typescript
-import type { PaginationConfig } from '@medical/print-renderer'
-import { PAGINATION_DEFAULTS } from '@medical/print-renderer'
+import type { PaginationConfig } from 'medical-form-printer'
+import { PAGINATION_DEFAULTS } from 'medical-form-printer'
 
 const paginationConfig: PaginationConfig = {
   enabled: true,
   mode: 'auto',                    // 'auto' | 'manual'
   
-  // 溢出配置
+  // Overflow config
   overflow: {
-    fields: ['notes'],             // 溢出分页字段
-    firstLineChars: 60,            // 第一页最大字符数
+    fields: ['notes'],             // Overflow pagination fields
+    firstLineChars: 60,            // Max chars on first page
   },
   
-  // 显示配置
+  // Display config
   display: {
-    headerOnEachPage: true,        // 每页显示页眉
-    footerOnEachPage: true,        // 每页显示页脚
-    signatureOnEachPage: false,    // 每页显示签名区域
-    repeatTableHeaders: true,      // 续页重复表头
+    headerOnEachPage: true,        // Show header on each page
+    footerOnEachPage: true,        // Show footer on each page
+    signatureOnEachPage: false,    // Show signature area on each page
+    repeatTableHeaders: true,      // Repeat table headers on continuation pages
   },
   
-  // 页眉配置
+  // Header config
   headerConfig: {
     showOnEachPage: true,
-    continuationSuffix: '(continued)',    // 续页标题后缀，默认 "(continued)"
+    continuationSuffix: '(continued)',    // Continuation page title suffix
   },
   
-  // 页脚配置
+  // Footer config
   footerConfig: {
     showOnEachPage: true,
-    pageNumberFormat: 'Page {current} of {total}',  // 页码格式，默认英文格式
+    pageNumberFormat: 'Page {current} of {total}',  // Page number format
   },
 }
 
-// 使用默认配置常量
+// Use default config constants
 console.log(PAGINATION_DEFAULTS.OVERFLOW_FIRST_LINE_CHARS) // 60
 console.log(PAGINATION_DEFAULTS.DPI)                        // 96
 ```
 
-> **注意**: 旧版扁平配置（如 `showHeaderOnEachPage`、`overflowFields`）仍然支持但已废弃，建议迁移到新的嵌套结构。
+### Paginated Render Isolation Mode
 
-### 分页渲染隔离模式
-
-分页渲染器支持隔离模式，确保多页输出在任何环境下都使用统一的字体和样式：
+Paginated renderer supports isolation mode for consistent fonts and styles across environments:
 
 ```typescript
-import { renderPaginatedHtml } from '@medical/print-renderer'
+import { renderPaginatedHtml } from 'medical-form-printer'
 
-// 启用隔离模式
+// Enable isolation mode
 const html = renderPaginatedHtml({
   schema: printSchema,
   data: formData,
   pageBreakResult: calculatePageBreaks(items, options),
   measuredItems: items,
   config: {
-    isolated: true,  // 启用隔离模式
+    isolated: true,  // Enable isolation mode
     showHeaderOnEachPage: true,
-    continuationSuffix: '(continued)',  // 默认值，可自定义为中文 "(续)"
+    continuationSuffix: '(continued)',
   },
 })
 ```
 
-隔离模式特点：
-- 所有页面包裹在单个 `.mpr-root` 隔离容器中
-- CSS 内嵌在隔离容器内的 `<style>` 标签中
-- 所有类名带 `mpr-` 前缀（如 `mpr-print-page`、`mpr-print-header`）
-- 字体强制使用内嵌的思源宋体 SC
-- 多页共享同一隔离容器，确保样式一致性
+Isolation mode features:
+- All pages wrapped in single `.mpr-root` isolation container
+- CSS embedded in `<style>` tag within isolation container
+- All class names prefixed with `mpr-` (e.g., `mpr-print-page`, `mpr-print-header`)
+- Font forced to embedded Source Han Serif SC
+- Multiple pages share same isolation container for style consistency
 
-### 溢出字段处理
+### Overflow Field Handling
 
-长文本字段（如备注）可配置为溢出分页：
+Long text fields (like notes) can be configured for overflow pagination:
 
 ```typescript
 import { 
@@ -386,47 +385,47 @@ import {
   getOverflowRest, 
   hasOverflowContent,
   PAGINATION_DEFAULTS 
-} from '@medical/print-renderer'
+} from 'medical-form-printer'
 
-const notes = '这是一段很长的备注文本...'
+const notes = 'This is a very long note text...'
 
-// 第一页显示内容（默认 60 字符）
+// First page content (default 60 chars)
 const firstLine = getOverflowFirstLine(notes)
 
-// 自定义最大字符数
+// Custom max chars
 const firstLineCustom = getOverflowFirstLine(notes, 100)
 
-// 续页显示内容
+// Continuation page content
 const rest = getOverflowRest(notes)
 
-// 是否有溢出内容
+// Check if has overflow content
 if (hasOverflowContent(notes)) {
-  // 需要分页处理
+  // Need pagination handling
 }
 
-// 使用默认配置常量
+// Use default config constants
 console.log(PAGINATION_DEFAULTS.OVERFLOW_FIRST_LINE_CHARS) // 60
 ```
 
-### 分页计算
+### Page Break Calculation
 
 ```typescript
 import { 
   calculatePageBreaks, 
   calculateUsableHeight,
   MEASURABLE_ITEM_TYPES 
-} from '@medical/print-renderer'
-import type { MeasurableItem, MeasurableItemType } from '@medical/print-renderer'
+} from 'medical-form-printer'
+import type { MeasurableItem, MeasurableItemType } from 'medical-form-printer'
 
-// 可测量内容项类型
-// MEASURABLE_ITEM_TYPES.HEADER       - 页眉
-// MEASURABLE_ITEM_TYPES.SECTION      - 区块
-// MEASURABLE_ITEM_TYPES.TABLE_HEADER - 表头
-// MEASURABLE_ITEM_TYPES.TABLE_ROW    - 表格行
-// MEASURABLE_ITEM_TYPES.SIGNATURE    - 签名区域
-// MEASURABLE_ITEM_TYPES.FOOTER       - 页脚
+// Measurable content item types
+// MEASURABLE_ITEM_TYPES.HEADER       - Header
+// MEASURABLE_ITEM_TYPES.SECTION      - Section
+// MEASURABLE_ITEM_TYPES.TABLE_HEADER - Table header
+// MEASURABLE_ITEM_TYPES.TABLE_ROW    - Table row
+// MEASURABLE_ITEM_TYPES.SIGNATURE    - Signature area
+// MEASURABLE_ITEM_TYPES.FOOTER       - Footer
 
-// 测量后的内容项
+// Measured content items
 const items: MeasurableItem[] = [
   { id: 'header-1', type: MEASURABLE_ITEM_TYPES.HEADER, height: 80 },
   { id: 'table-header-1', type: MEASURABLE_ITEM_TYPES.TABLE_HEADER, height: 40, tableId: 'nursing' },
@@ -434,7 +433,7 @@ const items: MeasurableItem[] = [
   // ...
 ]
 
-// 计算分页
+// Calculate page breaks
 const result = calculatePageBreaks(items, {
   pageHeight: calculateUsableHeight(PAGE_16K),
   headerHeight: 60,
@@ -442,13 +441,13 @@ const result = calculatePageBreaks(items, {
   repeatTableHeaders: true,
 })
 
-// result.pages: 分页后的页面列表
-// result.totalPages: 总页数
+// result.pages: Paginated page list
+// result.totalPages: Total page count
 ```
 
-### 内容测量器（浏览器环境）
+### Content Measurer (Browser Environment)
 
-在浏览器环境中测量 DOM 元素的实际渲染高度，用于精确分页计算：
+Measure actual rendered height of DOM elements in browser for precise pagination:
 
 ```typescript
 import { 
@@ -460,56 +459,56 @@ import {
   isBrowserEnvironment,
   DEFAULT_MEASURE_CONFIG,
   MEASURE_SELECTORS,
-} from '@medical/print-renderer'
+} from 'medical-form-printer'
 import type { 
   MeasureConfig, 
   MeasureResult,
   MeasureElementOptions,
   TextEstimateOptions,
-} from '@medical/print-renderer'
+} from 'medical-form-printer'
 ```
 
-#### Composable 风格 API
+#### Composable Style API
 
 ```typescript
-// 创建测量器实例
+// Create measurer instance
 const measurer = createContentMeasurer({ containerWidth: 624 })
 
-// 测量单个元素
+// Measure single element
 const height = measurer.measureElement(element)
 
-// 批量测量表格行
+// Batch measure table rows
 const tableItems = measurer.measureTable(tableElement, { tableId: 'nursing' })
 
-// 测量所有内容
+// Measure all content
 const allItems = measurer.measureAll(contentContainer)
 
-// 清理资源
+// Cleanup resources
 measurer.cleanup()
 ```
 
-#### 手动管理测量容器
+#### Manual Measure Container Management
 
 ```typescript
-// 创建隐藏的测量容器
+// Create hidden measure container
 const container = createMeasureContainer({
   containerWidth: 624,
   fontSize: '10pt',
   lineHeight: 1.8,
 })
 
-// 测量元素高度
+// Measure element height
 const height = measureElementHeight(element, container)
 
-// 清理
+// Cleanup
 destroyMeasureContainer(container)
 ```
 
-#### 文本高度估算（无 DOM 环境）
+#### Text Height Estimation (No DOM Environment)
 
 ```typescript
-// 估算文本高度（用于 Node.js 环境降级）
-const height = estimateTextHeight('这是一段测试文本', {
+// Estimate text height (for Node.js environment fallback)
+const height = estimateTextHeight('This is test text', {
   containerWidth: 624,
   fontSize: 13.33,  // 10pt ≈ 13.33px
   lineHeight: 1.8,
@@ -517,20 +516,20 @@ const height = estimateTextHeight('这是一段测试文本', {
 })
 ```
 
-#### 环境检测
+#### Environment Detection
 
 ```typescript
 if (isBrowserEnvironment()) {
-  // 使用 DOM 测量
+  // Use DOM measurement
   const measurer = createContentMeasurer()
   // ...
 } else {
-  // 使用文本估算降级方案
+  // Use text estimation fallback
   const height = estimateTextHeight(text)
 }
 ```
 
-> **注意**: 内容测量器仅在浏览器环境可用。Node.js 环境需要使用 Puppeteer 进行测量，或使用 `estimateTextHeight` 进行估算。
+> **Note**: Content measurer is only available in browser environment. Node.js environment requires Puppeteer for measurement, or use `estimateTextHeight` for estimation.
 
 ## License
 

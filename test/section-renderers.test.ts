@@ -167,7 +167,7 @@ describe('renderTable', () => {
     }
     const html = renderTable(config, data)
 
-    expect(html).toContain('序号')
+    expect(html).toContain('No.')
     expect(html).toContain('>1<')
   })
 
@@ -317,7 +317,7 @@ describe('renderSignatureArea', () => {
     }
     const html = renderSignatureArea(basicConfig, data)
 
-    expect(html).toContain('日期：')
+    expect(html).toContain('Date:')
     expect(html).toContain('2024-03-15')
   })
 
@@ -547,7 +547,7 @@ describe('renderMedicalCheckboxRow', () => {
     const html = renderMedicalCheckboxRow(config, data)
 
     expect(html).toContain('class="input-label-group"')
-    expect(html).toContain('疾病名称：')
+    expect(html).toContain('疾病名称:')
     expect(html).toContain('高血压')
   })
 

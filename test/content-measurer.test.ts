@@ -52,7 +52,7 @@ describe('Content Measurer Constants', () => {
       expect(DEFAULT_MEASURE_CONFIG.containerWidth).toBeGreaterThan(0)
       expect(DEFAULT_MEASURE_CONFIG.fontSize).toBe('10pt')
       expect(DEFAULT_MEASURE_CONFIG.lineHeight).toBe(1.8)
-      expect(DEFAULT_MEASURE_CONFIG.fontFamily).toContain('宋体')
+      expect(DEFAULT_MEASURE_CONFIG.fontFamily).toContain('Source Han Serif SC')
     })
   })
 

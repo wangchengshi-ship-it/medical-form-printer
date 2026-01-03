@@ -53,8 +53,8 @@ This plan prepares the `medical-print-renderer` library for open source release 
     - Counterexample: `src/utils/watermark.ts` contains 271 Chinese characters
     - Need to translate Chinese comments and strings in source code
 
-- [ ] 2. Package Configuration
-  - [ ] 2.1 Update package.json for npm publishing
+- [x] 2. Package Configuration
+  - [x] 2.1 Update package.json for npm publishing
     - Change name from `@medical/print-renderer` to `medical-form-printer`
     - Update description to English
     - Add repository, homepage, bugs fields with GitHub URLs
@@ -62,24 +62,24 @@ This plan prepares the `medical-print-renderer` library for open source release 
     - Verify files, engines, and license fields
     - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-  - [ ] 2.2 Update all internal package references
+  - [x] 2.2 Update all internal package references
     - Search and replace `@medical/print-renderer` with `medical-form-printer` in all files
     - Update import statements in documentation and examples
     - _Requirements: 1.6_
 
-  - [ ] 2.3 Write property test for package.json validity
+  - [x] 2.3 Write property test for package.json validity
     - **Property 1: Package.json Validity**
     - **Validates: Requirements 1.1, 1.2, 1.5**
 
-  - [ ] 2.4 Write property test for no old package name references
+  - [x] 2.4 Write property test for no old package name references
     - **Property 2: No Old Package Name References**
     - **Validates: Requirements 1.6**
 
-- [ ] 3. Checkpoint - Data sanitization and package config complete
+- [x] 3. Checkpoint - Data sanitization and package config complete
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 4. Documentation
-  - [ ] 4.1 Create English README.md
+- [-] 4. Documentation
+  - [-] 4.1 Create English README.md
     - Write comprehensive English documentation
     - Include installation, quick start, API reference, examples
     - Add badges (npm version, CI status, license)

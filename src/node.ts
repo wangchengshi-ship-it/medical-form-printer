@@ -1,6 +1,6 @@
 /**
  * @fileoverview Node.js PDF generation entry point
- * @module @medical/print-renderer/node
+ * @module medical-form-printer/node
  * @version 0.1.0
  * 
  * @description
@@ -9,7 +9,7 @@
  * 
  * @example
  * ```typescript
- * import { renderToPdf, mergePdfs } from '@medical/print-renderer/node'
+ * import { renderToPdf, mergePdfs } from 'medical-form-printer/node'
  * 
  * // Generate single PDF
  * const pdfBuffer = await renderToPdf(printSchema, formData, {
