@@ -105,35 +105,35 @@ This plan prepares the `medical-print-renderer` library for open source release 
     - **Property 6: JSDoc Coverage for Public Exports**
     - **Validates: Requirements 3.1, 3.2, 3.3**
 
-- [-] 5. Legal and Community Files
-  - [ ] 5.1 Create LICENSE file
+- [x] 5. Legal and Community Files
+  - [x] 5.1 Create LICENSE file
     - Add MIT license with correct year and copyright holder
     - _Requirements: 7.1, 7.2, 7.3_
 
-  - [ ] 5.2 Create CONTRIBUTING.md
+  - [x] 5.2 Create CONTRIBUTING.md
     - Document development setup process
     - Describe PR process and coding standards
     - Include commit message conventions
     - _Requirements: 6.1, 6.2, 6.3, 6.4_
 
-  - [ ] 5.3 Create CODE_OF_CONDUCT.md
+  - [x] 5.3 Create CODE_OF_CONDUCT.md
     - Use Contributor Covenant or similar standard
     - _Requirements: 6.5_
 
-  - [ ] 5.4 Create GitHub issue and PR templates
+  - [x] 5.4 Create GitHub issue and PR templates
     - Create `.github/ISSUE_TEMPLATE/bug_report.md`
     - Create `.github/ISSUE_TEMPLATE/feature_request.md`
     - Create `.github/PULL_REQUEST_TEMPLATE.md`
     - _Requirements: 6.6_
 
-- [ ] 6. CI/CD Configuration
-  - [ ] 6.1 Create CI workflow
+- [-] 6. CI/CD Configuration
+  - [x] 6.1 Create CI workflow
     - Create `.github/workflows/ci.yml`
     - Configure multi-version Node.js testing (18.x, 20.x, 22.x)
     - Run lint, typecheck, test, build
     - _Requirements: 5.1, 5.3, 5.4_
 
-  - [ ] 6.2 Create npm publish workflow
+  - [-] 6.2 Create npm publish workflow
     - Create `.github/workflows/publish.yml`
     - Configure automatic publishing on release tags
     - _Requirements: 5.2, 5.5_
