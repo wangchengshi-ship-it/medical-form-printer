@@ -23,7 +23,7 @@ const defaultDateOptions: Required<DateFormatOptions> = {
  * @example
  * ```typescript
  * formatDate('2024-01-15')                    // '2024-01-15'
- * formatDate(new Date(), 'YYYY年MM月DD日')    // '2024年01月15日'
+ * formatDate(new Date(), 'YYYY/MM/DD')        // '2024/01/15'
  * formatDate('2024-01-15', 'MM/DD/YYYY')      // '01/15/2024'
  * ```
  */

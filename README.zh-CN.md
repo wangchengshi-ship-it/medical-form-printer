@@ -81,7 +81,7 @@ const printSchema = {
 }
 
 const formData = {
-  name: '张三',
+  name: 'Jane Doe',
   age: 28,
   admissionDate: '2024-01-15',
   roomNumber: 'A-101'

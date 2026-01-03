@@ -82,6 +82,8 @@ function hasJSDocComment(content: string, functionName: string): boolean {
     new RegExp(`\\/\\*\\*[\\s\\S]*?\\*\\/\\s*export\\s+const\\s+${functionName}\\s*=`, 'm'),
     // export { name } with JSDoc above the actual function
     new RegExp(`\\/\\*\\*[\\s\\S]*?\\*\\/\\s*(?:export\\s+)?function\\s+${functionName}\\s*[(<]`, 'm'),
+    // JSDoc followed by export { name } (re-export with JSDoc)
+    new RegExp(`\\/\\*\\*[\\s\\S]*?\\*\\/\\s*export\\s*\\{\\s*${functionName}\\s*\\}`, 'm'),
   ]
 
   return patterns.some(pattern => pattern.test(content))

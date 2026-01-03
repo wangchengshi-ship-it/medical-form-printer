@@ -161,5 +161,9 @@ ${footer}
 </html>`
 }
 
-// Re-export escapeHtml for backward compatibility
+/**
+ * Escapes HTML special characters in a string to prevent XSS attacks.
+ * Re-exported from utils/html-builder for backward compatibility.
+ * @see {@link ../utils/html-builder.ts}
+ */
 export { escapeHtml }
