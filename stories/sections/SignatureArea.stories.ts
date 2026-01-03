@@ -25,7 +25,7 @@ export const Basic: Story = {
         fields: [{ label: '护士签名', field: 'nurseSignature' }],
       } as SignatureConfig,
     },
-    { nurseSignature: '张护士' },
+    { nurseSignature: 'Nurse Smith' },
     { title: '基础签名', description: '单个签名字段', height: '280px' }
   ),
 }
@@ -45,9 +45,9 @@ export const MultipleFields: Story = {
       } as SignatureConfig,
     },
     {
-      nurseSignature: '张护士',
-      doctorSignature: '李医生',
-      headNurseSignature: '王护士长',
+      nurseSignature: 'Nurse Smith',
+      doctorSignature: 'Dr. Johnson',
+      headNurseSignature: 'Head Nurse Wilson',
     },
     { title: '多签名字段', description: '多个签名字段并排显示', height: '280px' }
   ),
@@ -66,7 +66,7 @@ export const WithDate: Story = {
         ],
       } as SignatureConfig,
     },
-    { nurseSignature: '张护士', signDate: '2026-01-03' },
+    { nurseSignature: 'Nurse Smith', signDate: '2026-01-03' },
     { title: '带日期签名', description: '签名带日期字段', height: '280px' }
   ),
 }
@@ -104,9 +104,9 @@ export const LongLabels: Story = {
       } as SignatureConfig,
     },
     {
-      nurseSignature: '张三',
-      doctorSignature: '李四',
-      headSignature: '王五',
+      nurseSignature: 'Jane Doe',
+      doctorSignature: 'John Smith',
+      headSignature: 'Mary Wilson',
     },
     { title: '长标签签名', description: '较长的标签文字不换行', height: '280px' }
   ),
@@ -151,11 +151,11 @@ export const InForm: Story = {
       },
     ],
     {
-      name: '张女士',
+      name: 'Mary Johnson',
       age: 28,
       bedNo: '301',
       admissionNo: 'A20260103001',
-      nurseSignature: '李护士',
+      nurseSignature: 'Nurse Smith',
       recordDate: '2026-01-03',
     },
     { title: '护理记录单', description: '真实医疗场景：签名区域在完整表单底部' }

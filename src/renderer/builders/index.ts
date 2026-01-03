@@ -1,10 +1,10 @@
 /**
- * @fileoverview HTML 构建器模块
+ * @fileoverview HTML builder module
  * @module renderer/builders
  * 
  * @description
- * 使用 Builder 模式构建 HTML 结构。
- * 提供链式 API 构建复杂的 HTML 元素。
+ * Build HTML structures using the Builder pattern.
+ * Provides a chainable API for constructing complex HTML elements.
  */
 
 export {

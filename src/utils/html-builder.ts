@@ -1,14 +1,14 @@
 /**
- * @fileoverview 类型安全的 HTML 构建器
+ * @fileoverview Type-safe HTML builder
  * @module utils/html-builder
- * @description 提供链式 API 构建 HTML 元素，统一 HTML 转义处理
+ * @description Provides chainable API for building HTML elements with unified HTML escaping
  * 
  * @example
- * // 基础用法
+ * // Basic usage
  * const html = h('div').class('container').child('Hello').build()
  * // => '<div class="container">Hello</div>'
  * 
- * // 嵌套元素
+ * // Nested elements
  * const html = h('table').child(
  *   h('tr').child(
  *     h('td').text('Cell 1'),
@@ -17,22 +17,22 @@
  * ).build()
  */
 
-/** HTML 空元素（自闭合标签） */
+/** HTML void elements (self-closing tags) */
 const VOID_ELEMENTS = new Set([
   'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
   'link', 'meta', 'param', 'source', 'track', 'wbr'
 ])
 
-/** HTML 属性值类型 */
+/** HTML attribute value type */
 type AttributeValue = string | number | boolean | undefined | null
 
-/** 子元素类型 */
+/** Child element type */
 type ChildElement = string | HtmlBuilder | undefined | null | false
 
 /**
- * HTML 转义
- * @param str - 要转义的字符串
- * @returns 转义后的字符串
+ * Escape HTML special characters
+ * @param str - String to escape
+ * @returns Escaped string
  */
 export function escapeHtml(str: string): string {
   if (!str) return ''
@@ -45,9 +45,9 @@ export function escapeHtml(str: string): string {
 }
 
 /**
- * HTML 属性值转义（用于属性值）
- * @param value - 属性值
- * @returns 转义后的字符串
+ * Escape HTML attribute value
+ * @param value - Attribute value
+ * @returns Escaped string
  */
 export function escapeAttr(value: string): string {
   if (!value) return ''
@@ -57,8 +57,8 @@ export function escapeAttr(value: string): string {
 }
 
 /**
- * HTML 构建器类
- * 提供链式 API 构建 HTML 元素
+ * HTML builder class
+ * Provides chainable API for building HTML elements
  */
 export class HtmlBuilder {
   private tagName: string
@@ -73,9 +73,9 @@ export class HtmlBuilder {
   }
 
   /**
-   * 设置属性
-   * @param name - 属性名
-   * @param value - 属性值（undefined/null/false 会跳过该属性）
+   * Set attribute
+   * @param name - Attribute name
+   * @param value - Attribute value (undefined/null/false will skip the attribute)
    */
   attr(name: string, value: AttributeValue): this {
     if (value === undefined || value === null || value === false) {
@@ -90,8 +90,8 @@ export class HtmlBuilder {
   }
 
   /**
-   * 批量设置属性
-   * @param attrs - 属性对象
+   * Set multiple attributes
+   * @param attrs - Attributes object
    */
   attrs(attrs: Record<string, AttributeValue>): this {
     for (const [name, value] of Object.entries(attrs)) {
@@ -101,8 +101,8 @@ export class HtmlBuilder {
   }
 
   /**
-   * 添加 CSS 类名
-   * @param names - 类名（支持多个参数或空格分隔）
+   * Add CSS class names
+   * @param names - Class names (supports multiple arguments or space-separated)
    */
   class(...names: (string | undefined | null | false)[]): this {
     for (const name of names) {
@@ -114,17 +114,17 @@ export class HtmlBuilder {
   }
 
   /**
-   * 设置 ID
-   * @param id - 元素 ID
+   * Set ID
+   * @param id - Element ID
    */
   id(id: string): this {
     return this.attr('id', id)
   }
 
   /**
-   * 设置单个样式
-   * @param property - CSS 属性名
-   * @param value - CSS 属性值
+   * Set single style
+   * @param property - CSS property name
+   * @param value - CSS property value
    */
   style(property: string, value: string | undefined | null): this {
     if (value !== undefined && value !== null && value !== '') {
@@ -134,8 +134,8 @@ export class HtmlBuilder {
   }
 
   /**
-   * 批量设置样式
-   * @param styles - 样式对象
+   * Set multiple styles
+   * @param styles - Styles object
    */
   css(styles: Record<string, string | undefined | null>): this {
     for (const [property, value] of Object.entries(styles)) {
@@ -145,8 +145,8 @@ export class HtmlBuilder {
   }
 
   /**
-   * 添加子元素（自动转义文本）
-   * @param children - 子元素
+   * Add child elements (auto-escapes text)
+   * @param children - Child elements
    */
   child(...children: ChildElement[]): this {
     this.children.push(...children)
@@ -154,8 +154,8 @@ export class HtmlBuilder {
   }
 
   /**
-   * 添加文本内容（自动转义）
-   * @param text - 文本内容
+   * Add text content (auto-escaped)
+   * @param text - Text content
    */
   text(text: string | number | undefined | null): this {
     if (text !== undefined && text !== null) {
@@ -165,8 +165,8 @@ export class HtmlBuilder {
   }
 
   /**
-   * 添加原始 HTML（不转义）
-   * @param html - 原始 HTML 字符串
+   * Add raw HTML (not escaped)
+   * @param html - Raw HTML string
    */
   raw(html: string): this {
     this.rawContent = html
@@ -174,9 +174,9 @@ export class HtmlBuilder {
   }
 
   /**
-   * 条件渲染
-   * @param condition - 条件
-   * @param builder - 条件为真时执行的构建函数
+   * Conditional rendering
+   * @param condition - Condition
+   * @param builder - Builder function to execute when condition is true
    */
   when(condition: boolean, builder: (b: this) => void): this {
     if (condition) {
@@ -186,21 +186,21 @@ export class HtmlBuilder {
   }
 
   /**
-   * 构建 HTML 字符串
-   * @returns HTML 字符串
+   * Build HTML string
+   * @returns HTML string
    */
   build(): string {
     const parts: string[] = []
     
-    // 开始标签
+    // Opening tag
     parts.push(`<${this.tagName}`)
     
-    // 类名
+    // Class names
     if (this.classNames.length > 0) {
       parts.push(` class="${escapeAttr(this.classNames.join(' '))}"`)
     }
     
-    // 样式
+    // Styles
     if (this.styles.size > 0) {
       const styleStr = Array.from(this.styles.entries())
         .map(([prop, val]) => `${prop}: ${val}`)
@@ -208,7 +208,7 @@ export class HtmlBuilder {
       parts.push(` style="${escapeAttr(styleStr)}"`)
     }
     
-    // 其他属性
+    // Other attributes
     for (const [name, value] of this.attributes) {
       if (name === value) {
         // boolean attribute
@@ -218,7 +218,7 @@ export class HtmlBuilder {
       }
     }
     
-    // 空元素
+    // Void elements
     if (VOID_ELEMENTS.has(this.tagName)) {
       parts.push(' />')
       return parts.join('')
@@ -226,7 +226,7 @@ export class HtmlBuilder {
     
     parts.push('>')
     
-    // 内容
+    // Content
     if (this.rawContent !== null) {
       parts.push(this.rawContent)
     } else {
@@ -242,14 +242,14 @@ export class HtmlBuilder {
       }
     }
     
-    // 结束标签
+    // Closing tag
     parts.push(`</${this.tagName}>`)
     
     return parts.join('')
   }
 
   /**
-   * 转换为字符串（等同于 build）
+   * Convert to string (equivalent to build)
    */
   toString(): string {
     return this.build()
@@ -257,9 +257,9 @@ export class HtmlBuilder {
 }
 
 /**
- * 创建 HTML 元素构建器
- * @param tag - 标签名
- * @returns HtmlBuilder 实例
+ * Create HTML element builder
+ * @param tag - Tag name
+ * @returns HtmlBuilder instance
  * 
  * @example
  * h('div').class('container').text('Hello').build()
@@ -269,9 +269,9 @@ export function h(tag: string): HtmlBuilder {
 }
 
 /**
- * 创建文档片段（多个元素的容器）
- * @param children - 子元素
- * @returns HTML 字符串
+ * Create document fragment (container for multiple elements)
+ * @param children - Child elements
+ * @returns HTML string
  */
 export function fragment(...children: ChildElement[]): string {
   return children
@@ -281,10 +281,10 @@ export function fragment(...children: ChildElement[]): string {
 }
 
 /**
- * 条件渲染
- * @param condition - 条件
- * @param content - 条件为真时的内容
- * @param fallback - 条件为假时的内容（可选）
+ * Conditional rendering
+ * @param condition - Condition
+ * @param content - Content when condition is true
+ * @param fallback - Content when condition is false (optional)
  */
 export function when(
   condition: boolean,
@@ -303,10 +303,10 @@ export function when(
 }
 
 /**
- * 列表渲染
- * @param items - 数据数组
- * @param renderer - 渲染函数
- * @returns HTML 字符串
+ * List rendering
+ * @param items - Data array
+ * @param renderer - Render function
+ * @returns HTML string
  */
 export function each<T>(
   items: T[] | undefined | null,
@@ -326,7 +326,7 @@ export function each<T>(
     .join('')
 }
 
-// 常用标签快捷方法
+// Common tag shortcut methods
 export const div = () => h('div')
 export const span = () => h('span')
 export const table = () => h('table')

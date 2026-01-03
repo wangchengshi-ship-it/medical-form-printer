@@ -69,13 +69,13 @@ const singlePageData: FormData = {
   roomNumber: '301',
   hospitalNumber: '2024010001',
   admissionTime: '2024-01-15T10:30:00',
-  name: '张三',
+  name: 'Jane Doe',
   age: 28,
-  bloodType: 'A型',
-  ethnicity: '汉族',
-  birthplace: '天津',
+  bloodType: 'A+',
+  ethnicity: 'Asian',
+  birthplace: 'Sample City',
   allergies: ['none'],
-  nurseSignature: '李护士',
+  nurseSignature: 'Nurse Smith',
 }
 
 const meta: Meta = {

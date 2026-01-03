@@ -43,7 +43,7 @@ export const Basic: Story = {
       } as InfoGridConfig,
     },
     {
-      name: '张三',
+      name: 'Jane Doe',
       age: 28,
       gender: '女',
       bloodType: 'A型',
@@ -159,7 +159,7 @@ export const Textarea: Story = {
         ],
       } as InfoGridConfig,
     },
-    { name: '李女士', admissionDate: '2024-01-15', chiefComplaint: '产后3天，乳房胀痛2天。\n伴有轻微发热，体温37.5℃。' },
+    { name: 'Mary Smith', admissionDate: '2024-01-15', chiefComplaint: '产后3天，乳房胀痛2天。\n伴有轻微发热，体温37.5℃。' },
     { title: '多行文本', description: '支持多行文本自然换行显示', height: '320px' }
   ),
 }
@@ -295,11 +295,11 @@ export const MaternalInfo: Story = {
       roomNumber: '301',
       hospitalNumber: 'INT-2025-CKFK-001',
       admissionTime: '2025-01-15',
-      name: '张三',
+      name: 'Mary Johnson',
       age: 28,
       ethnicity: '汉族',
-      birthplace: '天津',
-      deliveryHospital: '天津市中心妇产科医院',
+      birthplace: 'Beijing',
+      deliveryHospital: 'Sample Medical Center',
       deliveryDate: '2025-01-14',
       deliveryMethod: '剖宫产',
       parity: '初次产',

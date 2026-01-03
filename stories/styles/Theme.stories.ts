@@ -56,7 +56,7 @@ const sampleSchema: PrintSchema = {
 }
 
 const sampleData: FormData = {
-  name: '张三',
+  name: 'Jane Doe',
   age: 28,
   gender: '女',
   bloodType: 'A型',

@@ -71,7 +71,7 @@
 1. THE Library SHALL NOT contain any hardcoded internal URLs, API keys, or credentials
 2. THE Library SHALL NOT contain any references to internal systems or proprietary code
 3. THE Library SHALL NOT contain any TODO comments referencing internal tasks or tickets
-4. THE Library SHALL NOT contain any real hospital names (e.g., "Sample Hospital" must be replaced)
+4. THE Library SHALL NOT contain any real hospital names (Chinese hospital names like "天津市中心妇产科医院" must be replaced with generic placeholders)
 5. THE Library SHALL NOT contain any real patient information or medical data
 6. THE Library SHALL NOT contain any real department names or staff names
 7. THE Library SHALL use generic placeholder data in all examples, tests, and documentation:

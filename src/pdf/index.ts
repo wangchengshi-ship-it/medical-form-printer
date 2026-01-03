@@ -1,5 +1,5 @@
 /**
- * @fileoverview PDF 模块导出
+ * @fileoverview PDF module exports
  * @module pdf
  */
 

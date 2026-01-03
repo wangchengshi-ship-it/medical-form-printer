@@ -1,5 +1,5 @@
 /**
- * @fileoverview 类型定义导出
+ * @fileoverview Type definitions exports
  * @module types
  */
 

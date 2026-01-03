@@ -19,6 +19,11 @@
 
 ### Changed
 
+- **paginated-renderer 模块国际化**：
+  - 文件级注释和函数注释翻译为英文（开源准备）
+  - 默认续页标题后缀从 `(续)` 改为 `(continued)`
+  - 默认页码格式从 `第 {current} 页 / 共 {total} 页` 改为 `Page {current} of {total}`
+  - 中文用户可通过 `PaginatedRenderConfig` 自定义为中文格式
 - **info-grid 区块国际化**：
   - 标签后的中文冒号 `：` 改为英文冒号 `:`
   - 默认 `checkbox-inline` 选项从 `['无', '有']` 改为 `['No', 'Yes']`

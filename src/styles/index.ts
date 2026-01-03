@@ -1,5 +1,5 @@
 /**
- * @fileoverview 样式模块导出
+ * @fileoverview Styles module exports
  * @module styles
  */
 

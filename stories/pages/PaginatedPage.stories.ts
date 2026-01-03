@@ -186,12 +186,12 @@ type Story = StoryObj
 const createLegacyRenderer = (recordCount: number) => {
   return () => {
     const data: FormData = {
-      motherName: '张三',
+      motherName: 'Mary Johnson',
       roomNumber: '301',
       gender: '男',
       birthDate: '2024-01-10',
       dailyRecords: generateDailyRecords(recordCount),
-      nurseSignature: '李护士',
+      nurseSignature: 'Nurse Li',
     }
     
     const html = renderToIsolatedHtml(paginatedSchema, data)
@@ -221,12 +221,12 @@ const createPaginatedRenderer = (
 ) => {
   return () => {
     const data: FormData = {
-      motherName: '张三',
+      motherName: 'Mary Johnson',
       roomNumber: '301',
       gender: '男',
       birthDate: '2024-01-10',
       dailyRecords: generateDailyRecords(recordCount),
-      nurseSignature: '李护士',
+      nurseSignature: 'Nurse Li',
     }
     
     // 创建测量项
@@ -390,12 +390,12 @@ export const LandscapeLayout: Story = {
     }
     
     const data: FormData = {
-      motherName: '张三',
+      motherName: 'Mary Johnson',
       roomNumber: '301',
       gender: '男',
       birthDate: '2024-01-10',
       dailyRecords: generateDailyRecords(14),
-      nurseSignature: '李护士',
+      nurseSignature: 'Nurse Li',
     }
     
     const html = renderToIsolatedHtml(schema, data)

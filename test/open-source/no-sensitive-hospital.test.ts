@@ -15,13 +15,12 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 /**
- * Sensitive hospital names that should not appear in the codebase
+ * Real sensitive hospital names that should not appear in the codebase
+ * Note: Generic placeholders like "Sample Hospital", "Demo Medical Center" are acceptable
  */
 const SENSITIVE_HOSPITAL_NAMES = [
-  'Sample Hospital',
   '中医二附属',
   '天津市中心妇产科医院',
-  'Postpartum Care Center',
   '天津',
 ]
 

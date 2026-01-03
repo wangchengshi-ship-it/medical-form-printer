@@ -1,5 +1,5 @@
 /**
- * @fileoverview 分页渲染器
+ * @fileoverview Paginated renderer
  * @module pagination/paginated-renderer
  * @version 1.1.0
  * @author Kiro
@@ -7,32 +7,32 @@
  * @modified 2026-01-03
  *
  * @description
- * 将分页结果渲染为多页 HTML，每页独立且可打印。
- * 支持：
- * - 每页独立的 .print-page 元素
- * - 每页页眉渲染（续页添加 "(续)" 标记）
- * - 每页页脚渲染（页码显示）
- * - 续页自动插入表格表头
- * - CSS 分页规则
+ * Renders pagination results to multi-page HTML, each page independent and printable.
+ * Supports:
+ * - Independent .print-page element for each page
+ * - Header rendering on each page (continuation pages add "(continued)" marker)
+ * - Footer rendering on each page (page number display)
+ * - Automatic table header insertion on continuation pages
+ * - CSS pagination rules
  *
  * @requirements
- * - 11.1: 每页渲染为独立的 .print-page 元素
- * - 11.2: 续页自动插入表格表头
- * - 11.3: 显示页码（"第 X 页 / 共 Y 页"）
- * - 11.4: 续页标题添加 "(续)" 标记
- * - 11.5: 支持 CSS page-break 规则
- * - 11.6: 保持跨页样式一致性
+ * - 11.1: Render each page as independent .print-page element
+ * - 11.2: Automatically insert table headers on continuation pages
+ * - 11.3: Display page numbers ("Page X of Y")
+ * - 11.4: Add "(continued)" marker to continuation page titles
+ * - 11.5: Support CSS page-break rules
+ * - 11.6: Maintain consistent styles across pages
  *
  * @dependencies
- * - ./types.ts - 类型定义
- * - ./page-break-calculator.ts - 分页算法
- * - ../renderer/section-renderers - 区块渲染器
- * - ../styles - 样式系统
- * - ../utils/html-builder.ts - HTML 构建器
+ * - ./types.ts - Type definitions
+ * - ./page-break-calculator.ts - Pagination algorithm
+ * - ../renderer/section-renderers - Section renderers
+ * - ../styles - Style system
+ * - ../utils/html-builder.ts - HTML builder
  *
  * @usedBy
- * - ../index.ts - 库主入口
- * - international-postpartum-frontend - 前端打印模块
+ * - ../index.ts - Library main entry
+ * - international-postpartum-frontend - Frontend print module
  */
 
 import type { PrintSchema, FormData, PrintSection } from '../types/print-schema'
@@ -44,147 +44,147 @@ import { generateCss, generateIsolatedCss, mergeTheme, namespaceClass, ISOLATION
 import { escapeHtml, h, div, header, footer, main, renderWatermarkHtml, extractWatermarkOptions } from '../utils'
 import { PAGE_16K } from './page-dimensions'
 
-// ==================== 类型定义 ====================
+// ==================== Type Definitions ====================
 
 /**
- * 分页渲染配置
+ * Paginated render configuration
  */
 export interface PaginatedRenderConfig {
-  /** 是否在每页显示页眉 */
+  /** Whether to show header on each page */
   showHeaderOnEachPage?: boolean
-  /** 是否在每页显示页脚 */
+  /** Whether to show footer on each page */
   showFooterOnEachPage?: boolean
-  /** 是否在每页显示签名区域 */
+  /** Whether to show signature area on each page */
   showSignatureOnEachPage?: boolean
-  /** 续页标题后缀，默认 "(续)" */
+  /** Continuation page title suffix, default "(continued)" */
   continuationSuffix?: string
-  /** 页码格式，默认 "第 {current} 页 / 共 {total} 页" */
+  /** Page number format, default "Page {current} of {total}" */
   pageNumberFormat?: string
-  /** 页面尺寸配置 */
+  /** Page dimensions configuration */
   pageDimensions?: PageDimensions
   /**
-   * 是否启用隔离模式
-   * 启用后：
-   * - 所有类名带 mpr- 前缀
-   * - 样式完全隔离，不受外部影响
-   * - 字体强制使用内嵌的思源宋体 SC
+   * Whether to enable isolation mode
+   * When enabled:
+   * - All class names have mpr- prefix
+   * - Styles are fully isolated, unaffected by external styles
+   * - Fonts forced to use embedded Source Han Serif SC
    * @default false
    */
   isolated?: boolean
 }
 
 /**
- * 分页渲染上下文
+ * Paginated render context
  */
 export interface PaginatedRenderContext {
-  /** 打印布局配置 */
+  /** Print layout configuration */
   schema: PrintSchema
-  /** 表单数据 */
+  /** Form data */
   data: FormData
-  /** 渲染选项 */
+  /** Render options */
   options?: RenderOptions
-  /** 分页结果 */
+  /** Pagination result */
   pageBreakResult: PageBreakResult
-  /** 所有可测量内容项 */
+  /** All measurable content items */
   measuredItems: MeasurableItem[]
-  /** 分页渲染配置 */
+  /** Paginated render configuration */
   config?: PaginatedRenderConfig
 }
 
 /**
- * 单页渲染上下文
+ * Single page render context
  */
 interface SinglePageContext {
-  /** 页面内容 */
+  /** Page content */
   page: PageContent
-  /** 当前页码 */
+  /** Current page number */
   pageNumber: number
-  /** 总页数 */
+  /** Total pages */
   totalPages: number
-  /** 是否为首页 */
+  /** Whether this is the first page */
   isFirstPage: boolean
-  /** 是否为末页 */
+  /** Whether this is the last page */
   isLastPage: boolean
-  /** 打印布局配置 */
+  /** Print layout configuration */
   schema: PrintSchema
-  /** 表单数据 */
+  /** Form data */
   data: FormData
-  /** 渲染选项 */
+  /** Render options */
   options?: RenderOptions
-  /** 所有可测量内容项 */
+  /** All measurable content items */
   measuredItems: MeasurableItem[]
-  /** 分页渲染配置 */
+  /** Paginated render configuration */
   config: Required<PaginatedRenderConfig>
-  /** 主题配置 */
+  /** Theme configuration */
   theme: Theme
 }
 
-// ==================== CSS 类名常量 ====================
+// ==================== CSS Class Name Constants ====================
 
-/** CSS 类名常量，避免魔法字符串 */
+/** CSS class name constants to avoid magic strings */
 const CSS_CLASSES = {
-  // 页面结构
+  // Page structure
   PRINT_PAGE: 'print-page',
   CONTINUATION_PAGE: 'continuation-page',
   PRINT_HEADER: 'print-header',
   PRINT_FOOTER: 'print-footer',
   PRINT_CONTENT: 'print-content',
   
-  // 页眉元素
+  // Header elements
   HEADER_LOGO: 'header-logo',
   HOSPITAL_NAME: 'hospital-name',
   DEPARTMENT_NAME: 'department-name',
   FORM_TITLE: 'form-title',
   
-  // 页脚元素
+  // Footer elements
   FOOTER_NOTES: 'footer-notes',
   PAGE_NUMBER: 'page-number',
   
-  // 表格
+  // Table
   DATA_TABLE: 'data-table',
   REPEATED_HEADER: 'repeated-header',
   SECTION_TITLE: 'section-title',
   SIGNATURE_AREA: 'signature-area',
   
-  // 分页控制
+  // Pagination control
   PAGE_BREAK_BEFORE: 'page-break-before',
   PAGE_BREAK_AFTER: 'page-break-after',
   NO_PAGE_BREAK: 'no-page-break',
   
-  // 水印
+  // Watermark
   WATERMARK: 'watermark',
 } as const
 
-/** 非隔离模式的文档根类名 */
+/** Non-isolated mode document root class name */
 const PAGINATED_DOCUMENT_CLASS = 'paginated-document'
 
-// ==================== 类型定义 ====================
+// ==================== Type Definitions ====================
 
-/** 类名生成函数类型 */
+/** Class name generator function type */
 type ClassNameFn = (name: string) => string
 
-/** 水印渲染选项类型 */
+/** Watermark render options type */
 type WatermarkRenderOptions = RenderOptions & { watermark?: string; watermarkOpacity?: number }
 
-// ==================== 默认配置 ====================
+// ==================== Default Configuration ====================
 
 /**
- * 默认分页渲染配置
+ * Default paginated render configuration
  */
 export const DEFAULT_PAGINATED_RENDER_CONFIG: Required<PaginatedRenderConfig> = {
   showHeaderOnEachPage: true,
   showFooterOnEachPage: true,
   showSignatureOnEachPage: false,
-  continuationSuffix: '(续)',
-  pageNumberFormat: '第 {current} 页 / 共 {total} 页',
+  continuationSuffix: '(continued)',
+  pageNumberFormat: 'Page {current} of {total}',
   pageDimensions: PAGE_16K,
   isolated: false,
 }
 
-// ==================== 辅助函数 ====================
+// ==================== Helper Functions ====================
 
 /**
- * 合并分页渲染配置
+ * Merge paginated render configuration
  */
 function mergeConfig(config?: PaginatedRenderConfig): Required<PaginatedRenderConfig> {
   return {
@@ -193,23 +193,23 @@ function mergeConfig(config?: PaginatedRenderConfig): Required<PaginatedRenderCo
   }
 }
 
-/** 恒等函数，用于非隔离模式 */
+/** Identity function for non-isolated mode */
 const identity = (name: string): string => name
 
 /**
- * 创建类名生成函数
- * @param isolated - 是否启用隔离模式
- * @returns 类名生成函数
+ * Create class name generator function
+ * @param isolated - Whether to enable isolation mode
+ * @returns Class name generator function
  */
 function createClassNameFn(isolated: boolean): ClassNameFn {
   return isolated ? namespaceClass : identity
 }
 
 /**
- * 格式化页码
- * @param format - 页码格式字符串
- * @param current - 当前页码
- * @param total - 总页数
+ * Format page number
+ * @param format - Page number format string
+ * @param current - Current page number
+ * @param total - Total pages
  */
 function formatPageNumber(format: string, current: number, total: number): string {
   return format
@@ -218,7 +218,7 @@ function formatPageNumber(format: string, current: number, total: number): strin
 }
 
 /**
- * 获取页面 CSS 类名
+ * Get page CSS class names
  */
 function getPageClasses(schema: PrintSchema, pageNumber: number, cls: ClassNameFn): string {
   const classes = [
@@ -232,17 +232,17 @@ function getPageClasses(schema: PrintSchema, pageNumber: number, cls: ClassNameF
   return classes.join(' ')
 }
 
-// ==================== 页眉渲染 ====================
+// ==================== Header Rendering ====================
 
 /**
- * 渲染页眉
- * @requirements 3.3, 11.4 - 每页页眉渲染，续页添加 "(续)" 标记
+ * Render page header
+ * @requirements 3.3, 11.4 - Header rendering on each page, add "(continued)" marker on continuation pages
  */
 function renderPageHeader(ctx: SinglePageContext, cls: ClassNameFn): string {
   const { schema, isFirstPage, config } = ctx
   const { header: headerConfig } = schema
 
-  // 非首页且不显示页眉
+  // Not first page and don't show header
   if (!isFirstPage && !config.showHeaderOnEachPage) {
     return ''
   }
@@ -274,7 +274,7 @@ function renderPageHeader(ctx: SinglePageContext, cls: ClassNameFn): string {
     )
   }
 
-  // 表单标题（续页添加后缀）
+  // Form title (add suffix on continuation pages)
   if (headerConfig.title) {
     const titleText = isFirstPage
       ? headerConfig.title
@@ -287,51 +287,51 @@ function renderPageHeader(ctx: SinglePageContext, cls: ClassNameFn): string {
   return header().class(cls(CSS_CLASSES.PRINT_HEADER)).raw(parts.join('\n')).build()
 }
 
-// ==================== 页脚渲染 ====================
+// ==================== Footer Rendering ====================
 
 /**
- * 渲染签名区域
- * @requirements 11.3 - 支持 showSignatureOnEachPage 配置
+ * Render signature area
+ * @requirements 11.3 - Support showSignatureOnEachPage configuration
  */
 function renderSignatureArea(ctx: SinglePageContext): string {
   const { schema, data, options, isLastPage, config } = ctx
 
-  // 只在末页显示签名，除非配置了每页显示
+  // Only show signature on last page, unless configured to show on each page
   if (!isLastPage && !config.showSignatureOnEachPage) {
     return ''
   }
 
-  // 查找签名区域 section
+  // Find signature area section
   const signatureSection = schema.sections.find(s => s.type === 'signature-area')
   if (!signatureSection) {
     return ''
   }
 
-  // 使用 section renderer 渲染签名区域
+  // Use section renderer to render signature area
   return renderSection(signatureSection.type, signatureSection.config, data, options)
 }
 
 /**
- * 渲染页脚
- * @requirements 3.4, 11.3 - 每页页脚渲染，页码显示
+ * Render page footer
+ * @requirements 3.4, 11.3 - Footer rendering on each page, page number display
  */
 function renderPageFooter(ctx: SinglePageContext, cls: ClassNameFn): string {
   const { schema, pageNumber, totalPages, isLastPage, config } = ctx
   const { footer: footerConfig } = schema
 
-  // 非末页且不显示页脚（但仍显示页码）
+  // Not last page and don't show footer (but still show page number)
   const showFooterContent = isLastPage || config.showFooterOnEachPage
 
   const parts: string[] = []
 
-  // 备注（仅在显示页脚内容时）
+  // Notes (only when showing footer content)
   if (showFooterContent && footerConfig?.notes) {
     parts.push(
       h('span').class(cls(CSS_CLASSES.FOOTER_NOTES)).text(footerConfig.notes).build()
     )
   }
 
-  // 页码（始终显示）
+  // Page number (always show)
   if (footerConfig?.showPageNumber !== false) {
     const pageNumberText = formatPageNumber(
       config.pageNumberFormat,
@@ -350,11 +350,11 @@ function renderPageFooter(ctx: SinglePageContext, cls: ClassNameFn): string {
   return footer().class(cls(CSS_CLASSES.PRINT_FOOTER)).raw(parts.join('\n')).build()
 }
 
-// ==================== 表头重复渲染 ====================
+// ==================== Table Header Repetition Rendering ====================
 
 /**
- * 渲染重复的表格表头
- * @requirements 11.2 - 续页自动插入表格表头
+ * Render repeated table headers
+ * @requirements 11.2 - Automatically insert table headers on continuation pages
  */
 function renderRepeatedHeaders(
   ctx: SinglePageContext,
@@ -370,15 +370,15 @@ function renderRepeatedHeaders(
   const parts: string[] = []
 
   for (const headerId of page.repeatedHeaders) {
-    // 找到对应的测量项
+    // Find corresponding measured item
     const measuredItem = measuredItems.find(item => item.id === headerId)
     if (!measuredItem || !measuredItem.tableId) continue
 
-    // 找到对应的表格 section
+    // Find corresponding table section
     const tableSection = sectionMap.get(measuredItem.tableId)
     if (!tableSection || tableSection.type !== 'table') continue
 
-    // 渲染表格表头（只渲染 thead 部分）
+    // Render table header (only thead part)
     const tableConfig = tableSection.config as { columns: Array<{ header: string; width?: string }> }
     const headerCells = tableConfig.columns
       .map((col: { header: string; width?: string }) => h('th').style('width', col.width || null).text(col.header).build())
@@ -395,15 +395,15 @@ function renderRepeatedHeaders(
   return parts.join('\n')
 }
 
-// ==================== 内容渲染 ====================
+// ==================== Content Rendering ====================
 
 /**
- * 渲染带标题的 section
- * @param section - PrintSection 配置
- * @param data - 表单数据
- * @param options - 渲染选项
- * @param cls - 类名生成函数
- * @returns 渲染后的 HTML 字符串
+ * Render section with title
+ * @param section - PrintSection configuration
+ * @param data - Form data
+ * @param options - Render options
+ * @param cls - Class name generator function
+ * @returns Rendered HTML string
  */
 function renderSectionWithTitle(
   section: PrintSection,
@@ -419,8 +419,8 @@ function renderSectionWithTitle(
 }
 
 /**
- * 内容项渲染策略映射
- * 使用策略模式便于扩展新的内容类型
+ * Content item render strategy mapping
+ * Uses strategy pattern for easy extension of new content types
  */
 type ContentRenderer = (
   item: MeasurableItem,
@@ -436,28 +436,28 @@ const contentRenderers: Record<MeasurableItem['type'], ContentRenderer> = {
     if (!section) return ''
     return renderSectionWithTitle(section, data, options, cls)
   },
-  // 表格行渲染需要包裹在表格中，建议使用 renderAllSections 降级处理
+  // Table row rendering needs to be wrapped in table, recommend using renderAllSections fallback
   'table-row': () => '',
-  // 表格表头通常在 repeatedHeaders 中处理
+  // Table headers are usually handled in repeatedHeaders
   'table-header': () => '',
-  // 以下类型在其他专用函数中处理
+  // Following types are handled in dedicated functions
   header: () => '',
   footer: () => '',
   signature: () => '',
 }
 
 /**
- * 根据内容项 ID 渲染对应的区块
- * 注意：此函数用于基于测量项的精细分页渲染
- * 对于简单场景，会自动降级到 renderAllSections
+ * Render corresponding section based on content item ID
+ * Note: This function is for fine-grained pagination rendering based on measured items
+ * For simple scenarios, it will automatically fallback to renderAllSections
  *
- * @param itemId - 内容项 ID
- * @param itemMap - 预构建的测量项映射（避免重复查找）
- * @param sectionMap - section ID 到 PrintSection 的映射
- * @param data - 表单数据
- * @param options - 渲染选项
- * @param cls - 类名生成函数
- * @returns 渲染后的 HTML 字符串
+ * @param itemId - Content item ID
+ * @param itemMap - Pre-built measured item map (avoid repeated lookups)
+ * @param sectionMap - Section ID to PrintSection mapping
+ * @param data - Form data
+ * @param options - Render options
+ * @param cls - Class name generator function
+ * @returns Rendered HTML string
  */
 function renderContentItem(
   itemId: string,
@@ -475,19 +475,19 @@ function renderContentItem(
 }
 
 /**
- * 渲染所有 sections（降级模式）
- * 当精细分页不可用时，渲染所有 sections（除签名区域外）
+ * Render all sections (fallback mode)
+ * When fine-grained pagination is not available, render all sections (except signature area)
  *
- * @param ctx - 单页渲染上下文
- * @param cls - 类名生成函数
- * @returns 渲染后的 HTML 字符串
+ * @param ctx - Single page render context
+ * @param cls - Class name generator function
+ * @returns Rendered HTML string
  */
 function renderAllSections(ctx: SinglePageContext, cls: ClassNameFn): string {
   const { schema, data, options } = ctx
   const parts: string[] = []
 
   for (const section of schema.sections) {
-    // 跳过签名区域（在页脚处理）
+    // Skip signature area (handled in footer)
     if (section.type === 'signature-area') continue
     parts.push(renderSectionWithTitle(section, data, options, cls))
   }
@@ -496,13 +496,13 @@ function renderAllSections(ctx: SinglePageContext, cls: ClassNameFn): string {
 }
 
 /**
- * 渲染页面主体内容
- * 优先使用精细分页渲染，无有效测量项时降级到全量渲染
+ * Render page body content
+ * Prioritize fine-grained pagination rendering, fallback to full rendering when no valid measured items
  *
- * @param ctx - 单页渲染上下文
- * @param sectionMap - section ID 到 PrintSection 的映射
- * @param cls - 类名生成函数
- * @returns 渲染后的 HTML 字符串
+ * @param ctx - Single page render context
+ * @param sectionMap - Section ID to PrintSection mapping
+ * @param cls - Class name generator function
+ * @returns Rendered HTML string
  */
 function renderPageBody(
   ctx: SinglePageContext,
@@ -513,23 +513,23 @@ function renderPageBody(
 
   const parts: string[] = []
 
-  // 渲染重复的表头
+  // Render repeated headers
   const repeatedHeaders = renderRepeatedHeaders(ctx, sectionMap, cls)
   if (repeatedHeaders) {
     parts.push(repeatedHeaders)
   }
 
-  // 预构建测量项映射，避免重复 O(n) 查找
+  // Pre-build measured item map to avoid repeated O(n) lookups
   const itemMap = new Map(measuredItems.map(m => [m.id, m]))
 
-  // 检查是否有有效的内容项映射
+  // Check if there are valid content item mappings
   const hasValidItems = page.items.length > 0 && page.items.some(itemId => {
     const item = itemMap.get(itemId)
     return item?.type === 'section'
   })
 
   if (hasValidItems) {
-    // 使用测量项精细渲染
+    // Use measured items for fine-grained rendering
     for (const itemId of page.items) {
       const content = renderContentItem(itemId, itemMap, sectionMap, data, options, cls)
       if (content) {
@@ -537,17 +537,17 @@ function renderPageBody(
       }
     }
   } else {
-    // 降级：渲染所有 sections
+    // Fallback: render all sections
     parts.push(renderAllSections(ctx, cls))
   }
 
   return main().class(cls(CSS_CLASSES.PRINT_CONTENT)).raw(parts.join('\n')).build()
 }
 
-// ==================== 单页渲染 ====================
+// ==================== Single Page Rendering ====================
 
 /**
- * 渲染水印
+ * Render watermark
  */
 function renderWatermark(options: WatermarkRenderOptions | undefined, cls: ClassNameFn): string {
   return renderWatermarkHtml({
@@ -557,8 +557,8 @@ function renderWatermark(options: WatermarkRenderOptions | undefined, cls: Class
 }
 
 /**
- * 渲染单个页面
- * @requirements 11.1 - 每页渲染为独立的 .print-page 元素
+ * Render single page
+ * @requirements 11.1 - Render each page as independent .print-page element
  */
 function renderSinglePage(
   ctx: SinglePageContext,
@@ -569,7 +569,7 @@ function renderSinglePage(
 
   const pageClasses = getPageClasses(schema, pageNumber, cls)
 
-  // 组装页面各部分
+  // Assemble page parts
   const watermark = renderWatermark(options as WatermarkRenderOptions, cls)
   const headerHtml = renderPageHeader(ctx, cls)
   const bodyHtml = renderPageBody(ctx, sectionMap, cls)
@@ -587,10 +587,10 @@ function renderSinglePage(
     .build()
 }
 
-// ==================== 主渲染函数 ====================
+// ==================== Main Render Function ====================
 
 /**
- * 构建 section ID 到 PrintSection 的映射
+ * Build section ID to PrintSection mapping
  */
 function buildSectionMap(
   schema: PrintSchema,
@@ -598,22 +598,22 @@ function buildSectionMap(
 ): Map<string, PrintSection> {
   const map = new Map<string, PrintSection>()
   
-  // 为每个 section 创建映射
+  // Create mapping for each section
   schema.sections.forEach((section, index) => {
     const sectionId = `section-${index}`
     map.set(sectionId, section)
     
-    // 如果是表格，也用 tableId 作为键
+    // If it's a table, also use tableId as key
     if (section.type === 'table') {
       const tableConfig = section.config as { dataField: string }
       map.set(`table-${tableConfig.dataField}`, section)
     }
   })
   
-  // 从 measuredItems 中提取 tableId 映射
+  // Extract tableId mapping from measuredItems
   for (const item of measuredItems) {
     if (item.tableId && !map.has(item.tableId)) {
-      // 尝试找到对应的表格 section
+      // Try to find corresponding table section
       const tableSection = schema.sections.find(s => {
         if (s.type !== 'table') return false
         const config = s.config as { dataField: string }
@@ -629,11 +629,11 @@ function buildSectionMap(
 }
 
 /**
- * 生成 HTML 文档结构
- * @param title - 文档标题
- * @param css - CSS 样式
- * @param bodyContent - body 内容
- * @param isolated - 是否隔离模式
+ * Generate HTML document structure
+ * @param title - Document title
+ * @param css - CSS styles
+ * @param bodyContent - Body content
+ * @param isolated - Whether in isolation mode
  */
 function generateHtmlDocument(
   title: string,
@@ -658,7 +658,7 @@ ${bodyContent}
 }
 
 /**
- * 生成隔离模式的 body 内容
+ * Generate isolated mode body content
  */
 function generateIsolatedBodyContent(css: string, pagesHtml: string): string {
   return `<div class="${ISOLATION_ROOT_CLASS}">
@@ -670,15 +670,15 @@ ${pagesHtml}
 }
 
 /**
- * 渲染分页 HTML
+ * Render paginated HTML
  * @requirements 11.1, 11.2, 11.3, 11.4, 11.5, 11.6
- * @requirements 3.1, 4.2 - CSS 隔离和字体嵌入（隔离模式）
+ * @requirements 3.1, 4.2 - CSS isolation and font embedding (isolation mode)
  *
- * @param context - 分页渲染上下文
- * @returns 完整的分页 HTML 字符串
+ * @param context - Paginated render context
+ * @returns Complete paginated HTML string
  *
  * @example
- * // 普通模式
+ * // Normal mode
  * const html = renderPaginatedHtml({
  *   schema: printSchema,
  *   data: formData,
@@ -688,7 +688,7 @@ ${pagesHtml}
  * })
  *
  * @example
- * // 隔离模式 - 所有类名带 mpr- 前缀，样式完全隔离
+ * // Isolation mode - all class names have mpr- prefix, styles fully isolated
  * const html = renderPaginatedHtml({
  *   schema: printSchema,
  *   data: formData,
@@ -704,17 +704,17 @@ export function renderPaginatedHtml(context: PaginatedRenderContext): string {
   const theme = mergeTheme(options?.theme)
   const cls = createClassNameFn(mergedConfig.isolated)
   
-  // 根据隔离模式选择 CSS 生成方式
+  // Select CSS generation method based on isolation mode
   const baseCss = mergedConfig.isolated
     ? generateIsolatedCss(options?.theme)
     : generateCss(theme)
   const paginationCss = generatePaginationCss(mergedConfig.isolated)
   const fullCss = `${baseCss}\n${paginationCss}`
 
-  // 构建 section 映射
+  // Build section mapping
   const sectionMap = buildSectionMap(schema, measuredItems)
 
-  // 渲染每一页
+  // Render each page
   const { totalPages } = pageBreakResult
   const pages = pageBreakResult.pages.map((page, i) => {
     const pageNumber = i + 1
@@ -736,7 +736,7 @@ export function renderPaginatedHtml(context: PaginatedRenderContext): string {
 
   const pagesHtml = pages.join('\n')
   
-  // 根据隔离模式生成不同的 body 内容
+  // Generate different body content based on isolation mode
   const bodyContent = mergedConfig.isolated
     ? generateIsolatedBodyContent(fullCss, pagesHtml)
     : pagesHtml
@@ -744,12 +744,12 @@ export function renderPaginatedHtml(context: PaginatedRenderContext): string {
   return generateHtmlDocument(schema.header.title, fullCss, bodyContent, mergedConfig.isolated)
 }
 
-// ==================== CSS 分页规则 ====================
+// ==================== CSS Pagination Rules ====================
 
 /**
- * 生成分页相关的 CSS 规则
- * @requirements 11.5, 11.6 - CSS page-break 规则
- * @param isolated - 是否启用隔离模式（类名带 mpr- 前缀）
+ * Generate pagination-related CSS rules
+ * @requirements 11.5, 11.6 - CSS page-break rules
+ * @param isolated - Whether to enable isolation mode (class names have mpr- prefix)
  */
 export function generatePaginationCss(isolated: boolean = false): string {
   const cls = createClassNameFn(isolated)
@@ -768,12 +768,12 @@ export function generatePaginationCss(isolated: boolean = false): string {
   const noPageBreak = cls(CSS_CLASSES.NO_PAGE_BREAK)
   
   return `
-/* 分页文档样式 */
+/* Paginated document styles */
 ${rootSelector} {
   background: #f0f0f0;
 }
 
-/* 每页样式 */
+/* Each page styles */
 ${rootSelector} .${printPage} {
   background: white;
   margin: 10mm auto;
@@ -781,12 +781,12 @@ ${rootSelector} .${printPage} {
   position: relative;
 }
 
-/* 续页标记 */
+/* Continuation page marker */
 .${continuationPage} .${formTitle}::after {
   content: '';
 }
 
-/* 重复的表头样式 */
+/* Repeated header styles */
 .${repeatedHeader} {
   margin-bottom: 0;
   border-bottom: none;
@@ -800,13 +800,13 @@ ${rootSelector} .${printPage} {
   background: #f5f5f5;
 }
 
-/* 页码样式 */
+/* Page number styles */
 .${pageNumber} {
   text-align: right;
   flex: 1;
 }
 
-/* 打印样式 */
+/* Print styles */
 @media print {
   ${rootSelector} {
     background: white;
@@ -823,23 +823,23 @@ ${rootSelector} .${printPage} {
     page-break-after: auto;
   }
 
-  /* 避免在表格行中间分页 */
+  /* Avoid page break in middle of table rows */
   .${dataTable} tr {
     page-break-inside: avoid;
   }
 
-  /* 避免在区块标题后分页 */
+  /* Avoid page break after section titles */
   .${sectionTitle} {
     page-break-after: avoid;
   }
 
-  /* 签名区域避免分页 */
+  /* Signature area avoid page break */
   .${signatureArea} {
     page-break-inside: avoid;
   }
 }
 
-/* 分页控制类 */
+/* Pagination control classes */
 .${pageBreakBefore} {
   page-break-before: always;
 }
@@ -854,11 +854,11 @@ ${rootSelector} .${printPage} {
 `
 }
 
-// ==================== 简化 API ====================
+// ==================== Simplified API ====================
 
 /**
- * 简化的分页渲染函数
- * 适用于已经有分页结果的场景
+ * Simplified paginated render function
+ * For scenarios where pagination result is already available
  */
 export function renderPaginatedHtmlSimple(
   schema: PrintSchema,
@@ -879,7 +879,7 @@ export function renderPaginatedHtmlSimple(
 }
 
 /**
- * 从 PaginationConfig 创建 PaginatedRenderConfig
+ * Create PaginatedRenderConfig from PaginationConfig
  */
 export function createRenderConfigFromPaginationConfig(
   paginationConfig?: PaginationConfig

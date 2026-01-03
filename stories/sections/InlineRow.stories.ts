@@ -109,7 +109,7 @@ export const MixedTypes: Story = {
         ],
       } as InlineRowConfig,
     },
-    { name: '张三', age: 28, gender: ['female'] },
+    { name: 'Jane Doe', age: 28, gender: ['female'] },
     { title: '混合区块类型', description: 'InfoGrid + CheckboxGrid 组合' }
   ),
 }
@@ -161,7 +161,7 @@ export const MaternalInfoRow: Story = {
       },
     ],
     {
-      name: '李女士',
+      name: 'Mary Smith',
       age: 30,
       bedNo: 'A-201',
       deliveryMethod: ['natural'],

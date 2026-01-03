@@ -1,5 +1,5 @@
 /**
- * @fileoverview PDF 生成器
+ * @fileoverview PDF generator
  * @module pdf/pdf-generator
  */
 
@@ -8,20 +8,20 @@ import type { PdfOptions } from '../types/options'
 import { renderToHtml } from '../renderer'
 
 /**
- * 将 PrintSchema 和 FormData 渲染为 PDF Buffer
+ * Render PrintSchema and FormData to PDF Buffer
  * 
- * @param schema - 打印布局配置
- * @param data - 表单数据
- * @param options - PDF 生成选项
- * @returns PDF 文件的 Buffer
- * @throws 如果 Puppeteer 未安装
+ * @param schema - Print layout configuration
+ * @param data - Form data
+ * @param options - PDF generation options
+ * @returns PDF file Buffer
+ * @throws If Puppeteer is not installed
  */
 export async function renderToPdf(
   schema: PrintSchema,
   data: FormData,
   options?: PdfOptions
 ): Promise<Buffer> {
-  // 动态导入 Puppeteer（可选依赖）
+  // Dynamically import Puppeteer (optional dependency)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let puppeteer: any
   try {
@@ -32,10 +32,10 @@ export async function renderToPdf(
     )
   }
   
-  // 生成 HTML
+  // Generate HTML
   const html = renderToHtml(schema, data, options)
   
-  // 启动浏览器
+  // Launch browser
   const browser = await puppeteer.default.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
@@ -44,16 +44,16 @@ export async function renderToPdf(
   try {
     const page = await browser.newPage()
     
-    // 设置页面内容
+    // Set page content
     await page.setContent(html, {
       waitUntil: 'networkidle0',
     })
     
-    // 确定页面尺寸
+    // Determine page size
     const format = schema.pageSize.toUpperCase() as 'A4' | 'A5'
     const landscape = schema.orientation === 'landscape'
     
-    // 生成 PDF
+    // Generate PDF
     const pdfBuffer = await page.pdf({
       format,
       landscape,
@@ -64,7 +64,7 @@ export async function renderToPdf(
         bottom: '0',
         left: '0',
       },
-      // PDF/A 格式（如果需要）
+      // PDF/A format (if needed)
       ...(options?.pdfA && {
         tagged: true,
         outline: true,

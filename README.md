@@ -331,13 +331,13 @@ const paginationConfig: PaginationConfig = {
   // 页眉配置
   headerConfig: {
     showOnEachPage: true,
-    continuationSuffix: '(续)',    // 续页标题后缀
+    continuationSuffix: '(continued)',    // 续页标题后缀，默认 "(continued)"
   },
   
   // 页脚配置
   footerConfig: {
     showOnEachPage: true,
-    pageNumberFormat: '第 {current} 页 / 共 {total} 页',
+    pageNumberFormat: 'Page {current} of {total}',  // 页码格式，默认英文格式
   },
 }
 
@@ -364,7 +364,7 @@ const html = renderPaginatedHtml({
   config: {
     isolated: true,  // 启用隔离模式
     showHeaderOnEachPage: true,
-    continuationSuffix: '(续)',
+    continuationSuffix: '(continued)',  // 默认值，可自定义为中文 "(续)"
   },
 })
 ```

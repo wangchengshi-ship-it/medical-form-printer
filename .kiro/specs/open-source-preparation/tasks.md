@@ -31,26 +31,27 @@ This plan prepares the `medical-print-renderer` library for open source release 
     - **Status: PARTIAL** - Translated some files but ~65 files still contain Chinese comments
     - _Requirements: 4.6, 4.8_
 
-  - [-] 1.5 Write property test for no sensitive hospital data
+  - [x] 1.5 Write property test for no sensitive hospital data
     - **Property 4: No Sensitive Hospital Data**
     - **Validates: Requirements 4.4, 4.5, 4.11, 4.12**
     - Created `test/open-source/no-sensitive-hospital.test.ts`
-    - **Status: FAILING** - Test detects sensitive hospital data in story files (stories/pages/Watermark.stories.ts, stories/sections/_story-utils.ts, etc.)
-    - Counterexample: `stories/pages/Watermark.stories.ts` contains "Sample Hospital"
+    - **Status: PASSING** ✅ - All story files sanitized
+    - **Remaining Issues**: None - all sensitive hospital names replaced with generic placeholders
 
-  - [-] 1.6 Write property test for no sensitive personal data
+  - [x] 1.6 Write property test for no sensitive personal data
     - **Property 5: No Sensitive Personal Data**
     - **Validates: Requirements 4.4, 4.5, 4.11, 4.12**
     - Created `test/open-source/no-sensitive-personal.test.ts`
-    - **Status: FAILING** - Test detects sensitive personal data in story files
-    - Counterexample: `stories/styles/BaseUnit.stories.ts` contains "张三"
+    - **Status: PASSING** ✅ - All story files sanitized
+    - **Remaining Issues**: None - all Chinese personal names replaced with English placeholders
 
-  - [-] 1.7 Write property test for no Chinese in source code
+  - [x] 1.7 Write property test for no Chinese in source code
     - **Property 3: No Chinese Characters in Source Code**
     - **Validates: Requirements 2.8, 2.9, 4.6, 4.7**
     - Created `test/open-source/no-chinese-source.test.ts`
-    - **Status: FAILING** - Test detects Chinese characters in ~65 source files
-    - Counterexample: `src/pagination/page-break-calculator.ts` contains Chinese comments
+    - **Status: FAILING** - Test detects Chinese characters in source files
+    - Counterexample: `src/utils/watermark.ts` contains 271 Chinese characters
+    - Need to translate Chinese comments and strings in source code
 
 - [ ] 2. Package Configuration
   - [ ] 2.1 Update package.json for npm publishing

@@ -1,26 +1,26 @@
 /**
- * @fileoverview Template Method 模式 - 页面渲染流程
+ * @fileoverview Template Method Pattern - Page Rendering Flow
  * @module renderer/templates
  * @version 1.2.0
  * @author Kiro
  * @modified 2026-01-03
  *
  * @description
- * 使用 Template Method 模式定义页面渲染的骨架流程。
- * AbstractPageRenderer 定义渲染步骤：renderHeader → renderBody → renderFooter
- * 子类实现具体步骤：SinglePageRenderer、PaginatedPageRenderer
+ * Uses Template Method pattern to define the skeleton flow for page rendering.
+ * AbstractPageRenderer defines rendering steps: renderHeader → renderBody → renderFooter
+ * Subclasses implement specific steps: SinglePageRenderer, PaginatedPageRenderer
  *
- * v1.2.0 优化：
- * - 增强类型安全，引入 PaginatedPageContext 消除非空断言
- * - 页码格式化提取为可配置项
- * - 提取公共页脚渲染逻辑
- * - 添加 formatPageNumber 工具函数
+ * v1.2.0 optimizations:
+ * - Enhanced type safety, introduced PaginatedPageContext to eliminate non-null assertions
+ * - Extracted page number formatting as configurable option
+ * - Extracted common footer rendering logic
+ * - Added formatPageNumber utility function
  *
- * v1.1.0 优化：
- * - 提取公共页眉渲染逻辑到基类
- * - 提取 CSS 类名常量
- * - 改进类型安全（水印选项类型守卫）
- * - 减少子类重复代码
+ * v1.1.0 optimizations:
+ * - Extracted common header rendering logic to base class
+ * - Extracted CSS class name constants
+ * - Improved type safety (watermark options type guard)
+ * - Reduced duplicate code in subclasses
  */
 
 import type { PrintSchema, FormData, PrintSection } from '../../types/print-schema'
@@ -220,7 +220,7 @@ export abstract class AbstractPageRenderer {
   }
 }
 
-// ==================== 单页渲染器 ====================
+// ==================== Single Page Renderer ====================
 
 /**
  * Single page renderer
@@ -255,7 +255,7 @@ export class SinglePageRenderer extends AbstractPageRenderer {
   }
 }
 
-// ==================== 分页渲染器 ====================
+// ==================== Paginated Renderer ====================
 
 /**
  * Paginated renderer options
@@ -388,7 +388,7 @@ export class PaginatedPageRenderer extends AbstractPageRenderer {
   }
 }
 
-// ==================== 工厂函数 ====================
+// ==================== Factory Functions ====================
 
 /**
  * Create single page renderer
@@ -404,6 +404,6 @@ export function createPaginatedPageRenderer(): PaginatedPageRenderer {
   return new PaginatedPageRenderer()
 }
 
-// ==================== 导出类型 ====================
+// ==================== Export Types ====================
 
 export type { PaginatedRenderOptions }

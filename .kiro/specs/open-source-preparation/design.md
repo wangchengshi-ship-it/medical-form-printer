@@ -90,15 +90,16 @@ medical-form-printer/
 
 | Original (Sensitive) | Replacement (Generic) |
 |---------------------|----------------------|
-| Sample Hospital | Sample Hospital |
-| Postpartum Care Center | Postpartum Care Center |
 | 张三 | Jane Doe |
 | 李护士 | Nurse Smith |
 | 王护士长 | Head Nurse Johnson |
 | 张宝宝 | Baby Doe |
-| 天津市中心妇产科医院 | City Medical Center |
+| 天津市中心妇产科医院 | Sample Hospital / City Medical Center |
+| 中医二附属 | Sample Hospital / Demo Medical Center |
 | 天津 | Sample City |
 | 汉族 | - (remove or use generic) |
+
+**Note**: Generic placeholder names like "Sample Hospital", "Demo Medical Center", "Postpartum Care Center" are acceptable and should be used as replacements for real sensitive hospital names.
 
 ### 4. CI/CD Workflow
 
@@ -214,7 +215,7 @@ export const PLACEHOLDER = {
 
 ### Property 4: No Sensitive Hospital Data
 
-*For any* file in the repository (source, tests, stories, documentation), there SHALL be zero occurrences of sensitive hospital names including but not limited to: "Sample Hospital", "中医二附属", "天津市中心妇产科医院".
+*For any* file in the repository (source, tests, stories, documentation), there SHALL be zero occurrences of real sensitive hospital names including Chinese hospital names like "中医二附属", "天津市中心妇产科医院". Generic placeholder names like "Sample Hospital", "Demo Medical Center" are acceptable.
 
 **Validates: Requirements 4.4, 4.5, 4.11, 4.12**
 

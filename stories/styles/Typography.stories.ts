@@ -202,7 +202,7 @@ export const ChineseTypography: Story = {
           <div style="margin-bottom: 24px;">
             <h4 style="font-size: ${theme.fontSize.sectionTitle};">一、产妇基本信息</h4>
             <p style="font-size: ${theme.fontSize.body}; line-height: 1.8;">
-              患者张三，女，28岁，于2024年1月15日入院。主诉：产后3天，乳房胀痛2天。
+              患者Jane Doe，女，28岁，于2024年1月15日入院。主诉：产后3天，乳房胀痛2天。
               患者于3天前顺产一女婴，产后第2天开始出现双侧乳房胀痛，伴有轻度发热，体温37.5℃。
               无明显红肿，无脓性分泌物。
             </p>

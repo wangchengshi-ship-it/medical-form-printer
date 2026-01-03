@@ -24,26 +24,26 @@
 // ==================== Type Exports ====================
 
 export type {
-  // 页面尺寸
+  // Page dimensions
   PageDimensions,
-  // 可测量内容项
+  // Measurable content items
   MeasurableItemType,
   MeasurableItem,
-  // 分页结果
+  // Pagination result
   PageContent,
   PageBreakResult,
-  // 溢出字段配置
+  // Overflow field configuration
   OverflowFieldConfig,
   OverflowConfig,
   DisplayConfig,
-  // 分页配置
+  // Pagination configuration
   PageHeaderConfig,
   PageFooterConfig,
   SmartPaginationConfig,
   PaginationConfig,
-  // 分页计算参数
+  // Page break calculation options
   PageBreakOptions,
-  // 工具类型
+  // Utility types
   PageSizePreset,
   PaginationMode,
 } from './types'

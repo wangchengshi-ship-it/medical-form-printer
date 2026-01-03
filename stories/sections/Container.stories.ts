@@ -216,7 +216,7 @@ export const RealMedicalExample: Story = {
       } as ContainerConfig,
     },
     {
-      name: '张三',
+      name: 'Mary Johnson',
       age: 28,
       admissionDate: '2024-01-15',
       bedNumber: 'A-101',

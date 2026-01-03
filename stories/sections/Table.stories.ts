@@ -88,10 +88,10 @@ export const NursingRecord: Story = {
     },
     {
       nursingRecords: [
-        { time: '08:00', content: '晨间护理，测量生命体征', nurse: '李护士' },
-        { time: '10:00', content: '协助母乳喂养指导', nurse: '王护士' },
-        { time: '14:00', content: '产后康复操指导', nurse: '李护士' },
-        { time: '18:00', content: '晚间护理，观察恶露情况', nurse: '张护士' },
+        { time: '08:00', content: '晨间护理，测量生命体征', nurse: 'Nurse Li' },
+        { time: '10:00', content: '协助母乳喂养指导', nurse: 'Nurse Wang' },
+        { time: '14:00', content: '产后康复操指导', nurse: 'Nurse Li' },
+        { time: '18:00', content: '晚间护理，观察恶露情况', nurse: 'Nurse Zhang' },
       ],
     },
     { title: '护理记录表', description: '真实医疗场景：护理记录表格' }
