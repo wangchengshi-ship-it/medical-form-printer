@@ -1,5 +1,5 @@
 /**
- * @fileoverview Data formatters
+ * @fileoverview Data formatters for converting values to display strings
  * @module formatters
  * @modified 2023-03-02
  */
@@ -14,7 +14,18 @@ const defaultDateOptions: Required<DateFormatOptions> = {
 }
 
 /**
- * Format date
+ * Format a date value to a string
+ * 
+ * @param value - The date value (Date object, string, or number)
+ * @param format - The format string (default: 'YYYY-MM-DD')
+ * @returns Formatted date string, or empty string if value is falsy
+ * 
+ * @example
+ * ```typescript
+ * formatDate('2024-01-15')                    // '2024-01-15'
+ * formatDate(new Date(), 'YYYY年MM月DD日')    // '2024年01月15日'
+ * formatDate('2024-01-15', 'MM/DD/YYYY')      // '01/15/2024'
+ * ```
  */
 export function formatDate(
   value: unknown,
@@ -42,15 +53,40 @@ export function formatDate(
 }
 
 /**
- * Format boolean value to checkbox symbol
- * Uses □ (U+25A1) as unchecked symbol, consistent with Vue components
+ * Format a boolean value to a checkbox symbol
+ * 
+ * Uses ☑ (U+2611) for checked and □ (U+25A1) for unchecked,
+ * consistent with Vue component rendering.
+ * 
+ * @param value - The boolean value (truthy/falsy)
+ * @returns '☑' for truthy values, '□' for falsy values
+ * 
+ * @example
+ * ```typescript
+ * formatBoolean(true)   // '☑'
+ * formatBoolean(false)  // '□'
+ * formatBoolean(1)      // '☑'
+ * formatBoolean(null)   // '□'
+ * ```
  */
 export function formatBoolean(value: unknown): string {
   return value ? '☑' : '□'
 }
 
 /**
- * Format number
+ * Format a number value to a string with optional precision
+ * 
+ * @param value - The number value
+ * @param precision - Number of decimal places (optional)
+ * @returns Formatted number string, or empty string if value is empty/invalid
+ * 
+ * @example
+ * ```typescript
+ * formatNumber(1234.567)        // '1234.567'
+ * formatNumber(1234.567, 2)     // '1234.57'
+ * formatNumber('invalid')       // 'invalid'
+ * formatNumber(null)            // ''
+ * ```
  */
 export function formatNumber(
   value: unknown,
@@ -68,7 +104,26 @@ export function formatNumber(
 }
 
 /**
- * Format value (generic)
+ * Format a value based on its type
+ * 
+ * Generic formatter that handles different data types and supports
+ * custom formatters for specialized formatting needs.
+ * 
+ * @param value - The value to format
+ * @param type - The data type ('text', 'checkbox', 'date', 'datetime', 'number')
+ * @param options - Formatting options
+ * @param options.dateFormat - Date format configuration
+ * @param options.emptyPlaceholder - Placeholder for empty values (default: '')
+ * @param options.customFormatters - Custom formatter functions by type
+ * @returns Formatted string
+ * 
+ * @example
+ * ```typescript
+ * formatValue('Hello', 'text')                    // 'Hello'
+ * formatValue(true, 'checkbox')                   // '☑'
+ * formatValue('2024-01-15', 'date')               // '2024-01-15'
+ * formatValue(null, 'text', { emptyPlaceholder: '-' })  // '-'
+ * ```
  */
 export function formatValue(
   value: unknown,
@@ -107,7 +162,21 @@ export function formatValue(
 }
 
 /**
- * Check if array value contains specified option
+ * Check if a value is checked/selected for a given option
+ * 
+ * Handles both array values (multiple selection) and single values.
+ * 
+ * @param values - The value(s) to check (array or single value)
+ * @param optionValue - The option value to check against
+ * @returns true if the option is selected, false otherwise
+ * 
+ * @example
+ * ```typescript
+ * isChecked(['a', 'b', 'c'], 'b')  // true
+ * isChecked(['a', 'b', 'c'], 'd')  // false
+ * isChecked('yes', 'yes')          // true
+ * isChecked('no', 'yes')           // false
+ * ```
  */
 export function isChecked(values: unknown, optionValue: string): boolean {
   if (Array.isArray(values)) {

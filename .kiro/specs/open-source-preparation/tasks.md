@@ -78,34 +78,34 @@ This plan prepares the `medical-print-renderer` library for open source release 
 - [x] 3. Checkpoint - Data sanitization and package config complete
   - Ensure all tests pass, ask the user if questions arise.
 
-- [-] 4. Documentation
-  - [-] 4.1 Create English README.md
+- [x] 4. Documentation
+  - [x] 4.1 Create English README.md
     - Write comprehensive English documentation
     - Include installation, quick start, API reference, examples
     - Add badges (npm version, CI status, license)
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
 
-  - [ ] 4.2 Create Chinese README (README.zh-CN.md)
+  - [x] 4.2 Create Chinese README (README.zh-CN.md)
     - Translate English README to Chinese
     - Keep code examples consistent
     - _Requirements: 2.7_
 
-  - [ ] 4.3 Create CHANGELOG.md
+  - [x] 4.3 Create CHANGELOG.md
     - Follow Keep a Changelog format
     - Document initial release features
     - _Requirements: 8.1, 8.2, 8.3_
 
-  - [ ] 4.4 Add JSDoc comments to public exports
+  - [x] 4.4 Add JSDoc comments to public exports
     - Audit `src/index.ts` exports
     - Add/improve JSDoc for all public functions and types
     - Include @param, @returns, @example annotations
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-  - [ ] 4.5 Write property test for JSDoc coverage
+  - [x] 4.5 Write property test for JSDoc coverage
     - **Property 6: JSDoc Coverage for Public Exports**
     - **Validates: Requirements 3.1, 3.2, 3.3**
 
-- [ ] 5. Legal and Community Files
+- [-] 5. Legal and Community Files
   - [ ] 5.1 Create LICENSE file
     - Add MIT license with correct year and copyright holder
     - _Requirements: 7.1, 7.2, 7.3_

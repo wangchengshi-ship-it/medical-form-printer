@@ -4,23 +4,23 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/node/v/medical-form-printer.svg)](https://nodejs.org)
 
-A schema-driven medical form print renderer that transforms structured form data into printable HTML and PDF documents. Designed for healthcare applications requiring professional document generation with support for complex layouts, smart pagination, and cross-environment consistency.
+一个基于 Schema 驱动的医疗表单打印渲染库，将结构化表单数据转换为可打印的 HTML 和 PDF 文档。专为医疗健康应用设计，支持复杂布局、智能分页和跨环境一致性渲染。
 
-[中文文档](./README.zh-CN.md)
+[English Documentation](./README.md)
 
-## Features
+## 特性
 
-- 🖨️ **Dual Environment** - Works seamlessly in both browser and Node.js
-- 📄 **Rich Section Types** - Info grids, data tables, checkbox grids, signature areas, notes, and more
-- 🎨 **Theme Customization** - Fully customizable fonts, colors, spacing, and sizing
-- 📑 **PDF Generation** - High-fidelity PDF output via Puppeteer (Node.js)
-- 🔗 **PDF Merging** - Combine multiple documents into a single PDF
-- 📐 **Smart Pagination** - Automatic page breaks with header repetition and overflow handling
-- 🔒 **CSS Isolation** - Embedded fonts and namespaced styles for consistent rendering
-- 🔌 **Extensible** - Register custom section renderers for specialized content
-- 📦 **TypeScript First** - Full type definitions with comprehensive JSDoc documentation
+- 🖨️ **双环境支持** - 同时支持浏览器和 Node.js 环境
+- 📄 **丰富的区块类型** - 信息网格、数据表格、复选框网格、签名区域、备注等
+- 🎨 **主题定制** - 完全可定制的字体、颜色、间距和尺寸
+- 📑 **PDF 生成** - 通过 Puppeteer 生成高保真 PDF（Node.js）
+- 🔗 **PDF 合并** - 将多个文档合并为单个 PDF
+- 📐 **智能分页** - 自动分页，支持表头重复和溢出处理
+- 🔒 **CSS 隔离** - 内嵌字体和命名空间样式，确保一致渲染
+- 🔌 **可扩展** - 注册自定义区块渲染器以支持特殊内容
+- 📦 **TypeScript 优先** - 完整的类型定义和 JSDoc 文档
 
-## Installation
+## 安装
 
 ```bash
 # npm
@@ -36,15 +36,15 @@ pnpm add medical-form-printer
 bun add medical-form-printer
 ```
 
-For PDF generation in Node.js, install Puppeteer as a peer dependency:
+如需在 Node.js 中生成 PDF，请安装 Puppeteer 作为对等依赖：
 
 ```bash
 npm install puppeteer
 ```
 
-## Quick Start
+## 快速开始
 
-### Browser Usage
+### 浏览器使用
 
 ```typescript
 import { renderToHtml } from 'medical-form-printer'
@@ -53,9 +53,9 @@ const printSchema = {
   pageSize: 'A4',
   orientation: 'portrait',
   header: {
-    hospital: 'Sample Hospital',
-    department: 'Postpartum Care Center',
-    title: 'Patient Assessment Form',
+    hospital: '示例医院',
+    department: '产后康复中心',
+    title: '患者评估表',
   },
   sections: [
     {
@@ -65,10 +65,10 @@ const printSchema = {
         rows: [
           {
             cells: [
-              { label: 'Name', field: 'name', type: 'text' },
-              { label: 'Age', field: 'age', type: 'number' },
-              { label: 'Date', field: 'admissionDate', type: 'date' },
-              { label: 'Room', field: 'roomNumber', type: 'text' },
+              { label: '姓名', field: 'name', type: 'text' },
+              { label: '年龄', field: 'age', type: 'number' },
+              { label: '日期', field: 'admissionDate', type: 'date' },
+              { label: '房间', field: 'roomNumber', type: 'text' },
             ]
           }
         ]
@@ -81,34 +81,34 @@ const printSchema = {
 }
 
 const formData = {
-  name: 'Jane Doe',
+  name: '张三',
   age: 28,
   admissionDate: '2024-01-15',
   roomNumber: 'A-101'
 }
 
-// Render to HTML
+// 渲染为 HTML
 const html = renderToHtml(printSchema, formData, {
-  watermark: 'Internal Use Only'
+  watermark: '内部使用'
 })
 
-// Display in iframe or div
+// 显示在 iframe 或 div 中
 document.getElementById('preview').innerHTML = html
 ```
 
-### Node.js Usage (PDF Generation)
+### Node.js 使用（PDF 生成）
 
 ```typescript
 import { renderToPdf, mergePdfs } from 'medical-form-printer/node'
 import fs from 'fs'
 
-// Generate single PDF
+// 生成单个 PDF
 const pdfBuffer = await renderToPdf(printSchema, formData, {
-  watermark: 'Confidential'
+  watermark: '机密文件'
 })
 fs.writeFileSync('assessment.pdf', pdfBuffer)
 
-// Merge multiple forms into one PDF
+// 合并多个表单为一个 PDF
 const mergedPdf = await mergePdfs([
   { schema: maternalSchema, data: maternalData },
   { schema: newbornSchema, data: newbornData },
@@ -116,51 +116,51 @@ const mergedPdf = await mergePdfs([
 fs.writeFileSync('complete-record.pdf', mergedPdf)
 ```
 
-## API Reference
+## API 参考
 
-### Core Rendering
+### 核心渲染
 
 #### `renderToHtml(schema, data, options?)`
 
-Renders a print schema with form data to an HTML string.
+将打印 Schema 和表单数据渲染为 HTML 字符串。
 
 ```typescript
 import { renderToHtml } from 'medical-form-printer'
 
 const html = renderToHtml(printSchema, formData, {
   theme: customTheme,
-  watermark: 'Draft',
+  watermark: '草稿',
   watermarkOpacity: 0.1
 })
 ```
 
-**Parameters:**
-- `schema: PrintSchema` - The print schema defining layout and sections
-- `data: FormData` - The form data to render
-- `options?: RenderOptions` - Optional rendering configuration
+**参数：**
+- `schema: PrintSchema` - 定义布局和区块的打印 Schema
+- `data: FormData` - 要渲染的表单数据
+- `options?: RenderOptions` - 可选的渲染配置
 
-**Returns:** `string` - Complete HTML document
+**返回：** `string` - 完整的 HTML 文档
 
 #### `renderToIsolatedHtml(schema, data, options?)`
 
-Renders with CSS isolation for consistent cross-environment styling.
+使用 CSS 隔离模式渲染，确保跨环境样式一致性。
 
 ```typescript
 import { renderToIsolatedHtml } from 'medical-form-printer'
 
 const html = renderToIsolatedHtml(printSchema, formData, {
-  watermark: 'Internal Use Only'
+  watermark: '内部使用'
 })
 ```
 
-All content is wrapped in an isolation container with:
-- Namespaced CSS classes (prefixed with `mpr-`)
-- Embedded Source Han Serif SC font
-- Style containment for predictable rendering
+所有内容都包装在隔离容器中，具有：
+- 命名空间 CSS 类（以 `mpr-` 为前缀）
+- 内嵌思源宋体字体
+- 样式隔离，确保可预测的渲染效果
 
 #### `renderToIsolatedFragment(schema, data, options?)`
 
-Renders an isolated HTML fragment for embedding in existing pages.
+渲染隔离的 HTML 片段，用于嵌入现有页面。
 
 ```typescript
 import { renderToIsolatedFragment } from 'medical-form-printer'
@@ -169,17 +169,17 @@ const fragment = renderToIsolatedFragment(printSchema, formData)
 document.getElementById('preview').innerHTML = fragment
 ```
 
-### PDF Generation (Node.js)
+### PDF 生成（Node.js）
 
 #### `renderToPdf(schema, data, options?)`
 
-Generates a PDF buffer from a print schema.
+从打印 Schema 生成 PDF 缓冲区。
 
 ```typescript
 import { renderToPdf } from 'medical-form-printer/node'
 
 const pdfBuffer = await renderToPdf(printSchema, formData, {
-  watermark: 'Confidential',
+  watermark: '机密',
   pdfOptions: {
     format: 'A4',
     printBackground: true
@@ -187,16 +187,16 @@ const pdfBuffer = await renderToPdf(printSchema, formData, {
 })
 ```
 
-**Parameters:**
-- `schema: PrintSchema` - The print schema
-- `data: FormData` - The form data
-- `options?: RenderOptions & { pdfOptions?: PdfOptions }` - Rendering and PDF options
+**参数：**
+- `schema: PrintSchema` - 打印 Schema
+- `data: FormData` - 表单数据
+- `options?: RenderOptions & { pdfOptions?: PdfOptions }` - 渲染和 PDF 选项
 
-**Returns:** `Promise<Buffer>` - PDF file buffer
+**返回：** `Promise<Buffer>` - PDF 文件缓冲区
 
 #### `mergePdfs(documents, options?)`
 
-Merges multiple documents into a single PDF.
+将多个文档合并为单个 PDF。
 
 ```typescript
 import { mergePdfs } from 'medical-form-printer/node'
@@ -205,15 +205,15 @@ const mergedPdf = await mergePdfs([
   { schema: schema1, data: data1 },
   { schema: schema2, data: data2 },
 ], {
-  watermark: 'Complete Record'
+  watermark: '完整记录'
 })
 ```
 
-### Custom Section Renderers
+### 自定义区块渲染器
 
 #### `registerSectionRenderer(type, renderer)`
 
-Registers a custom section renderer for specialized content.
+注册自定义区块渲染器以支持特殊内容。
 
 ```typescript
 import { registerSectionRenderer } from 'medical-form-printer'
@@ -223,7 +223,7 @@ registerSectionRenderer('vital-signs-chart', (config, data, options) => {
   return `
     <div class="vital-signs-chart">
       <h3>${config.title}</h3>
-      <!-- Custom chart rendering -->
+      <!-- 自定义图表渲染 -->
     </div>
   `
 })
@@ -231,7 +231,7 @@ registerSectionRenderer('vital-signs-chart', (config, data, options) => {
 
 #### `getSectionRenderer(type)`
 
-Retrieves a registered section renderer.
+获取已注册的区块渲染器。
 
 ```typescript
 import { getSectionRenderer } from 'medical-form-printer'
@@ -239,11 +239,11 @@ import { getSectionRenderer } from 'medical-form-printer'
 const renderer = getSectionRenderer('info-grid')
 ```
 
-### Pagination
+### 分页
 
 #### `renderPaginatedHtml(config)`
 
-Renders multi-page content with smart pagination.
+使用智能分页渲染多页内容。
 
 ```typescript
 import { 
@@ -267,12 +267,12 @@ const html = renderPaginatedHtml({
   config: {
     isolated: true,
     showHeaderOnEachPage: true,
-    continuationSuffix: '(continued)'
+    continuationSuffix: '（续）'
   }
 })
 ```
 
-#### Page Size Presets
+#### 页面尺寸预设
 
 ```typescript
 import { PAGE_A4, PAGE_A5, PAGE_16K, PAGE_PRESETS } from 'medical-form-printer'
@@ -282,20 +282,20 @@ import { PAGE_A4, PAGE_A5, PAGE_16K, PAGE_PRESETS } from 'medical-form-printer'
 // PAGE_16K: { width: 185, height: 260 } (mm)
 ```
 
-#### Unit Conversion
+#### 单位转换
 
 ```typescript
 import { mmToPx, pxToMm, mmToPt, ptToMm } from 'medical-form-printer'
 
-const heightPx = mmToPx(297)  // 297mm → pixels
-const heightMm = pxToMm(1123) // pixels → mm
+const heightPx = mmToPx(297)  // 297mm → 像素
+const heightMm = pxToMm(1123) // 像素 → mm
 ```
 
-### Styling
+### 样式
 
 #### `generateCss(theme?)`
 
-Generates CSS styles for print rendering.
+生成打印渲染的 CSS 样式。
 
 ```typescript
 import { generateCss, defaultTheme } from 'medical-form-printer'
@@ -305,16 +305,16 @@ const css = generateCss(defaultTheme)
 
 #### `generateIsolatedCss(theme?)`
 
-Generates isolated CSS with embedded fonts and namespaced classes.
+生成带有内嵌字体和命名空间类的隔离 CSS。
 
 ```typescript
 import { generateIsolatedCss } from 'medical-form-printer'
 
 const css = generateIsolatedCss()
-// Includes @font-face, isolation container, and all component styles
+// 包含 @font-face、隔离容器和所有组件样式
 ```
 
-#### Theme Customization
+#### 主题定制
 
 ```typescript
 import { renderToHtml, mergeTheme, defaultTheme } from 'medical-form-printer'
@@ -343,7 +343,7 @@ const customTheme = mergeTheme(defaultTheme, {
 const html = renderToHtml(schema, data, { theme: customTheme })
 ```
 
-### Formatters
+### 格式化工具
 
 ```typescript
 import { 
@@ -362,7 +362,7 @@ formatNumber(1234.5, { decimals: 2 })  // '1234.50'
 isChecked('yes', ['yes', 'true'])  // true
 ```
 
-### HTML Builder Utilities
+### HTML 构建工具
 
 ```typescript
 import { 
@@ -374,18 +374,18 @@ import {
   escapeHtml 
 } from 'medical-form-printer'
 
-// Fluent HTML building
+// 流式 HTML 构建
 const html = h('div', { class: 'container' },
-  h('h1', {}, 'Title'),
-  when(showContent, () => h('p', {}, 'Content')),
+  h('h1', {}, '标题'),
+  when(showContent, () => h('p', {}, '内容')),
   each(items, (item) => h('li', {}, item.name))
 )
 
-// Safe HTML escaping
+// 安全的 HTML 转义
 const safe = escapeHtml('<script>alert("xss")</script>')
 ```
 
-## PrintSchema Structure
+## PrintSchema 结构
 
 ```typescript
 interface PrintSchema {
@@ -406,18 +406,18 @@ interface PrintSchema {
 }
 ```
 
-## Section Types
+## 区块类型
 
-| Type | Description | Use Case |
-|------|-------------|----------|
-| `info-grid` | Grid layout for key-value pairs | Patient demographics, basic info |
-| `table` | Data table with columns | Nursing records, medication logs |
-| `checkbox-grid` | Grid of checkbox options | Assessment checklists, symptoms |
-| `signature-area` | Signature fields with labels | Approvals, acknowledgments |
-| `notes` | Static text content | Instructions, disclaimers |
-| `free-text` | Multi-line text input | Comments, observations |
+| 类型 | 描述 | 使用场景 |
+|------|------|----------|
+| `info-grid` | 键值对网格布局 | 患者基本信息、人口统计 |
+| `table` | 带列的数据表格 | 护理记录、用药日志 |
+| `checkbox-grid` | 复选框选项网格 | 评估清单、症状选择 |
+| `signature-area` | 带标签的签名字段 | 审批、确认签字 |
+| `notes` | 静态文本内容 | 说明、免责声明 |
+| `free-text` | 多行文本输入 | 备注、观察记录 |
 
-### Info Grid Section
+### 信息网格区块
 
 ```typescript
 {
@@ -427,10 +427,10 @@ interface PrintSchema {
     rows: [
       {
         cells: [
-          { label: 'Name', field: 'name', type: 'text' },
-          { label: 'Age', field: 'age', type: 'number', span: 1 },
-          { label: 'Date', field: 'date', type: 'date' },
-          { label: 'Status', field: 'status', type: 'checkbox', options: ['Active'] }
+          { label: '姓名', field: 'name', type: 'text' },
+          { label: '年龄', field: 'age', type: 'number', span: 1 },
+          { label: '日期', field: 'date', type: 'date' },
+          { label: '状态', field: 'status', type: 'checkbox', options: ['在院'] }
         ]
       }
     ]
@@ -438,61 +438,61 @@ interface PrintSchema {
 }
 ```
 
-### Table Section
+### 表格区块
 
 ```typescript
 {
   type: 'table',
-  title: 'Nursing Records',
+  title: '护理记录',
   config: {
     dataField: 'nursingRecords',
     columns: [
-      { header: 'Date', field: 'date', type: 'date', width: '15%' },
-      { header: 'Time', field: 'time', type: 'text', width: '10%' },
-      { header: 'Temperature', field: 'temperature', type: 'number', width: '15%' },
-      { header: 'Notes', field: 'notes', type: 'text' }
+      { header: '日期', field: 'date', type: 'date', width: '15%' },
+      { header: '时间', field: 'time', type: 'text', width: '10%' },
+      { header: '体温', field: 'temperature', type: 'number', width: '15%' },
+      { header: '备注', field: 'notes', type: 'text' }
     ]
   }
 }
 ```
 
-### Checkbox Grid Section
+### 复选框网格区块
 
 ```typescript
 {
   type: 'checkbox-grid',
-  title: 'Symptoms Assessment',
+  title: '症状评估',
   config: {
     field: 'symptoms',
     columns: 4,
     options: [
-      { value: 'fever', label: 'Fever' },
-      { value: 'headache', label: 'Headache' },
-      { value: 'fatigue', label: 'Fatigue' },
-      { value: 'nausea', label: 'Nausea' }
+      { value: 'fever', label: '发热' },
+      { value: 'headache', label: '头痛' },
+      { value: 'fatigue', label: '乏力' },
+      { value: 'nausea', label: '恶心' }
     ]
   }
 }
 ```
 
-### Signature Area Section
+### 签名区域区块
 
 ```typescript
 {
   type: 'signature-area',
   config: {
     fields: [
-      { label: 'Patient Signature', field: 'patientSignature' },
-      { label: 'Nurse Signature', field: 'nurseSignature' },
-      { label: 'Date', field: 'signatureDate', type: 'date' }
+      { label: '患者签名', field: 'patientSignature' },
+      { label: '护士签名', field: 'nurseSignature' },
+      { label: '日期', field: 'signatureDate', type: 'date' }
     ]
   }
 }
 ```
 
-## CSS Isolation
+## CSS 隔离
 
-For consistent rendering across different environments, use isolation mode:
+为确保跨环境一致渲染，请使用隔离模式：
 
 ```typescript
 import { 
@@ -506,43 +506,43 @@ import {
 // CSS_NAMESPACE = 'mpr'
 // ISOLATION_ROOT_CLASS = 'mpr-root'
 
-// Namespace utilities
+// 命名空间工具
 namespaceClass('header')           // 'mpr-header'
 namespaceClasses(['header', 'footer'])  // ['mpr-header', 'mpr-footer']
 ```
 
-Isolation mode provides:
-- All classes prefixed with `mpr-` namespace
-- Embedded Source Han Serif SC font (subset for CJK support)
-- CSS containment (`contain: layout style`)
-- Consistent rendering regardless of host page styles
+隔离模式提供：
+- 所有类以 `mpr-` 命名空间为前缀
+- 内嵌思源宋体字体（CJK 字符子集）
+- CSS 隔离（`contain: layout style`）
+- 无论宿主页面样式如何，都能保持一致渲染
 
-## Examples
+## 示例
 
-See the [examples](./examples) directory for complete working examples:
+请参阅 [examples](./examples) 目录获取完整的工作示例：
 
-- [Browser Example](./examples/browser) - Vanilla HTML/JS usage
-- [Node.js Example](./examples/node) - PDF generation with file output
+- [浏览器示例](./examples/browser) - 原生 HTML/JS 使用
+- [Node.js 示例](./examples/node) - PDF 生成与文件输出
 
 ## Storybook
 
-Interactive component documentation is available via Storybook:
+通过 Storybook 可以查看交互式组件文档：
 
 ```bash
 npm run storybook
 ```
 
-## Contributing
+## 贡献
 
-Contributions are welcome! Please read our [Contributing Guide](./CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+欢迎贡献！请阅读我们的[贡献指南](./CONTRIBUTING.md)了解行为准则和提交 Pull Request 的流程。
 
-## License
+## 许可证
 
 [MIT](./LICENSE) © 2024
 
-## Links
+## 链接
 
-- [GitHub Repository](https://github.com/wangchengshi-ship-it/medical-form-printer)
-- [npm Package](https://www.npmjs.com/package/medical-form-printer)
-- [Issue Tracker](https://github.com/wangchengshi-ship-it/medical-form-printer/issues)
-- [Changelog](./CHANGELOG.md)
+- [GitHub 仓库](https://github.com/wangchengshi-ship-it/medical-form-printer)
+- [npm 包](https://www.npmjs.com/package/medical-form-printer)
+- [问题追踪](https://github.com/wangchengshi-ship-it/medical-form-printer/issues)
+- [更新日志](./CHANGELOG.md)

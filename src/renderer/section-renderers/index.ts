@@ -17,7 +17,17 @@ import { renderMedicalCheckboxRow } from './medical-checkbox-row'
 import { renderInlineRow } from './inline-row'
 import { renderContainer } from './container'
 
-/** Section renderer function type */
+/**
+ * Section renderer function type
+ * 
+ * A function that takes section configuration, form data, and optional render options,
+ * and returns an HTML string representing the rendered section.
+ * 
+ * @param config - The section configuration object
+ * @param data - The form data containing field values
+ * @param options - Optional render options (theme, locale, formatters, etc.)
+ * @returns HTML string for the rendered section
+ */
 export type SectionRenderer = (
   config: SectionConfig,
   data: FormData,
@@ -42,7 +52,19 @@ const renderers: Record<SectionType, SectionRenderer> = {
 const customRenderers: Record<string, SectionRenderer> = {}
 
 /**
- * Register custom section renderer
+ * Register a custom section renderer for a new section type
+ * 
+ * @param type - The section type identifier (e.g., 'custom-chart', 'vital-signs')
+ * @param renderer - The renderer function that generates HTML for this section type
+ * @returns void
+ * 
+ * @example
+ * ```typescript
+ * registerSectionRenderer('vital-signs-chart', (config, data, options) => {
+ *   const values = data[config.dataField] || []
+ *   return `<div class="vital-signs-chart">...</div>`
+ * })
+ * ```
  */
 export function registerSectionRenderer(
   type: string,
@@ -52,14 +74,31 @@ export function registerSectionRenderer(
 }
 
 /**
- * Get section renderer
+ * Get a registered section renderer by type
+ * 
+ * @param type - The section type identifier
+ * @returns The renderer function if found, undefined otherwise
+ * 
+ * @example
+ * ```typescript
+ * const renderer = getSectionRenderer('info-grid')
+ * if (renderer) {
+ *   const html = renderer(config, data, options)
+ * }
+ * ```
  */
 export function getSectionRenderer(type: string): SectionRenderer | undefined {
   return customRenderers[type] || renderers[type as SectionType]
 }
 
 /**
- * Render section
+ * Render a section to HTML string
+ * 
+ * @param type - The section type identifier
+ * @param config - The section configuration
+ * @param data - The form data
+ * @param options - Optional render options
+ * @returns HTML string for the section
  */
 export function renderSection(
   type: string,

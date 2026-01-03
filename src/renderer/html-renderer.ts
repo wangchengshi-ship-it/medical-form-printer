@@ -88,12 +88,34 @@ function renderWatermark(text?: string, opacity?: number): string {
 }
 
 /**
- * Render PrintSchema and FormData to complete HTML string
+ * Render PrintSchema and FormData to a complete HTML document
  * 
- * @param schema - Print layout configuration
- * @param data - Form data
- * @param options - Render options
- * @returns Complete HTML string (including CSS)
+ * This is the main rendering function that generates a complete HTML document
+ * with embedded CSS styles, ready for printing or PDF generation.
+ * 
+ * @param schema - Print layout configuration defining page size, header, sections, and footer
+ * @param data - Form data object containing field values
+ * @param options - Optional render configuration
+ * @param options.theme - Custom theme configuration for fonts, colors, and spacing
+ * @param options.watermark - Watermark text to display on the page
+ * @param options.watermarkOpacity - Watermark opacity (0-1)
+ * @returns Complete HTML document string including DOCTYPE, head, and body
+ * 
+ * @example
+ * ```typescript
+ * import { renderToHtml } from 'medical-form-printer'
+ * 
+ * const html = renderToHtml(printSchema, formData, {
+ *   watermark: 'Internal Use Only',
+ *   watermarkOpacity: 0.1,
+ *   theme: {
+ *     colors: { primary: '#1a1a1a' }
+ *   }
+ * })
+ * 
+ * // Display in iframe or use for PDF generation
+ * document.getElementById('preview').innerHTML = html
+ * ```
  */
 export function renderToHtml(
   schema: PrintSchema,

@@ -90,8 +90,27 @@ function deepMerge<T extends object>(target: T, source: DeepPartial<T>): T {
 
 /**
  * Deep merge theme configuration
+ * 
+ * Merges a partial custom theme with the default theme, supporting
+ * deep nested property overrides.
+ * 
  * @param customTheme - Custom theme configuration (deep partial)
  * @returns Merged complete theme
+ * 
+ * @example
+ * ```typescript
+ * import { mergeTheme, defaultTheme } from 'medical-form-printer'
+ * 
+ * const customTheme = mergeTheme(defaultTheme, {
+ *   colors: {
+ *     primary: '#1a1a1a',
+ *     border: '#333333'
+ *   },
+ *   fontSize: {
+ *     body: '11pt'
+ *   }
+ * })
+ * ```
  */
 export function mergeTheme(customTheme?: DeepPartial<Theme>): Theme {
   if (!customTheme) return defaultTheme
@@ -645,6 +664,7 @@ function generateComponentStyles(theme: Theme, config: StyleConfig): string {
 
 /**
  * Generate CSS style string (normal mode)
+ * 
  * @param theme - Theme configuration
  * @returns Complete CSS style string
  *
@@ -657,13 +677,27 @@ function generateComponentStyles(theme: Theme, config: StyleConfig): string {
  * - Watermark styles
  *
  * All size values are obtained from theme configuration, supporting overall scaling through base unit system.
+ * 
+ * @example
+ * ```typescript
+ * import { generateCss, defaultTheme, mergeTheme } from 'medical-form-printer'
+ * 
+ * // Use default theme
+ * const css = generateCss(defaultTheme)
+ * 
+ * // Use custom theme
+ * const customTheme = mergeTheme(defaultTheme, {
+ *   colors: { primary: '#1a1a1a' }
+ * })
+ * const customCss = generateCss(customTheme)
+ * ```
  */
 export function generateCss(theme: Theme): string {
   return generateComponentStyles(theme, NORMAL_CONFIG)
 }
 
 /**
- * Generate complete isolated CSS
+ * Generate complete isolated CSS with embedded fonts and namespaced classes
  *
  * @param customTheme - Custom theme configuration (font configuration will be ignored)
  * @returns Complete CSS including font, isolation and component styles
@@ -678,6 +712,21 @@ export function generateCss(theme: Theme): string {
  *
  * Note: The fonts property in the passed theme configuration will be ignored,
  * always uses embedded Source Han Serif SC.
+ * 
+ * @example
+ * ```typescript
+ * import { generateIsolatedCss, ISOLATION_ROOT_CLASS } from 'medical-form-printer'
+ * 
+ * const css = generateIsolatedCss()
+ * 
+ * // Use in HTML
+ * const html = `
+ *   <style>${css}</style>
+ *   <div class="${ISOLATION_ROOT_CLASS}">
+ *     <!-- Rendered content -->
+ *   </div>
+ * `
+ * ```
  */
 export function generateIsolatedCss(customTheme?: DeepPartial<Theme>): string {
   const theme = mergeTheme(customTheme)
