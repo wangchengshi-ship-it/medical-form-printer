@@ -2,7 +2,7 @@
 node_modules/
 
 # Kiro IDE (internal development)
-.kiro/
+# .kiro/
 
 # Build output
 dist/
