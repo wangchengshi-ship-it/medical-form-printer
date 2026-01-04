@@ -199,26 +199,26 @@ async function main() {
   
   const fontDataPath = join(__dirname, '../src/fonts/font-data.ts')
   const fontDataContent = `/**
- * @fileoverview 思源宋体 SC Regular 字体数据（子集化）
+ * @fileoverview Source Han Serif SC Regular font data (subset)
  * @module fonts/font-data
- * @description 包含常用汉字 + ASCII + 医疗专用字符的子集化字体
+ * @description Contains subset font with common CJK characters + ASCII + medical-specific characters
  * 
- * 生成命令: node scripts/subset-font.mjs
- * 源字体: Source Han Serif SC Regular
- * 字符集大小: ${charset.length} 字符
- * 文件大小: ${subsetSize} MB
+ * Generation command: node scripts/subset-font.mjs
+ * Source font: Source Han Serif SC Regular
+ * Character set size: ${charset.length} characters
+ * File size: ${subsetSize} MB
  */
 
-/** 字体 Data URL (woff2 格式, Base64 编码) */
+/** Font Data URL (woff2 format, Base64 encoded) */
 export const FONT_DATA_URL = '${dataUrl}'
 
-/** 字体家族名称 */
+/** Font family name */
 export const FONT_FAMILY = 'Source Han Serif SC'
 
-/** 字体粗细 */
+/** Font weight */
 export const FONT_WEIGHT = 400
 
-/** 字体样式 */
+/** Font style */
 export const FONT_STYLE = 'normal'
 `
   

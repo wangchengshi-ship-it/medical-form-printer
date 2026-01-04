@@ -5,7 +5,7 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores: ['dist/**', 'node_modules/**', 'coverage/**', 'storybook-static/**', '*.config.*']
+    ignores: ['dist/**', 'node_modules/**', 'coverage/**', 'storybook-static/**', 'scripts/**', '*.config.*']
   },
   {
     rules: {
