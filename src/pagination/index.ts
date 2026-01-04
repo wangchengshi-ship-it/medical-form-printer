@@ -1,10 +1,10 @@
 /**
  * @fileoverview Pagination module entry point
  * @module pagination
- * @version 1.0.0
+ * @version 1.1.0
  * @author Kiro
  * @created 2026-01-03
- * @modified 2026-01-03
+ * @modified 2026-01-04
  *
  * @description
  * Exports all pagination-related types and functions:
@@ -12,9 +12,11 @@
  * - Page size configuration
  * - Pagination algorithm
  * - Overflow field handling
+ * - Strategy pattern interface and context
  *
  * @requirements
  * - 9.1: Calculate page breaks based on measured content height
+ * - 1.5: Export strategy interface and context
  *
  * @usedBy
  * - ../index.ts - Library main entry
@@ -138,9 +140,30 @@ export {
   hasAnyContinuationContent,
   // CSS class constants
   OVERFLOW_CSS_CLASSES,
-} from './overflow-pagination'
+} from './strategies/overflow/overflow-pagination'
 
-export type { OverflowRenderContext, OverflowContinuationPageContext } from './overflow-pagination'
+export type { OverflowRenderContext, OverflowContinuationPageContext } from './strategies/overflow/overflow-pagination'
+
+// ==================== Strategy Pattern Exports ====================
+
+export {
+  // Strategy context
+  PaginationContext,
+  // Factory function
+  createDefaultPaginationContext,
+} from './strategies'
+
+export type {
+  // Strategy interface
+  PaginationStrategy,
+  // Extended types
+  PrintSchemaWithPagination,
+  PaginationRenderOptions,
+} from './strategies'
+
+// Strategy implementations
+export { SmartPaginationStrategy } from './strategies/smart'
+export { OverflowPaginationStrategy } from './strategies/overflow'
 
 // ==================== Content Measurer Exports ====================
 
@@ -187,10 +210,24 @@ export type {
 } from './content-measurer'
 
 // ==================== Paginated Renderer Exports ====================
+// NOTE: These exports are deprecated since v1.3.0, will be removed in v2.0.0.
+// Use the Strategy Pattern API instead:
+// - createDefaultPaginationContext() for automatic strategy selection
+// - SmartPaginationStrategy for table-based pagination
+// - OverflowPaginationStrategy for long text field handling
 
 export {
-  // Main render function
+  /**
+   * @deprecated Since v1.3.0. Will be removed in v2.0.0.
+   * Use createDefaultPaginationContext().render() or strategy.render() instead.
+   * @see {@link createDefaultPaginationContext}
+   */
   renderPaginatedHtml,
+  /**
+   * @deprecated Since v1.3.0. Will be removed in v2.0.0.
+   * Use createDefaultPaginationContext().render() or strategy.render() instead.
+   * @see {@link createDefaultPaginationContext}
+   */
   renderPaginatedHtmlSimple,
   // CSS generation
   generatePaginationCss,
@@ -215,18 +252,32 @@ import {
   mmToPx,
   pxToMm,
 } from './page-dimensions'
-import { calculatePageBreaks } from './page-break-calculator'
+import { calculatePageBreaks } from './strategies/smart/page-break-calculator'
 
 /**
  * Print pagination utility function collection
  * Provides Vue Composable-like API style
  *
- * @param dimensions - Page size configuration, default 16K
- * @returns Pagination utility functions
- *
- * @example
+ * @deprecated Since v1.3.0. Will be removed in v2.0.0.
+ * Use the strategy pattern API instead for better maintainability.
+ * 
+ * @see {@link createDefaultPaginationContext} - Recommended replacement
+ * @see {@link SmartPaginationStrategy} - For table-based pagination
+ * 
+ * @migration
+ * ```typescript
+ * // ❌ Before (deprecated)
  * const { calculateBreaks, usableHeight } = usePrintPagination()
  * const result = calculateBreaks(measuredItems, usableHeight)
+ * 
+ * // ✅ After (recommended)
+ * import { createDefaultPaginationContext } from 'medical-print-renderer'
+ * const context = createDefaultPaginationContext()
+ * const html = context.render(schema, data, { isolated: true })
+ * ```
+ *
+ * @param dimensions - Page size configuration, default 16K
+ * @returns Pagination utility functions
  */
 export function usePrintPagination(dimensions: PageDimensions = PAGE_16K) {
   const usableHeight = calculateUsableHeight(dimensions)

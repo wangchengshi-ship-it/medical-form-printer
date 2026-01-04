@@ -53,7 +53,7 @@ import {
   hasAnyContinuationContent,
   mergeOverflowTextConfig,
   OVERFLOW_CSS_CLASSES,
-} from './overflow-pagination'
+} from './strategies/overflow/overflow-pagination'
 import { renderSection } from '../renderer/section-renderers'
 import { generateCss, generateIsolatedCss, mergeTheme, namespaceClass, ISOLATION_ROOT_CLASS } from '../styles'
 import { escapeHtml, h, div, header, footer, main, renderWatermarkHtml, extractWatermarkOptions } from '../utils'
@@ -790,6 +790,36 @@ ${pagesHtml}
  * @requirements 3.1, 4.2 - CSS isolation and font embedding (isolation mode)
  * @requirements 2.1, 2.2, 3.1, 3.2 - Overflow field pagination
  *
+ * @deprecated Since v1.3.0. Will be removed in v2.0.0.
+ * Use the strategy pattern API instead for better maintainability and extensibility.
+ * 
+ * @see {@link createDefaultPaginationContext} - Factory for automatic strategy selection
+ * @see {@link SmartPaginationStrategy} - Table-based smart pagination
+ * @see {@link OverflowPaginationStrategy} - Long text field overflow handling
+ * 
+ * @migration
+ * ```typescript
+ * // ❌ Before (deprecated)
+ * import { renderPaginatedHtml, calculatePageBreaks } from 'medical-print-renderer'
+ * const pageBreakResult = calculatePageBreaks(items, options)
+ * const html = renderPaginatedHtml({
+ *   schema, data, pageBreakResult, measuredItems: items,
+ *   config: { isolated: true }
+ * })
+ * 
+ * // ✅ After (recommended) - Option 1: Automatic strategy selection
+ * import { createDefaultPaginationContext } from 'medical-print-renderer'
+ * const context = createDefaultPaginationContext()
+ * const html = context.render(schema, data, { isolated: true })
+ * 
+ * // ✅ After (recommended) - Option 2: Direct strategy usage
+ * import { SmartPaginationStrategy } from 'medical-print-renderer'
+ * const strategy = new SmartPaginationStrategy()
+ * if (strategy.shouldApply(schema)) {
+ *   const html = strategy.render(schema, data, { isolated: true })
+ * }
+ * ```
+ *
  * @param context - Paginated render context
  * @returns Complete paginated HTML string
  *
@@ -1101,6 +1131,13 @@ ${rootSelector} .${printPage} {
 /**
  * Simplified paginated render function
  * For scenarios where pagination result is already available
+ * 
+ * @deprecated Use the strategy pattern API instead:
+ * ```typescript
+ * import { createDefaultPaginationContext } from 'medical-print-renderer'
+ * const context = createDefaultPaginationContext()
+ * const html = context.render(schema, data, { isolated: true })
+ * ```
  */
 export function renderPaginatedHtmlSimple(
   schema: PrintSchema,

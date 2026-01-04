@@ -57,7 +57,7 @@ const SOURCE_FILES = [
   'src/styles/css-generator.ts',
   'src/utils/html-builder.ts',
   'src/pagination/page-dimensions.ts',
-  'src/pagination/page-break-calculator.ts',
+  'src/pagination/strategies/smart/page-break-calculator.ts',
   'src/pagination/paginated-renderer.ts',
 ] as const
 

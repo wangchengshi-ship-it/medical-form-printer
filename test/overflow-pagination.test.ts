@@ -30,11 +30,11 @@ import {
   getOverflowFieldNames,
   renderOverflowFirstLine,
   renderOverflowContinuation,
-} from '../src/pagination/overflow-pagination'
-import { getOverflowRest, hasOverflowContent } from '../src/pagination/overflow-handler'
+} from '../src/pagination/strategies/overflow/overflow-pagination'
+import { getOverflowRest, hasOverflowContent } from '../src/pagination/strategies/overflow/overflow-handler'
 import type { PrintSection, InfoGridConfig, InfoGridCell } from '../src/types/print-schema'
 import type { PaginationConfig, OverflowTextConfig } from '../src/pagination/types'
-import type { OverflowFieldResult } from '../src/pagination/overflow-handler'
+import type { OverflowFieldResult } from '../src/pagination/strategies/overflow/overflow-handler'
 import { DEFAULT_OVERFLOW_TEXT, ENGLISH_OVERFLOW_TEXT } from '../src/pagination/types'
 import { renderPaginatedHtml } from '../src/pagination/paginated-renderer'
 

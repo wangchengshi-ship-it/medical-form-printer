@@ -27,9 +27,6 @@ export { SmartPaginationStrategy } from './smart-pagination-strategy'
 
 export {
   calculatePageBreaks,
-  type PageBreakOptions,
-  type PageBreakResult,
-  type PageContent,
 } from './page-break-calculator'
 
 // ==================== Type Re-exports ====================
@@ -37,4 +34,7 @@ export {
 export type {
   MeasurableItem,
   MeasurableItemType,
+  PageBreakOptions,
+  PageBreakResult,
+  PageContent,
 } from '../../types'

@@ -33,8 +33,8 @@ import type {
   PageContent,
   PageBreakResult,
   PageBreakOptions,
-} from './types'
-import { MEASURABLE_ITEM_TYPES } from './types'
+} from '../../types'
+import { MEASURABLE_ITEM_TYPES } from '../../types'
 
 // ==================== Helper Functions ====================
 

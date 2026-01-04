@@ -241,7 +241,40 @@ const renderer = getSectionRenderer('info-grid')
 
 ### Pagination
 
-#### `renderPaginatedHtml(config)`
+#### Strategy Pattern API (Recommended)
+
+The pagination system uses a strategy pattern for flexible rendering:
+
+```typescript
+import { 
+  createDefaultPaginationContext,
+  SmartPaginationStrategy,
+  OverflowPaginationStrategy
+} from 'medical-form-printer'
+
+// Option 1: Use PaginationContext for automatic strategy selection
+const context = createDefaultPaginationContext()
+const html = context.render(schema, data, { isolated: true })
+
+// Option 2: Use specific strategy directly
+const strategy = new SmartPaginationStrategy()
+if (strategy.shouldApply(schema)) {
+  const html = strategy.render(schema, data, { isolated: true })
+}
+
+// Option 3: Use OverflowPaginationStrategy for long text fields
+const overflowStrategy = new OverflowPaginationStrategy()
+if (overflowStrategy.shouldApply(schema)) {
+  const html = overflowStrategy.render(schema, data, { 
+    isolated: true,
+    textConfig: { seeNextMarker: '(continued on next page)' }
+  })
+}
+```
+
+#### `renderPaginatedHtml(config)` (Deprecated)
+
+> **Deprecated**: Use the Strategy Pattern API above instead.
 
 Renders multi-page content with smart pagination.
 

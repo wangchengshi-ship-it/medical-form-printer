@@ -270,13 +270,16 @@ export {
   mergeOverflowTextConfig,
   hasAnyContinuationContent,
   OVERFLOW_CSS_CLASSES,
-  // Paginated renderer
+  // Paginated renderer (deprecated - use strategy pattern instead)
+  /** @deprecated Use createDefaultPaginationContext().render() or strategy.render() instead */
   renderPaginatedHtml,
+  /** @deprecated Use createDefaultPaginationContext().render() or strategy.render() instead */
   renderPaginatedHtmlSimple,
   generatePaginationCss,
   createRenderConfigFromPaginationConfig,
   DEFAULT_PAGINATED_RENDER_CONFIG,
-  // Composable style API
+  // Composable style API (deprecated - use strategy pattern instead)
+  /** @deprecated Use createDefaultPaginationContext() or strategy classes instead */
   usePrintPagination,
   // Constants
   DEFAULT_DPI,
@@ -286,6 +289,11 @@ export {
   // Overflow text i18n constants
   DEFAULT_OVERFLOW_TEXT,
   ENGLISH_OVERFLOW_TEXT,
+  // Strategy pattern (recommended API)
+  PaginationContext,
+  createDefaultPaginationContext,
+  SmartPaginationStrategy,
+  OverflowPaginationStrategy,
 } from './pagination'
 
 export type {
@@ -310,4 +318,8 @@ export type {
   // Paginated renderer types
   PaginatedRenderConfig,
   PaginatedRenderContext,
+  // Strategy pattern types
+  PaginationStrategy,
+  PrintSchemaWithPagination,
+  PaginationRenderOptions,
 } from './pagination'

@@ -9,8 +9,8 @@
  * @description
  * Handles overflow field pagination rendering logic:
  * - Identifies sections containing overflow fields
- * - First page displays truncated content + continuation marker (红色"续见附页")
- * - Continuation pages display remaining content with field label + "（续）" suffix
+ * - First page displays truncated content + continuation marker (red "see next page")
+ * - Continuation pages display remaining content with field label + "(continued)" suffix
  * - Integrates with existing pagination features
  *
  * @requirements
@@ -24,19 +24,19 @@
  *
  * @dependencies
  * - ./overflow-handler.ts - Overflow field processing core logic
- * - ./types.ts - Type definitions
- * - ../types/print-schema.ts - PrintSection types
+ * - ../../types.ts - Type definitions
+ * - ../../../types/print-schema.ts - PrintSection types
  *
  * @usedBy
- * - ./paginated-renderer.ts - Paginated renderer
+ * - ../../paginated-renderer.ts - Paginated renderer
  */
 
-import type { PrintSection, InfoGridConfig, InfoGridCell } from '../types/print-schema'
-import type { PaginationConfig, OverflowTextConfig, OverflowFieldConfig } from './types'
+import type { PrintSection, InfoGridConfig, InfoGridCell } from '../../../types/print-schema'
+import type { PaginationConfig, OverflowTextConfig, OverflowFieldConfig } from '../../types'
 import type { OverflowFieldResult } from './overflow-handler'
-import { DEFAULT_OVERFLOW_TEXT, PAGINATION_DEFAULTS } from './types'
+import { DEFAULT_OVERFLOW_TEXT, PAGINATION_DEFAULTS } from '../../types'
 import { getOverflowFirstLine, hasOverflowContent } from './overflow-handler'
-import { span, div, escapeHtml } from '../utils'
+import { span, div, escapeHtml } from '../../../utils'
 
 // ==================== Type Definitions ====================
 
@@ -64,7 +64,7 @@ export const OVERFLOW_CSS_CLASSES = {
   OVERFLOW_FIRST_LINE: 'overflow-first-line',
   /** Continuation page content container */
   OVERFLOW_CONTINUATION: 'overflow-continuation',
-  /** "续见附页" marker (red color) */
+  /** "see next page" marker (red color) */
   SEE_NEXT: 'see-next',
   /** Field label on continuation page */
   OVERFLOW_LABEL: 'overflow-label',
@@ -124,7 +124,7 @@ export function isOverflowSection(
  *
  * @example
  * const label = findOverflowFieldLabel(section, 'nursingPoints')
- * // Returns: "婴儿护理要点（不足书写请加附页）"
+ * // Returns: "Nursing Points (add attachment if needed)"
  */
 export function findOverflowFieldLabel(
   section: PrintSection,
@@ -195,14 +195,16 @@ export function getOverflowFieldsFromConfig(
     return []
   }
 
-  // Try new config structure first
-  const fields = paginationConfig.overflow?.fields ?? paginationConfig.overflowFields
+  // Use new config structure, fallback to deprecated fields for backward compatibility
+  // TODO: Remove deprecated field support in v2.0
+  const fields = paginationConfig.overflow?.fields 
+    ?? paginationConfig.overflowFields // eslint-disable-line @typescript-eslint/no-deprecated
   if (!fields || fields.length === 0) {
     return []
   }
 
   const maxChars = paginationConfig.overflow?.firstLineChars
-    ?? paginationConfig.overflowFirstLineChars
+    ?? paginationConfig.overflowFirstLineChars // eslint-disable-line @typescript-eslint/no-deprecated
     ?? PAGINATION_DEFAULTS.OVERFLOW_FIRST_LINE_CHARS
 
   return fields.map(fieldName => ({
@@ -224,14 +226,17 @@ export function getOverflowFieldNames(
     return []
   }
 
-  return paginationConfig.overflow?.fields ?? paginationConfig.overflowFields ?? []
+  // TODO: Remove deprecated field support in v2.0
+  return paginationConfig.overflow?.fields 
+    ?? paginationConfig.overflowFields // eslint-disable-line @typescript-eslint/no-deprecated
+    ?? []
 }
 
 // ==================== First Page Rendering Functions ====================
 
 /**
  * Render overflow field content for first page
- * Displays truncated content with red "（续见附页）" marker when there is overflow
+ * Displays truncated content with red "(see next page)" marker when there is overflow
  *
  * @param value - Field value
  * @param maxChars - Maximum characters to display
@@ -242,7 +247,7 @@ export function getOverflowFieldNames(
  * @requirements 2.1, 2.2, 2.3, 2.4 - First page overflow rendering
  *
  * @example
- * // Output: "1. 母乳喂养指导，按需哺乳 <span class="see-next">（续见附页）</span>"
+ * // Output: "1. Breastfeeding guidance <span class="see-next">(see next page)</span>"
  * renderOverflowFirstLine(value, 60, DEFAULT_OVERFLOW_TEXT, cls)
  */
 export function renderOverflowFirstLine(
@@ -259,7 +264,7 @@ export function renderOverflowFirstLine(
     return span().class(cls(OVERFLOW_CSS_CLASSES.OVERFLOW_FIRST_LINE)).text(firstLine).build()
   }
 
-  // Has overflow, add red "续见附页" marker
+  // Has overflow, add red "see next page" marker
   const marker = span().class(cls(OVERFLOW_CSS_CLASSES.SEE_NEXT)).text(textConfig.seeNextMarker).build()
 
   // Build the content with both truncated text and marker
@@ -276,10 +281,10 @@ export function renderOverflowFirstLine(
 
 /**
  * Render overflow field content for continuation page
- * Displays field label with "（续）" suffix and remaining content
+ * Displays field label with "(continued)" suffix and remaining content
  *
  * @param result - Overflow field processing result
- * @param fieldLabel - Field label (e.g., "婴儿护理要点（不足书写请加附页）")
+ * @param fieldLabel - Field label (e.g., "Nursing Points (add attachment if needed)")
  * @param textConfig - Overflow text configuration for i18n
  * @param cls - Class name generator function
  * @returns Rendered HTML string
@@ -289,8 +294,8 @@ export function renderOverflowFirstLine(
  * @example
  * // Output:
  * // <div class="overflow-continuation">
- * //   <div class="overflow-label">婴儿护理要点（不足书写请加附页）（续）：</div>
- * //   <div class="overflow-content">2. 脐部护理，保持干燥\n3. 黄疸监测...</div>
+ * //   <div class="overflow-label">Nursing Points (continued):</div>
+ * //   <div class="overflow-content">2. Umbilical care, keep dry\n3. Jaundice monitoring...</div>
  * // </div>
  */
 export function renderOverflowContinuation(
@@ -303,7 +308,7 @@ export function renderOverflowContinuation(
     return ''
   }
 
-  // Label with "（续）" suffix
+  // Label with "(continued)" suffix
   const labelText = `${fieldLabel}${textConfig.continuationSuffix}：`
   const labelHtml = div()
     .class(cls(OVERFLOW_CSS_CLASSES.OVERFLOW_LABEL))
@@ -386,7 +391,7 @@ const PAGE_CSS_CLASSES = {
 
 /**
  * Render overflow continuation page header
- * Title includes "（续）" suffix
+ * Title includes "(continued)" suffix
  *
  * @param ctx - Continuation page context
  * @param cls - Class name generator function
@@ -412,7 +417,7 @@ function renderOverflowPageHeader(
     )
   }
 
-  // Form title with "（续）" suffix
+  // Form title with "(continued)" suffix
   const titleText = `${ctx.title} ${ctx.textConfig.pageTitleSuffix}`
   parts.push(
     div().class(cls(PAGE_CSS_CLASSES.FORM_TITLE)).text(titleText).build()
@@ -483,7 +488,7 @@ function renderOverflowPageContent(
 
 /**
  * Render complete overflow continuation page
- * Includes header (with "（续）" suffix), overflow content, optional signature, and footer
+ * Includes header (with "(continued)" suffix), overflow content, optional signature, and footer
  *
  * @param ctx - Continuation page context
  * @param cls - Class name generator function

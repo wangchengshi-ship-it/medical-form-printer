@@ -1,40 +1,42 @@
 /**
- * @fileoverview 溢出字段分页故事
+ * @fileoverview Overflow field pagination Storybook stories
  * @module stories/pagination/OverflowPagination
- * @version 1.0.0
+ * @version 2.0.0
  * @author Kiro
  * @created 2026-01-04
  * @modified 2026-01-04
  *
  * @description
- * 演示溢出字段分页功能：婴儿护理要点字段内容过长时自动分页
+ * Demonstrates overflow field pagination functionality: when the baby nursing points
+ * field content is too long, it automatically paginates using the strategy interface.
+ *
+ * @requirements
+ * - 5.2: Update existing OverflowPagination.stories.ts to use strategy interface
+ * - 5.3: Use unified strategy interface for rendering
  */
 
 import type { Meta, StoryObj } from '@storybook/html'
 import {
-  renderPaginatedHtml,
-  MEASURABLE_ITEM_TYPES,
-} from '../../src/pagination'
+  OverflowPaginationStrategy,
+  createDefaultPaginationContext,
+  type PrintSchemaWithPagination,
+} from '../../src/pagination/strategies'
 import {
   DEFAULT_OVERFLOW_TEXT,
   ENGLISH_OVERFLOW_TEXT,
 } from '../../src/pagination/types'
-import type { PrintSchema, FormData } from '../../src/types/print-schema'
-import type { MeasurableItem, PageBreakResult, PaginationConfig } from '../../src/pagination'
+import type { FormData } from '../../src/types/print-schema'
 import { PLACEHOLDER } from '../../src/test-utils/placeholder-data'
 
-// ==================== 扩展类型 ====================
-
-interface PrintSchemaWithPagination extends PrintSchema {
-  pagination?: PaginationConfig
-}
-
-// ==================== Schema 定义 ====================
+// ==================== Schema Definition ====================
 
 /**
- * 新生儿护理记录单 Schema（只有婴儿护理要点一个溢出字段）
+ * Newborn nursing record schema (with only nursing points as overflow field)
  */
-const createSchema = (firstLineChars?: number): PrintSchemaWithPagination => ({
+const createSchema = (options?: {
+  firstLineChars?: number
+  showSignatureOnEachPage?: boolean
+}): PrintSchemaWithPagination => ({
   pageSize: '16K',
   orientation: 'portrait',
   header: {
@@ -102,7 +104,10 @@ const createSchema = (firstLineChars?: number): PrintSchemaWithPagination => ({
     enabled: true,
     overflow: {
       fields: ['nursingPoints'],
-      firstLineChars: firstLineChars ?? 60,
+      firstLineChars: options?.firstLineChars ?? 60,
+    },
+    display: {
+      signatureOnEachPage: options?.showSignatureOnEachPage ?? false,
     },
   },
 })
@@ -140,54 +145,45 @@ const baseData: FormData = {
   headNurseSignature: PLACEHOLDER.staff.headNurse,
 }
 
-// ==================== 辅助函数 ====================
+// ==================== Renderer Functions ====================
 
-const createMeasuredItems = (schema: PrintSchemaWithPagination): MeasurableItem[] => {
-  return schema.sections.map((_, index) => ({
-    id: `section-${index}`,
-    type: MEASURABLE_ITEM_TYPES.SECTION,
-    height: 100,
-  }))
-}
-
-const createPageResult = (schema: PrintSchemaWithPagination): PageBreakResult => {
-  const items = createMeasuredItems(schema)
-  return {
-    pages: [{
-      pageNumber: 1,
-      isContinuation: false,
-      items: items.map(item => item.id),
-      repeatedHeaders: [],
-    }],
-    totalPages: 1,
-  }
-}
-
-const createRenderer = (
+/**
+ * Create renderer using strategy interface
+ * @requirements 5.2, 5.3 - Use strategy interface for rendering
+ */
+const createStrategyRenderer = (
   nursingPoints: string,
   config?: {
     firstLineChars?: number
     showSignatureOnEachPage?: boolean
     overflowText?: typeof DEFAULT_OVERFLOW_TEXT
+    useContext?: boolean
   }
 ) => {
   return () => {
-    const schema = createSchema(config?.firstLineChars)
-    const data = { ...baseData, nursingPoints }
-    const measuredItems = createMeasuredItems(schema)
-    const pageBreakResult = createPageResult(schema)
-
-    const html = renderPaginatedHtml({
-      schema,
-      data,
-      pageBreakResult,
-      measuredItems,
-      config: {
-        isolated: true,
-        showSignatureOnEachPage: config?.showSignatureOnEachPage,
-        overflowText: config?.overflowText,
-      },
+    const schema = createSchema({
+      firstLineChars: config?.firstLineChars,
+      showSignatureOnEachPage: config?.showSignatureOnEachPage,
     })
+    const data = { ...baseData, nursingPoints }
+
+    let html: string
+
+    if (config?.useContext) {
+      // Use PaginationContext for strategy selection
+      const context = createDefaultPaginationContext()
+      html = context.render(schema, data, {
+        isolated: true,
+        textConfig: config?.overflowText,
+      })
+    } else {
+      // Use OverflowPaginationStrategy directly
+      const strategy = new OverflowPaginationStrategy()
+      html = strategy.render(schema, data, {
+        isolated: true,
+        textConfig: config?.overflowText,
+      })
+    }
 
     const iframe = document.createElement('iframe')
     iframe.style.width = '100%'
@@ -215,6 +211,21 @@ When the "Baby Nursing Points" field content has multiple lines, it automaticall
 ### Pagination Logic
 - **First Page**: Shows only the first line + red "(continued on next page)" marker
 - **Continuation Page**: Shows the second line and all subsequent content
+
+### Strategy Pattern Usage
+\`\`\`typescript
+import { OverflowPaginationStrategy, createDefaultPaginationContext } from 'medical-print-renderer'
+
+// Direct strategy usage
+const strategy = new OverflowPaginationStrategy()
+if (strategy.shouldApply(schema)) {
+  const html = strategy.render(schema, data, { isolated: true })
+}
+
+// Or use context for automatic strategy selection
+const context = createDefaultPaginationContext()
+const html = context.render(schema, data, { isolated: true })
+\`\`\`
         `,
       },
     },
@@ -229,7 +240,7 @@ type Story = StoryObj
 /** Basic Overflow - Nursing points with 8 lines of content */
 export const BasicOverflow: Story = {
   name: 'Basic Overflow (8 lines)',
-  render: createRenderer(longContent),
+  render: createStrategyRenderer(longContent),
   parameters: {
     docs: {
       description: {
@@ -242,7 +253,7 @@ export const BasicOverflow: Story = {
 /** No Overflow - Only one line */
 export const NoOverflow: Story = {
   name: 'No Overflow (1 line)',
-  render: createRenderer(shortContent),
+  render: createStrategyRenderer(shortContent),
   parameters: {
     docs: {
       description: {
@@ -255,7 +266,7 @@ export const NoOverflow: Story = {
 /** Signature on each page */
 export const WithSignatureOnEachPage: Story = {
   name: 'Signature on Each Page',
-  render: createRenderer(longContent, { showSignatureOnEachPage: true }),
+  render: createStrategyRenderer(longContent, { showSignatureOnEachPage: true }),
   parameters: {
     docs: {
       description: {
@@ -268,11 +279,24 @@ export const WithSignatureOnEachPage: Story = {
 /** English text markers */
 export const EnglishText: Story = {
   name: 'English Text Markers',
-  render: createRenderer(longContent, { overflowText: ENGLISH_OVERFLOW_TEXT }),
+  render: createStrategyRenderer(longContent, { overflowText: ENGLISH_OVERFLOW_TEXT }),
   parameters: {
     docs: {
       description: {
         story: 'Uses English markers: "(continued on next page)" and "(continued)".',
+      },
+    },
+  },
+}
+
+/** Using PaginationContext */
+export const UsingContext: Story = {
+  name: 'Using PaginationContext',
+  render: createStrategyRenderer(longContent, { useContext: true }),
+  parameters: {
+    docs: {
+      description: {
+        story: 'Uses PaginationContext for automatic strategy selection. The context selects OverflowPaginationStrategy based on schema configuration.',
       },
     },
   },

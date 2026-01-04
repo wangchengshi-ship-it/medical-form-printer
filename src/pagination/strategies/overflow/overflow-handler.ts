@@ -19,15 +19,15 @@
  * - 9.7: Support overflow field pagination
  *
  * @dependencies
- * - ./types.ts - Type definitions
+ * - ../../types.ts - Type definitions
  *
  * @usedBy
  * - ./index.ts - Module entry
- * - ../renderer/paginated-renderer.ts - Paginated renderer (to be implemented)
+ * - ../../paginated-renderer.ts - Paginated renderer
  */
 
-import type { OverflowFieldConfig } from './types'
-import { PAGINATION_DEFAULTS } from './types'
+import type { OverflowFieldConfig } from '../../types'
+import { PAGINATION_DEFAULTS } from '../../types'
 
 // ==================== Type Definitions ====================
 

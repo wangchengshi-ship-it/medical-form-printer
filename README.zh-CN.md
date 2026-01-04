@@ -241,7 +241,40 @@ const renderer = getSectionRenderer('info-grid')
 
 ### 分页
 
-#### `renderPaginatedHtml(config)`
+#### 策略模式 API（推荐）
+
+分页系统使用策略模式实现灵活渲染：
+
+```typescript
+import { 
+  createDefaultPaginationContext,
+  SmartPaginationStrategy,
+  OverflowPaginationStrategy
+} from 'medical-form-printer'
+
+// 方式 1：使用 PaginationContext 自动选择策略
+const context = createDefaultPaginationContext()
+const html = context.render(schema, data, { isolated: true })
+
+// 方式 2：直接使用特定策略
+const strategy = new SmartPaginationStrategy()
+if (strategy.shouldApply(schema)) {
+  const html = strategy.render(schema, data, { isolated: true })
+}
+
+// 方式 3：使用 OverflowPaginationStrategy 处理长文本字段
+const overflowStrategy = new OverflowPaginationStrategy()
+if (overflowStrategy.shouldApply(schema)) {
+  const html = overflowStrategy.render(schema, data, { 
+    isolated: true,
+    textConfig: { seeNextMarker: '（续见附页）' }
+  })
+}
+```
+
+#### `renderPaginatedHtml(config)`（已废弃）
+
+> **已废弃**：请使用上述策略模式 API。
 
 使用智能分页渲染多页内容。
 

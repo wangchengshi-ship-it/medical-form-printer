@@ -9,26 +9,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Pagination Strategy Pattern** - 分页功能重构为统一的策略模式架构:
+  - `PaginationStrategy` interface with `name`, `shouldApply`, `render` methods
+  - `PaginationContext` class for strategy management and selection
+  - `SmartPaginationStrategy` adapter wrapping existing smart pagination algorithm
+  - `OverflowPaginationStrategy` adapter wrapping existing overflow pagination algorithm
+  - `createDefaultPaginationContext()` factory function for creating context with default strategies
+  - `PrintSchemaWithPagination` and `PaginationRenderOptions` types
+  - Property-based tests for strategy selection consistency (Property 4)
+  - Property-based tests for smart pagination applicability (Property 2)
+  - Property-based tests for overflow pagination applicability (Property 3)
+
+### Deprecated
+
+- `renderPaginatedHtml()` - 使用策略模式 API 替代：`createDefaultPaginationContext().render()` 或 `strategy.render()`
+- `renderPaginatedHtmlSimple()` - 使用策略模式 API 替代
+- `usePrintPagination()` composable - 使用策略模式 API 替代
 - `PrintSchema.baseUnit` property for global scaling (default: 1, e.g., 0.95 = 5% smaller, 1.1 = 10% larger)
 - `textarea` cell type in info-grid now supports pre-rendered overflow HTML via `__overflow_html_{field}` flag in form data (internal pagination system support)
 - `OverflowTextConfig` type for overflow field pagination i18n support
 - `DEFAULT_OVERFLOW_TEXT` constant with Chinese text (续见附页、续)
 - `ENGLISH_OVERFLOW_TEXT` constant with English text (continued on next page, continued)
-- **Overflow Pagination Rendering Functions** (advanced API for custom pagination flows):
-  - `isOverflowSection` - Check if a section contains overflow fields
-  - `findOverflowFieldLabel` - Extract field label from info-grid configuration
-  - `findOverflowFieldCell` - Find the cell configuration for an overflow field
-  - `getOverflowFieldsFromConfig` - Extract overflow field configs from PaginationConfig
-  - `getOverflowFieldNames` - Get list of overflow field names
-  - `renderOverflowFirstLine` - Render truncated content with "see next page" marker
-  - `renderOverflowContinuation` - Render continuation content with field label suffix
-  - `renderOverflowContinuationPage` - Render complete overflow continuation page
-  - `mergeOverflowTextConfig` - Merge custom overflow text with defaults
-  - `hasAnyContinuationContent` - Check if any fields have continuation content
-  - `OVERFLOW_CSS_CLASSES` - CSS class name constants for overflow styling
-- **Overflow Pagination Types**:
-  - `OverflowRenderContext` - Context for rendering overflow first line
-  - `OverflowContinuationPageContext` - Context for rendering continuation page
+
+### Removed
+
+- **Overflow Pagination Rendering Functions** - 移除高级溢出分页渲染 API（内部实现，不再公开导出）:
+  - `isOverflowSection`
+  - `findOverflowFieldLabel`
+  - `findOverflowFieldCell`
+  - `getOverflowFieldsFromConfig`
+  - `getOverflowFieldNames`
+  - `renderOverflowFirstLine`
+  - `renderOverflowContinuation`
+  - `renderOverflowContinuationPage`
+  - `mergeOverflowTextConfig`
+  - `hasAnyContinuationContent`
+  - `OVERFLOW_CSS_CLASSES`
+- **Overflow Pagination Types** - 移除相关类型导出:
+  - `OverflowRenderContext`
+  - `OverflowContinuationPageContext`
 
 ### Changed
 
