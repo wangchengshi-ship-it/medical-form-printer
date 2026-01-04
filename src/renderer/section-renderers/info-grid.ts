@@ -198,8 +198,12 @@ function renderTextareaCell(
 ): string {
   const value = getCellValue(cell, data)
   
+  // Check if this field has pre-rendered overflow HTML
+  const isOverflowHtml = data[`__overflow_html_${cell.field}`] === true
+  const contentHtml = isOverflowHtml ? value : escapeHtml(value)
+  
   return `<div class="${cls('info-item', options)} ${cls('textarea-item', options)}">
 <span class="${cls('label', options)}">${escapeHtml(cell.label)}:</span>
-<span class="${cls('textarea-content', options)}">${escapeHtml(value)}</span>
+<span class="${cls('textarea-content', options)}">${contentHtml}</span>
 </div>`
 }

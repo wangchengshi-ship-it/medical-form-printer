@@ -9,7 +9,7 @@
  * real Chinese personal names used as patient or staff identifiers.
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, it } from 'vitest'
 import * as fc from 'fast-check'
 import * as fs from 'fs'
 import * as path from 'path'

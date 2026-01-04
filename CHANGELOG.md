@@ -10,9 +10,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `PrintSchema.baseUnit` property for global scaling (default: 1, e.g., 0.95 = 5% smaller, 1.1 = 10% larger)
+- `textarea` cell type in info-grid now supports pre-rendered overflow HTML via `__overflow_html_{field}` flag in form data (internal pagination system support)
 - `OverflowTextConfig` type for overflow field pagination i18n support
 - `DEFAULT_OVERFLOW_TEXT` constant with Chinese text (续见附页、续)
 - `ENGLISH_OVERFLOW_TEXT` constant with English text (continued on next page, continued)
+- **Overflow Pagination Rendering Functions** (advanced API for custom pagination flows):
+  - `isOverflowSection` - Check if a section contains overflow fields
+  - `findOverflowFieldLabel` - Extract field label from info-grid configuration
+  - `findOverflowFieldCell` - Find the cell configuration for an overflow field
+  - `getOverflowFieldsFromConfig` - Extract overflow field configs from PaginationConfig
+  - `getOverflowFieldNames` - Get list of overflow field names
+  - `renderOverflowFirstLine` - Render truncated content with "see next page" marker
+  - `renderOverflowContinuation` - Render continuation content with field label suffix
+  - `renderOverflowContinuationPage` - Render complete overflow continuation page
+  - `mergeOverflowTextConfig` - Merge custom overflow text with defaults
+  - `hasAnyContinuationContent` - Check if any fields have continuation content
+  - `OVERFLOW_CSS_CLASSES` - CSS class name constants for overflow styling
+- **Overflow Pagination Types**:
+  - `OverflowRenderContext` - Context for rendering overflow first line
+  - `OverflowContinuationPageContext` - Context for rendering continuation page
 
 ### Changed
 

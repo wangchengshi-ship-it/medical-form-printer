@@ -46,6 +46,8 @@ export type {
   // Utility types
   PageSizePreset,
   PaginationMode,
+  // Overflow text i18n configuration
+  OverflowTextConfig,
 } from './types'
 
 export {
@@ -55,6 +57,9 @@ export {
   // Compatibility exports
   DEFAULT_DPI,
   MM_PER_INCH,
+  // Overflow text i18n constants
+  DEFAULT_OVERFLOW_TEXT,
+  ENGLISH_OVERFLOW_TEXT,
 } from './types'
 
 // ==================== Page Size Exports ====================
@@ -92,7 +97,7 @@ export {
   // Validation functions
   validatePageBreakResult,
   getPageContentHeight,
-} from './page-break-calculator'
+} from './strategies/smart/page-break-calculator'
 
 // ==================== Overflow Field Handling Exports ====================
 
@@ -109,9 +114,33 @@ export {
   // Batch processing
   processOverflowFields,
   hasAnyOverflowContent,
-} from './overflow-handler'
+} from './strategies/overflow/overflow-handler'
 
-export type { OverflowFieldResult } from './overflow-handler'
+export type { OverflowFieldResult } from './strategies/overflow/overflow-handler'
+
+// ==================== Overflow Pagination Exports ====================
+
+export {
+  // Section identification
+  isOverflowSection,
+  findOverflowFieldLabel,
+  findOverflowFieldCell,
+  // Configuration extraction
+  getOverflowFieldsFromConfig,
+  getOverflowFieldNames,
+  // First page rendering
+  renderOverflowFirstLine,
+  // Continuation page rendering
+  renderOverflowContinuation,
+  renderOverflowContinuationPage,
+  // Utility functions
+  mergeOverflowTextConfig,
+  hasAnyContinuationContent,
+  // CSS class constants
+  OVERFLOW_CSS_CLASSES,
+} from './overflow-pagination'
+
+export type { OverflowRenderContext, OverflowContinuationPageContext } from './overflow-pagination'
 
 // ==================== Content Measurer Exports ====================
 

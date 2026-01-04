@@ -42,8 +42,8 @@ import type { RenderOptions } from '../types/options'
 import type { Theme } from '../types/theme'
 import type { PageBreakResult, PageContent, MeasurableItem, PaginationConfig, PageDimensions, OverflowTextConfig } from './types'
 import { DEFAULT_OVERFLOW_TEXT, PAGINATION_DEFAULTS } from './types'
-import type { OverflowFieldResult } from './overflow-handler'
-import { processOverflowFields, createOverflowFieldConfigs } from './overflow-handler'
+import type { OverflowFieldResult } from './strategies/overflow/overflow-handler'
+import { processOverflowFields, createOverflowFieldConfigs } from './strategies/overflow/overflow-handler'
 import {
   isOverflowSection,
   findOverflowFieldLabel,
@@ -608,6 +608,7 @@ function renderSectionWithOverflow(
 /**
  * Render page body content
  * Prioritize fine-grained pagination rendering, fallback to full rendering when no valid measured items
+ * Always uses renderAllSections for first page when overflow fields are configured to ensure proper truncation
  *
  * @param ctx - Single page render context
  * @param sectionMap - Section ID to PrintSection mapping
@@ -619,7 +620,7 @@ function renderPageBody(
   sectionMap: Map<string, PrintSection>,
   cls: ClassNameFn
 ): string {
-  const { page, data, options, measuredItems } = ctx
+  const { page, data, options, measuredItems, isFirstPage, overflowFieldNames } = ctx
 
   const parts: string[] = []
 
@@ -638,8 +639,12 @@ function renderPageBody(
     return item?.type === 'section'
   })
 
-  if (hasValidItems) {
-    // Use measured items for fine-grained rendering
+  // For first page with overflow fields, always use renderAllSections to ensure proper truncation
+  // This is because renderContentItem doesn't handle overflow field truncation
+  const hasOverflowFields = isFirstPage && overflowFieldNames && overflowFieldNames.length > 0
+
+  if (hasValidItems && !hasOverflowFields) {
+    // Use measured items for fine-grained rendering (only when no overflow fields on first page)
     for (const itemId of page.items) {
       const content = renderContentItem(itemId, itemMap, sectionMap, data, options, cls)
       if (content) {
@@ -647,7 +652,7 @@ function renderPageBody(
       }
     }
   } else {
-    // Fallback: render all sections
+    // Fallback: render all sections (handles overflow field truncation)
     parts.push(renderAllSections(ctx, cls))
   }
 

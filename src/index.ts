@@ -258,6 +258,18 @@ export {
   isOverflowField,
   processOverflowFields,
   hasAnyOverflowContent,
+  // Overflow pagination rendering
+  isOverflowSection,
+  findOverflowFieldLabel,
+  findOverflowFieldCell,
+  getOverflowFieldsFromConfig,
+  getOverflowFieldNames,
+  renderOverflowFirstLine,
+  renderOverflowContinuation,
+  renderOverflowContinuationPage,
+  mergeOverflowTextConfig,
+  hasAnyContinuationContent,
+  OVERFLOW_CSS_CLASSES,
   // Paginated renderer
   renderPaginatedHtml,
   renderPaginatedHtmlSimple,
@@ -269,6 +281,11 @@ export {
   // Constants
   DEFAULT_DPI,
   MM_PER_INCH,
+  PAGINATION_DEFAULTS,
+  MEASURABLE_ITEM_TYPES,
+  // Overflow text i18n constants
+  DEFAULT_OVERFLOW_TEXT,
+  ENGLISH_OVERFLOW_TEXT,
 } from './pagination'
 
 export type {
@@ -285,6 +302,11 @@ export type {
   PaginationConfig,
   PageBreakOptions,
   OverflowFieldResult,
+  // Overflow text i18n type
+  OverflowTextConfig,
+  // Overflow pagination types
+  OverflowRenderContext,
+  OverflowContinuationPageContext,
   // Paginated renderer types
   PaginatedRenderConfig,
   PaginatedRenderContext,
