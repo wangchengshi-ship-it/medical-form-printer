@@ -38,7 +38,6 @@ import type { MeasurableItem } from './types'
 import type {
   MeasureConfig,
   RequiredMeasureConfig,
-  MeasureResult,
   MeasureElementOptions,
   MeasureTableOptions,
   TextEstimateOptions,

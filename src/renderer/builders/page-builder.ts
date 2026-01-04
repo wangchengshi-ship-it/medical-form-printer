@@ -1,13 +1,30 @@
 /**
  * @fileoverview Page Builder
  * @module renderer/builders/page-builder
- * 
+ * @version 1.0.0
+ *
  * @description
  * Uses Builder pattern to construct complete print page structure.
  * Supports header, content, footer, watermark and other components.
+ *
+ * @example
+ * ```typescript
+ * const builder = new PageBuilder({ pageSize: '16K', orientation: 'portrait' })
+ * const html = builder
+ *   .setCSS(css)
+ *   .setHeader({ hospital: 'Sample Hospital', title: 'Form Title' })
+ *   .addSection('<div>Content</div>')
+ *   .setWatermark('DRAFT', 0.1)
+ *   .build()
+ * ```
+ *
+ * @dependencies
+ * - ../../utils - HTML escape utilities
+ *
+ * @usedBy
+ * - ../index.ts - Main renderer module
  */
 
-import { HtmlElementBuilder } from './html-element-builder'
 import { escapeHtml } from '../../utils'
 
 /** Page configuration */
@@ -46,15 +63,32 @@ export interface FooterConfig {
 
 /**
  * Page Builder
- * Constructs complete print page structure
+ * Constructs complete print page structure using fluent Builder pattern.
+ *
+ * @example
+ * ```typescript
+ * const html = new PageBuilder({ pageSize: '16K', orientation: 'portrait' })
+ *   .setCSS(generateCss())
+ *   .setHeader({ hospital: 'Hospital', title: 'Form' })
+ *   .addSections(sectionHtmls)
+ *   .setFooter({ showPageNumber: true })
+ *   .build()
+ * ```
  */
 export class PageBuilder {
+  /** Page configuration */
   private config: PageConfig
+  /** CSS styles */
   private css: string = ''
+  /** Header configuration */
   private headerConfig: HeaderConfig | null = null
+  /** Footer configuration */
   private footerConfig: FooterConfig | null = null
+  /** Section HTML contents */
   private sections: string[] = []
+  /** Watermark text */
   private watermarkText: string | null = null
+  /** Watermark opacity (0-1) */
   private watermarkOpacity: number = 0.1
 
   /**
@@ -67,7 +101,8 @@ export class PageBuilder {
 
   /**
    * Set CSS styles
-   * @param css - CSS string
+   * @param css - CSS string to include in the page
+   * @returns this for method chaining
    */
   setCSS(css: string): this {
     this.css = css
@@ -75,8 +110,9 @@ export class PageBuilder {
   }
 
   /**
-   * Set header
-   * @param config - Header configuration
+   * Set header configuration
+   * @param config - Header configuration including hospital, department, title
+   * @returns this for method chaining
    */
   setHeader(config: HeaderConfig): this {
     this.headerConfig = config
@@ -84,8 +120,9 @@ export class PageBuilder {
   }
 
   /**
-   * Set footer
-   * @param config - Footer configuration
+   * Set footer configuration
+   * @param config - Footer configuration including notes and page number settings
+   * @returns this for method chaining
    */
   setFooter(config: FooterConfig | null): this {
     this.footerConfig = config
@@ -93,8 +130,9 @@ export class PageBuilder {
   }
 
   /**
-   * Add section content
-   * @param html - Section HTML
+   * Add a single section content
+   * @param html - Section HTML string
+   * @returns this for method chaining
    */
   addSection(html: string): this {
     this.sections.push(html)
@@ -102,8 +140,9 @@ export class PageBuilder {
   }
 
   /**
-   * Add multiple section contents
-   * @param htmls - Section HTML array
+   * Add multiple section contents at once
+   * @param htmls - Array of section HTML strings
+   * @returns this for method chaining
    */
   addSections(htmls: string[]): this {
     this.sections.push(...htmls)
@@ -111,9 +150,10 @@ export class PageBuilder {
   }
 
   /**
-   * Set watermark
-   * @param text - Watermark text
-   * @param opacity - Opacity
+   * Set watermark text and opacity
+   * @param text - Watermark text to display
+   * @param opacity - Opacity value between 0 and 1 (default: 0.1)
+   * @returns this for method chaining
    */
   setWatermark(text: string, opacity?: number): this {
     this.watermarkText = text
@@ -124,7 +164,9 @@ export class PageBuilder {
   }
 
   /**
-   * Build header HTML
+   * Build header HTML from configuration
+   * @returns Header HTML string or empty string if no header configured
+   * @private
    */
   private buildHeader(): string {
     if (!this.headerConfig) return ''
@@ -149,7 +191,9 @@ export class PageBuilder {
   }
 
   /**
-   * Build footer HTML
+   * Build footer HTML from configuration
+   * @returns Footer HTML string or empty string if no footer configured
+   * @private
    */
   private buildFooter(): string {
     if (!this.footerConfig) return ''
@@ -171,7 +215,9 @@ export class PageBuilder {
   }
 
   /**
-   * Build watermark HTML
+   * Build watermark HTML element
+   * @returns Watermark HTML string or empty string if no watermark set
+   * @private
    */
   private buildWatermark(): string {
     if (!this.watermarkText) return ''
@@ -181,7 +227,9 @@ export class PageBuilder {
   }
 
   /**
-   * Build page class names
+   * Build CSS class names for the page container
+   * @returns Space-separated class names string
+   * @private
    */
   private buildPageClasses(): string {
     return [
