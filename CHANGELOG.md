@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-01-04
+
 ### Added
 
 - Test utilities module `src/test-utils/placeholder-data.ts`
@@ -59,6 +61,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added empty label row support: shows only underline
   - Optimized `checkbox-inline` rendering logic
   - Optimized `compound` field handling
+- **checkbox-grid section enhancements**:
+  - Added Items mode with per-item field binding (`items[].field`)
+  - Added `prefixLabel` support for checkbox items
+  - Added mixed types support (checkbox, checkbox-with-input, text-input)
+  - Added comprehensive Storybook stories and unit tests
+- **Font subset update**:
+  - Regenerated font subset with comprehensive medical characters from 《产后母婴康复机构档案书写格式》 (13 pages)
+  - Fixed missing characters (e.g., "识" in "意识状态")
+  - 3653 characters, 1.57 MB, 93% compression ratio
 
 ## [0.1.0] - 2026-01-03
 
@@ -167,5 +178,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `PageDimensions`, `OverflowFieldConfig`
   - `IsolatedRenderOptions`, `PaginatedRenderConfig`
 
-[Unreleased]: https://github.com/wangchengshi-ship-it/medical-form-printer/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/wangchengshi-ship-it/medical-form-printer/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/wangchengshi-ship-it/medical-form-printer/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/wangchengshi-ship-it/medical-form-printer/releases/tag/v0.1.0

@@ -1,8 +1,20 @@
 /**
  * @fileoverview PrintSchema type definitions
  * @module types/print-schema
- * @description Defines complete type system for print layout configuration
- * @modif 2024-04-07
+ * @version 2.0.0
+ * @author Kiro
+ * @created 2024-04-07
+ * @modified 2026-01-04
+ * 
+ * @description
+ * Defines complete type system for print layout configuration.
+ * Includes page settings, section types, cell types, and all
+ * configuration interfaces for the medical form print renderer.
+ * 
+ * @usedBy
+ * - renderer/html-renderer - Main HTML rendering
+ * - renderer/section-renderers/* - Section-specific renderers
+ * - renderer/isolated-html-renderer - Isolated CSS rendering
  */
 
 /** Page size */
@@ -142,9 +154,13 @@ export interface CheckboxItem {
   /** Item type: checkbox or text-input */
   type?: 'checkbox' | 'text-input'
   /** Option value (for checkbox type) */
-  value?: string
+  value?: unknown
   /** Display label */
   label: string
+  /** Field name in formData (for per-item field binding) */
+  field?: string
+  /** Prefix label (displayed before the checkbox) */
+  prefixLabel?: string
   /** Whether has additional input (for checkbox type) */
   hasInput?: boolean
   /** Additional input field name */
@@ -153,8 +169,8 @@ export interface CheckboxItem {
 
 /** Checkbox grid configuration */
 export interface CheckboxGridConfig {
-  /** Field name in formData */
-  field: string
+  /** Field name in formData (optional when using items mode with per-item fields) */
+  field?: string
   /** Option list (options mode) */
   options?: CheckboxOption[]
   /** Item list (items mode, supports more types) */

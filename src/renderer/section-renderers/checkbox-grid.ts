@@ -1,8 +1,23 @@
 /**
  * @fileoverview Checkbox Grid Section Renderer
  * @module renderer/section-renderers/checkbox-grid
- * @description Supports options mode and items mode, supports grid/flex layout
- * @modified 2023-11-20
+ * @version 2.0.0
+ * @author Kiro
+ * @created 2023-11-20
+ * @modified 2026-01-04
+ * 
+ * @description
+ * Renders checkbox grid sections with support for two modes:
+ * - options mode: Simple checkbox list with shared field
+ * - items mode: Per-item field binding with prefix labels
+ * 
+ * Supports grid and flex layouts for flexible positioning.
+ * 
+ * @dependencies
+ * - ../../types/print-schema - Type definitions
+ * - ../../types/options - Render options and CSS class utilities
+ * - ../../formatters - Boolean and value formatters
+ * - ../../utils - HTML escape utilities
  */
 
 import type { CheckboxGridConfig, CheckboxOption, CheckboxItem, FormData } from '../../types/print-schema'
@@ -19,7 +34,7 @@ export function renderCheckboxGrid(
   data: FormData,
   options?: RenderOptions
 ): string {
-  const values = data[config.field]
+  const values = config.field ? data[config.field] : undefined
   const layout = config.layout || 'grid'
   const columns = config.columns || 4
   
@@ -101,20 +116,26 @@ function renderItems(
       const itemType = item.type || 'checkbox'
       const styleAttr = layout === 'grid' ? ` style="width: ${columnWidth}"` : ''
       
+      // Prefix label (if present)
+      const prefixHtml = item.prefixLabel 
+        ? `<span class="${cls('prefix-label', options)}">${escapeHtml(item.prefixLabel)}</span>` 
+        : ''
+      
       if (itemType === 'text-input') {
         // Pure text input item
-        const inputValue = item.inputField ? data[item.inputField] : undefined
+        const inputValue = item.inputField ? data[item.inputField] : (item.field ? data[item.field] : undefined)
         const displayValue = inputValue !== undefined && inputValue !== null && inputValue !== ''
           ? String(inputValue)
           : '________'
         
         return `<div class="${cls('checkbox-item', options)} ${cls('text-input-item', options)}"${styleAttr}>
-<span class="${cls('text-input-label', options)}">${escapeHtml(item.label)}</span>
+${prefixHtml}<span class="${cls('text-input-label', options)}">${escapeHtml(item.label)}</span>
 <span class="${cls('input-line', options)}">${escapeHtml(displayValue)}</span>
 </div>`
       } else {
-        // checkbox type
-        const checked = item.value ? isChecked(values, item.value) : false
+        // checkbox type - use item.field to get value from data
+        const itemValue = item.field ? data[item.field] : values
+        const checked = item.value !== undefined ? isChecked(itemValue, item.value) : false
         const symbol = formatBoolean(checked)
         
         let inputHtml = ''
@@ -127,7 +148,7 @@ function renderItems(
         }
         
         return `<div class="${cls('checkbox-item', options)}"${styleAttr}>
-<span class="${cls('checkbox-symbol', options)}">${symbol}</span>
+${prefixHtml}<span class="${cls('checkbox-symbol', options)}">${symbol}</span>
 <span class="${cls('checkbox-label', options)}">${escapeHtml(item.label)}</span>
 ${inputHtml}
 </div>`

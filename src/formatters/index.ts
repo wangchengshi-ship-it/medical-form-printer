@@ -1,7 +1,24 @@
 /**
  * @fileoverview Data formatters for converting values to display strings
  * @module formatters
- * @modified 2023-03-02
+ * @version 1.1.0
+ * @author Kiro
+ * @created 2023-03-02
+ * @modified 2026-01-04
+ * 
+ * @description
+ * Provides formatting utilities for converting various data types
+ * to display strings suitable for print rendering:
+ * - Date formatting with customizable patterns
+ * - Boolean to checkbox symbol conversion
+ * - Number formatting with precision control
+ * - Generic value formatting based on type
+ * - Checkbox selection state checking
+ * 
+ * @usedBy
+ * - renderer/section-renderers/info-grid - Cell value formatting
+ * - renderer/section-renderers/checkbox-grid - Checkbox state display
+ * - renderer/section-renderers/table - Table cell formatting
  */
 
 import type { DateFormatOptions } from '../types/options'
@@ -165,6 +182,7 @@ export function formatValue(
  * Check if a value is checked/selected for a given option
  * 
  * Handles both array values (multiple selection) and single values.
+ * Supports boolean, string, and number comparisons.
  * 
  * @param values - The value(s) to check (array or single value)
  * @param optionValue - The option value to check against
@@ -176,11 +194,24 @@ export function formatValue(
  * isChecked(['a', 'b', 'c'], 'd')  // false
  * isChecked('yes', 'yes')          // true
  * isChecked('no', 'yes')           // false
+ * isChecked(true, true)            // true
+ * isChecked(false, false)          // true
  * ```
  */
-export function isChecked(values: unknown, optionValue: string): boolean {
+export function isChecked(values: unknown, optionValue: unknown): boolean {
+  if (values === undefined || values === null) {
+    return false
+  }
+  
   if (Array.isArray(values)) {
     return values.includes(optionValue)
   }
-  return String(values) === optionValue
+  
+  // Direct comparison for boolean and other types
+  if (values === optionValue) {
+    return true
+  }
+  
+  // String comparison as fallback
+  return String(values) === String(optionValue)
 }

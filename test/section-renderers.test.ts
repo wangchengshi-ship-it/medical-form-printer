@@ -814,6 +814,132 @@ describe('renderCheckboxGrid - Items Mode', () => {
     expect(html).toContain('class="prefix-label"')
     expect(html).toContain('症状：')
   })
+
+  // New tests for per-item field binding
+  it('should render items with per-item field binding', () => {
+    const config: CheckboxGridConfig = {
+      layout: 'flex',
+      items: [
+        { type: 'checkbox', field: 'hasAllergy', value: true, label: '有' },
+        { type: 'checkbox', field: 'hasAllergy', value: false, label: '无' },
+      ],
+    }
+    const data: FormData = { hasAllergy: true }
+    const html = renderCheckboxGrid(config, data)
+
+    expect(html).toContain('有')
+    expect(html).toContain('无')
+    // '有' should be checked (value: true matches data.hasAllergy: true)
+    const checkedCount = (html.match(/☑/g) || []).length
+    const uncheckedCount = (html.match(/□/g) || []).length
+    expect(checkedCount).toBe(1)
+    expect(uncheckedCount).toBe(1)
+  })
+
+  it('should render items with per-item prefixLabel', () => {
+    const config: CheckboxGridConfig = {
+      layout: 'flex',
+      items: [
+        { type: 'checkbox', field: 'hasAllergy', value: true, label: '有', prefixLabel: '过敏史：' },
+        { type: 'checkbox', field: 'hasAllergy', value: false, label: '无' },
+      ],
+    }
+    const data: FormData = { hasAllergy: false }
+    const html = renderCheckboxGrid(config, data)
+
+    expect(html).toContain('class="prefix-label"')
+    expect(html).toContain('过敏史：')
+    expect(html).toContain('有')
+    expect(html).toContain('无')
+  })
+
+  it('should render mixed items (checkbox + text-input) with per-item fields', () => {
+    const config: CheckboxGridConfig = {
+      layout: 'flex',
+      items: [
+        { type: 'checkbox', field: 'hasDisease', value: true, label: '有', prefixLabel: '既往病史：' },
+        { type: 'checkbox', field: 'hasDisease', value: false, label: '无' },
+        { type: 'text-input', label: '病名', inputField: 'diseaseName' },
+      ],
+    }
+    const data: FormData = { hasDisease: true, diseaseName: '高血压' }
+    const html = renderCheckboxGrid(config, data)
+
+    expect(html).toContain('既往病史：')
+    expect(html).toContain('有')
+    expect(html).toContain('无')
+    expect(html).toContain('病名')
+    expect(html).toContain('高血压')
+    expect(html).toContain('text-input-item')
+  })
+
+  it('should render text-input with prefixLabel', () => {
+    const config: CheckboxGridConfig = {
+      layout: 'flex',
+      items: [
+        { type: 'text-input', label: '体温', inputField: 'temperature', prefixLabel: '生命体征：' },
+        { type: 'text-input', label: '脉搏', inputField: 'pulse' },
+      ],
+    }
+    const data: FormData = { temperature: '36.5℃', pulse: '72次/分' }
+    const html = renderCheckboxGrid(config, data)
+
+    expect(html).toContain('生命体征：')
+    expect(html).toContain('体温')
+    expect(html).toContain('36.5℃')
+    expect(html).toContain('脉搏')
+    expect(html).toContain('72次/分')
+  })
+
+  it('should render placeholder for empty text-input', () => {
+    const config: CheckboxGridConfig = {
+      layout: 'flex',
+      items: [
+        { type: 'text-input', label: '备注', inputField: 'notes' },
+      ],
+    }
+    const html = renderCheckboxGrid(config, {})
+
+    expect(html).toContain('________')
+  })
+
+  it('should use item.field for text-input when inputField is not provided', () => {
+    const config: CheckboxGridConfig = {
+      layout: 'flex',
+      items: [
+        { type: 'text-input', label: '备注', field: 'notes' },
+      ],
+    }
+    const data: FormData = { notes: '测试备注' }
+    const html = renderCheckboxGrid(config, data)
+
+    expect(html).toContain('测试备注')
+  })
+
+  // Property-based test: items mode with per-item field
+  it('should correctly check items based on per-item field values', () => {
+    fc.assert(
+      fc.property(
+        fc.boolean(),
+        (hasAllergy) => {
+          const config: CheckboxGridConfig = {
+            layout: 'flex',
+            items: [
+              { type: 'checkbox', field: 'hasAllergy', value: true, label: '有' },
+              { type: 'checkbox', field: 'hasAllergy', value: false, label: '无' },
+            ],
+          }
+          const data: FormData = { hasAllergy }
+          const html = renderCheckboxGrid(config, data)
+          
+          const checkedCount = (html.match(/☑/g) || []).length
+          // Exactly one should be checked
+          return checkedCount === 1
+        }
+      ),
+      { numRuns: 20 }
+    )
+  })
 })
 
 describe('renderInlineRow', () => {
