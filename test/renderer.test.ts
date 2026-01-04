@@ -178,4 +178,32 @@ describe('renderToHtml', () => {
     expect(html).not.toContain('<script>alert')
     expect(html).toContain('&lt;script&gt;')
   })
+
+  describe('baseUnit scaling', () => {
+    it('should use default baseUnit (1) when not specified', () => {
+      const html = renderToHtml(basicSchema, basicData)
+      // Default font size is 3.5mm * 1 = 9.92pt
+      expect(html).toContain('font-size: 9.92pt')
+    })
+
+    it('should scale sizes when baseUnit is specified', () => {
+      const scaledSchema: PrintSchema = {
+        ...basicSchema,
+        baseUnit: 0.9, // 10% smaller
+      }
+      const html = renderToHtml(scaledSchema, basicData)
+      // Font size should be 3.5mm * 0.9 = 8.93pt
+      expect(html).toContain('font-size: 8.93pt')
+    })
+
+    it('should scale up when baseUnit > 1', () => {
+      const scaledSchema: PrintSchema = {
+        ...basicSchema,
+        baseUnit: 1.1, // 10% larger
+      }
+      const html = renderToHtml(scaledSchema, basicData)
+      // Font size should be 3.5mm * 1.1 = 10.91pt
+      expect(html).toContain('font-size: 10.91pt')
+    })
+  })
 })

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `PrintSchema.baseUnit` property for global scaling (default: 1, e.g., 0.95 = 5% smaller, 1.1 = 10% larger)
+- `OverflowTextConfig` type for overflow field pagination i18n support
+- `DEFAULT_OVERFLOW_TEXT` constant with Chinese text (续见附页、续)
+- `ENGLISH_OVERFLOW_TEXT` constant with English text (continued on next page, continued)
+
+### Changed
+
+- Section title (`.section-title`) now centered by default with `text-align: center`
+- Vitest 配置添加 Bun 运行时兼容性支持（`pool: 'forks'` with `singleFork: true`），修复 Vitest 3.x 兼容性问题
+
 ## [0.2.0] - 2026-01-04
 
 ### Added

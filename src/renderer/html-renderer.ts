@@ -1,11 +1,37 @@
 /**
  * @fileoverview HTML Rendering Core
  * @module renderer/html-renderer
+ * @version 2.1.0
+ * @author Kiro
+ * @created 2024-04-07
+ * @modified 2026-01-04
+ *
+ * @description
+ * Core HTML rendering module for medical form print output.
+ * Generates complete HTML documents with embedded CSS styles,
+ * ready for printing or PDF generation.
+ *
+ * Features:
+ * - Schema-driven rendering with PrintSchema configuration
+ * - Per-template baseUnit scaling support
+ * - Watermark support
+ * - Custom theme configuration
+ *
+ * @dependencies
+ * - ../types/print-schema - Print configuration types
+ * - ../types/options - Render options types
+ * - ../styles - CSS generation and theme system
+ * - ./section-renderers - Section-specific renderers
+ * - ../utils - Utility functions
+ *
+ * @usedBy
+ * - ../index.ts - Library main entry
+ * - ../node.ts - Node.js PDF generation entry
  */
 
 import type { PrintSchema, FormData } from '../types/print-schema'
 import type { RenderOptions } from '../types/options'
-import { generateCss, mergeTheme } from '../styles'
+import { generateCss, mergeTheme, createThemeWithBaseUnit } from '../styles'
 import { renderSection } from './section-renderers'
 import { escapeHtml } from '../utils'
 
@@ -122,7 +148,10 @@ export function renderToHtml(
   data: FormData,
   options?: RenderOptions & { watermark?: string; watermarkOpacity?: number }
 ): string {
-  const theme = mergeTheme(options?.theme)
+  // Use baseUnit from schema if provided, otherwise use default theme
+  const theme = schema.baseUnit 
+    ? createThemeWithBaseUnit(schema.baseUnit)
+    : mergeTheme(options?.theme)
   const css = generateCss(theme)
   
   // Page class names

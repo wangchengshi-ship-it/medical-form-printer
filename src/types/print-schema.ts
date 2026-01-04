@@ -333,6 +333,8 @@ export interface PrintSchema {
   pageSize: PageSize
   /** Page orientation */
   orientation: PageOrientation
+  /** Base unit for scaling (default: 1, e.g., 0.95 = 5% smaller, 1.1 = 10% larger) */
+  baseUnit?: number
   /** Header configuration */
   header: PrintHeader
   /** Section list */

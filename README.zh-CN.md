@@ -291,6 +291,48 @@ const heightPx = mmToPx(297)  // 297mm → 像素
 const heightMm = pxToMm(1123) // 像素 → mm
 ```
 
+#### 溢出文本配置（国际化）
+
+为不同语言配置溢出字段分页文本：
+
+```typescript
+import { 
+  DEFAULT_OVERFLOW_TEXT,    // 中文（默认）
+  ENGLISH_OVERFLOW_TEXT     // 英文
+} from 'medical-form-printer'
+import type { OverflowTextConfig } from 'medical-form-printer'
+
+// DEFAULT_OVERFLOW_TEXT:
+// {
+//   seeNextMarker: '（续见附页）',      // 第一页的续页标记
+//   continuationSuffix: '（续）',       // 续页字段标签后缀
+//   pageTitleSuffix: '（续）'           // 续页标题后缀
+// }
+
+// ENGLISH_OVERFLOW_TEXT:
+// {
+//   seeNextMarker: '(continued on next page)',
+//   continuationSuffix: '(continued)',
+//   pageTitleSuffix: '(continued)'
+// }
+
+// 自定义配置
+const customText: OverflowTextConfig = {
+  seeNextMarker: '(voir page suivante)',
+  continuationSuffix: '(suite)',
+  pageTitleSuffix: '(suite)'
+}
+
+// 在分页渲染中使用
+const html = renderPaginatedHtml({
+  schema: printSchema,
+  data: formData,
+  config: {
+    overflowText: DEFAULT_OVERFLOW_TEXT  // 或 customText
+  }
+})
+```
+
 ### 样式
 
 #### `generateCss(theme?)`
@@ -391,6 +433,7 @@ const safe = escapeHtml('<script>alert("xss")</script>')
 interface PrintSchema {
   pageSize: 'A4' | 'A5' | '16K'
   orientation: 'portrait' | 'landscape'
+  baseUnit?: number  // 缩放因子（默认: 1，如 0.95 = 缩小 5%）
   header: {
     hospital: string
     department?: string
@@ -405,6 +448,23 @@ interface PrintSchema {
   }
 }
 ```
+
+### 基础单位缩放
+
+`baseUnit` 属性允许对渲染输出中的所有尺寸值进行全局缩放：
+
+```typescript
+const schema = {
+  pageSize: 'A4',
+  orientation: 'portrait',
+  baseUnit: 0.95,  // 缩小 5% - 适用于需要容纳更多内容的场景
+  // ...
+}
+```
+
+- `baseUnit: 1`（默认）- 正常尺寸
+- `baseUnit: 0.95` - 缩小 5%
+- `baseUnit: 1.1` - 放大 10%
 
 ## 区块类型
 

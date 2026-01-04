@@ -266,6 +266,7 @@ function generateSectionStyles(theme: Theme, cls: (name: string) => string, conf
   font-size: ${theme.fontSize.sectionTitle};
   font-weight: bold;
   margin-bottom: ${theme.spacing.xs};
+  text-align: center;
 }`
 }
 

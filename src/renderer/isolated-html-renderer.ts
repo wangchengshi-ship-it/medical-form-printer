@@ -25,7 +25,9 @@
 
 import type { PrintSchema, FormData } from '../types/print-schema'
 import type { RenderOptions } from '../types/options'
-import { generateIsolatedCss, ISOLATION_ROOT_CLASS, CSS_NAMESPACE } from '../styles'
+import { generateIsolatedCss, ISOLATION_ROOT_CLASS, CSS_NAMESPACE, createThemeWithBaseUnit } from '../styles'
+import type { DeepPartial } from '../styles'
+import type { Theme } from '../types/theme'
 import { renderSection } from './section-renderers'
 import { escapeHtml, renderWatermarkHtml } from '../utils'
 
@@ -164,8 +166,15 @@ function createRenderContext(
   data: FormData,
   options?: IsolatedRenderOptions
 ): RenderContext {
+  // Build theme with baseUnit if provided
+  let themeOverride: DeepPartial<Theme> | undefined = options?.theme
+  if (schema.baseUnit) {
+    const scaledTheme = createThemeWithBaseUnit(schema.baseUnit)
+    themeOverride = { ...scaledTheme, ...options?.theme }
+  }
+  
   return {
-    css: generateIsolatedCss(options?.theme),
+    css: generateIsolatedCss(themeOverride),
     pageClasses: getPageClasses(schema),
     header: renderHeader(schema),
     sections: renderSections(schema, data, options),

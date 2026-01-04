@@ -72,6 +72,12 @@ const maternalAdmissionSchema: PrintSchema = {
   },
 }
 
+// Scaled down version (95% size)
+const maternalAdmissionSchemaScaled: PrintSchema = {
+  ...maternalAdmissionSchema,
+  baseUnit: 0.95,
+}
+
 const maternalAdmissionData: FormData = {
   ...SAMPLE_MATERNAL_DATA,
   ethnicity: 'Not specified',
@@ -243,6 +249,22 @@ export const NewbornNursing: Story = {
 // Empty form
 export const EmptyForm: Story = {
   render: createRenderer(maternalAdmissionSchema, {}),
+  args: {
+    watermark: '',
+  },
+}
+
+// Scaled down form (95% size) - useful for dense content
+export const ScaledDownForm: Story = {
+  render: createRenderer(maternalAdmissionSchemaScaled, maternalAdmissionData),
+  args: {
+    watermark: '',
+  },
+}
+
+// Scaled up form (110% size)
+export const ScaledUpForm: Story = {
+  render: createRenderer({ ...maternalAdmissionSchema, baseUnit: 1.1 }, maternalAdmissionData),
   args: {
     watermark: '',
   },

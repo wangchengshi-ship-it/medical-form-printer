@@ -8,6 +8,9 @@
  * For any TypeScript source file in the src/ directory, there SHALL be
  * zero Chinese characters (Unicode range \u4e00-\u9fa5) in comments,
  * string literals, or identifiers.
+ *
+ * Exception: Files containing i18n configuration constants are excluded
+ * as they intentionally contain Chinese text for localization.
  */
 
 import { describe, it, expect } from 'vitest'
@@ -19,6 +22,15 @@ import * as path from 'path'
  * Regex pattern to match Chinese characters
  */
 const CHINESE_CHAR_PATTERN = /[\u4e00-\u9fa5]/g
+
+/**
+ * Files that are allowed to contain Chinese characters
+ * These are i18n configuration files that intentionally contain Chinese text
+ */
+const ALLOWED_CHINESE_FILES = [
+  'pagination/types.ts', // Contains DEFAULT_OVERFLOW_TEXT i18n constants
+  'pagination/overflow-pagination.ts', // Contains overflow pagination rendering with i18n text
+]
 
 /**
  * Get all TypeScript source files from src/ directory
@@ -80,11 +92,20 @@ describe('Property 3: No Chinese Characters in Source Code', () => {
    * For any TypeScript source file in the src/ directory, there SHALL be
    * zero Chinese characters (Unicode range \u4e00-\u9fa5) in comments,
    * string literals, or identifiers.
+   *
+   * Exception: Files in ALLOWED_CHINESE_FILES are excluded as they contain
+   * i18n configuration constants that intentionally include Chinese text.
    */
   it('should not contain any Chinese characters in src/ TypeScript files', () => {
     const baseDir = path.resolve(__dirname, '../..')
     const srcDir = path.join(baseDir, 'src')
-    const files = getSourceFiles(srcDir)
+    const allFiles = getSourceFiles(srcDir)
+
+    // Filter out files that are allowed to contain Chinese characters
+    const files = allFiles.filter((filePath) => {
+      const relativePath = path.relative(srcDir, filePath).replace(/\\/g, '/')
+      return !ALLOWED_CHINESE_FILES.some((allowed) => relativePath === allowed)
+    })
 
     expect(files.length).toBeGreaterThan(0)
 

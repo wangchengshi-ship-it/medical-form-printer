@@ -1,10 +1,10 @@
 /**
  * @fileoverview Pagination related type definitions
  * @module pagination/types
- * @version 1.0.0
+ * @version 1.1.0
  * @author Kiro
  * @created 2026-01-03
- * @modified 2026-01-03
+ * @modified 2026-01-04
  *
  * @description
  * Defines all types for the smart pagination module, including:
@@ -13,16 +13,19 @@
  * - Pagination results
  * - Overflow field configuration
  * - Pagination configuration
+ * - Overflow text i18n configuration
  *
  * @requirements
  * - 9.1: Calculate page breaks based on measured content height
  * - 9.5: Support configurable page sizes
  * - 9.7: Support pre-measuring content height
+ * - 5.1: Support i18n for overflow text
  *
  * @usedBy
  * - ./page-dimensions.ts - Page dimension configuration
  * - ./page-break-calculator.ts - Core pagination algorithm
  * - ./overflow-handler.ts - Overflow field handling
+ * - ./paginated-renderer.ts - Paginated renderer
  * - ./index.ts - Module entry
  */
 
@@ -97,6 +100,19 @@ export interface PageDimensions {
   /** Right margin (mm) */
   marginRight: number
 }
+
+/**
+ * Page size preset names
+ * @requirements 3.1 - Support A4, A5, 16K page sizes
+ */
+export type PageSizePreset = '16K' | 'A4' | 'A5'
+
+/**
+ * Pagination mode
+ * - auto: Automatic pagination based on content measurement
+ * - manual: Manual pagination with specified break points
+ */
+export type PaginationMode = 'auto' | 'manual'
 
 // ==================== Measurable Content Item Interface ====================
 
@@ -277,14 +293,52 @@ export interface PageBreakOptions {
   repeatTableHeaders?: boolean
 }
 
-// ==================== Utility Types ====================
+// ==================== Overflow Text I18n Configuration ====================
 
 /**
- * Page size preset name
+ * Overflow text configuration for internationalization
+ * Configures user-visible text for overflow field pagination
+ *
+ * @requirements 5.1 - Support i18n for overflow text
+ *
+ * @example
+ * // Use Chinese (default)
+ * const config = { overflowText: DEFAULT_OVERFLOW_TEXT }
+ *
+ * // Use English
+ * const config = { overflowText: ENGLISH_OVERFLOW_TEXT }
  */
-export type PageSizePreset = '16K' | 'A4' | 'A5'
+export interface OverflowTextConfig {
+  /** Continuation marker on first page, e.g., "（续见附页）" */
+  seeNextMarker: string
+  /** Label suffix on continuation page, e.g., "（续）" */
+  continuationSuffix: string
+  /** Page title suffix for continuation pages, e.g., "（续）" */
+  pageTitleSuffix: string
+}
 
 /**
- * Pagination mode
+ * Default overflow text configuration (Chinese)
+ * @requirements 5.1 - Default Chinese text
  */
-export type PaginationMode = 'auto' | 'manual'
+export const DEFAULT_OVERFLOW_TEXT: OverflowTextConfig = {
+  /** Continuation marker on first page */
+  seeNextMarker: '（续见附页）',
+  /** Label suffix on continuation page */
+  continuationSuffix: '（续）',
+  /** Page title suffix for continuation pages */
+  pageTitleSuffix: '（续）',
+} as const
+
+/**
+ * English overflow text configuration
+ * @requirements 5.1 - English text option
+ */
+export const ENGLISH_OVERFLOW_TEXT: OverflowTextConfig = {
+  /** Continuation marker on first page */
+  seeNextMarker: '(continued on next page)',
+  /** Label suffix on continuation page */
+  continuationSuffix: '(continued)',
+  /** Page title suffix for continuation pages */
+  pageTitleSuffix: '(continued)',
+} as const

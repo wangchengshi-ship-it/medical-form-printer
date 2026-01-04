@@ -291,6 +291,48 @@ const heightPx = mmToPx(297)  // 297mm → pixels
 const heightMm = pxToMm(1123) // pixels → mm
 ```
 
+#### Overflow Text Configuration (i18n)
+
+Configure overflow field pagination text for different languages:
+
+```typescript
+import { 
+  DEFAULT_OVERFLOW_TEXT,    // Chinese (default)
+  ENGLISH_OVERFLOW_TEXT     // English
+} from 'medical-form-printer'
+import type { OverflowTextConfig } from 'medical-form-printer'
+
+// DEFAULT_OVERFLOW_TEXT:
+// {
+//   seeNextMarker: '（续见附页）',      // Marker on first page
+//   continuationSuffix: '（续）',       // Label suffix on continuation page
+//   pageTitleSuffix: '（续）'           // Page title suffix
+// }
+
+// ENGLISH_OVERFLOW_TEXT:
+// {
+//   seeNextMarker: '(continued on next page)',
+//   continuationSuffix: '(continued)',
+//   pageTitleSuffix: '(continued)'
+// }
+
+// Custom configuration
+const customText: OverflowTextConfig = {
+  seeNextMarker: '(voir page suivante)',
+  continuationSuffix: '(suite)',
+  pageTitleSuffix: '(suite)'
+}
+
+// Use in paginated rendering
+const html = renderPaginatedHtml({
+  schema: printSchema,
+  data: formData,
+  config: {
+    overflowText: ENGLISH_OVERFLOW_TEXT  // or customText
+  }
+})
+```
+
 ### Styling
 
 #### `generateCss(theme?)`
@@ -391,6 +433,7 @@ const safe = escapeHtml('<script>alert("xss")</script>')
 interface PrintSchema {
   pageSize: 'A4' | 'A5' | '16K'
   orientation: 'portrait' | 'landscape'
+  baseUnit?: number  // Scaling factor (default: 1, e.g., 0.95 = 5% smaller)
   header: {
     hospital: string
     department?: string
@@ -405,6 +448,23 @@ interface PrintSchema {
   }
 }
 ```
+
+### Base Unit Scaling
+
+The `baseUnit` property allows global scaling of all size values in the rendered output:
+
+```typescript
+const schema = {
+  pageSize: 'A4',
+  orientation: 'portrait',
+  baseUnit: 0.95,  // 5% smaller - useful for fitting more content
+  // ...
+}
+```
+
+- `baseUnit: 1` (default) - Normal size
+- `baseUnit: 0.95` - 5% smaller
+- `baseUnit: 1.1` - 10% larger
 
 ## Section Types
 
