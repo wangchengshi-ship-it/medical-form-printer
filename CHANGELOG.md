@@ -5,6 +5,19 @@ All notable changes to `medical-form-printer` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0](https://github.com/wangchengshi-ship-it/medical-form-printer/compare/v0.2.0...v0.3.0) (2026-01-05)
+
+
+### Features
+
+* add multi-row table header support with colspan/rowspan ([1c318d9](https://github.com/wangchengshi-ship-it/medical-form-printer/commit/1c318d918ee83ad94cc3e5c185041e1de0c1bd8a))
+
+
+### Bug Fixes
+
+* footer height measurement for pagination ([d59388a](https://github.com/wangchengshi-ship-it/medical-form-printer/commit/d59388aaee7690de09c055cba34ab34dc36be39c))
+* update release-please to trigger on master branch ([1f48a8b](https://github.com/wangchengshi-ship-it/medical-form-printer/commit/1f48a8b15a57215f1e160c265972846b9076f497))
+
 ## [Unreleased]
 
 ### Added
