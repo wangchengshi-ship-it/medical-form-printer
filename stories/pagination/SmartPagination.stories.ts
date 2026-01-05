@@ -72,13 +72,12 @@ const createSchema = (options?: {
       title: 'Daily Nursing Records',
       config: {
         columns: [
-          { field: 'date', header: 'Date', width: '80px' },
+          { field: 'date', header: 'Date', width: '90px' },
           { field: 'time', header: 'Time', width: '60px' },
           { field: 'temperature', header: 'Temp (°C)', width: '70px' },
           { field: 'weight', header: 'Weight (g)', width: '80px' },
           { field: 'feeding', header: 'Feeding', width: '100px' },
-          { field: 'urination', header: 'Urination', width: '70px' },
-          { field: 'defecation', header: 'Defecation', width: '70px' },
+          { field: 'status', header: 'Status', width: '80px' },
           { field: 'nurse', header: 'Nurse', width: '80px' },
         ],
         dataField: 'nursingRecords',
@@ -89,7 +88,6 @@ const createSchema = (options?: {
       config: {
         fields: [
           { label: 'Nurse Signature', field: 'nurseSignature', showDate: true },
-          { label: 'Head Nurse Signature', field: 'headNurseSignature', showDate: true },
         ],
       },
     },
@@ -125,13 +123,12 @@ const generateNursingRecords = (count: number): Array<{
   temperature: string
   weight: number
   feeding: string
-  urination: string
-  defecation: string
+  status: string
   nurse: string
 }> => {
   const nurses = [PLACEHOLDER.staff.nurse, PLACEHOLDER.staff.nurseAlt, PLACEHOLDER.staff.nurseThird]
   const feedings = ['Breastfeeding', 'Formula', 'Breast + Formula']
-  const statuses = ['Normal', 'Frequent', 'None']
+  const statuses = ['Normal', 'Good', 'Monitor']
   
   const records: Array<{
     date: string
@@ -139,8 +136,7 @@ const generateNursingRecords = (count: number): Array<{
     temperature: string
     weight: number
     feeding: string
-    urination: string
-    defecation: string
+    status: string
     nurse: string
   }> = []
   const baseDate = new Date('2024-01-15')
@@ -159,8 +155,7 @@ const generateNursingRecords = (count: number): Array<{
       temperature: (36.5 + Math.random() * 0.5).toFixed(1),
       weight: 3250 + dayOffset * 15 + Math.floor(Math.random() * 20),
       feeding: feedings[Math.floor(Math.random() * feedings.length)],
-      urination: statuses[Math.floor(Math.random() * 2)],
-      defecation: statuses[Math.floor(Math.random() * 2)],
+      status: statuses[Math.floor(Math.random() * statuses.length)],
       nurse: nurses[timeSlot],
     })
   }

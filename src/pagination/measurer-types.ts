@@ -1,10 +1,10 @@
 /**
  * @fileoverview Content measurer type definitions
  * @module pagination/measurer-types
- * @version 1.0.0
+ * @version 1.1.0
  * @author Kiro
  * @created 2026-01-03
- * @modified 2026-01-03
+ * @modified 2026-01-05
  *
  * @description
  * Defines all types for the content measurer, including:
@@ -24,6 +24,7 @@
  */
 
 import type { MeasurableItemType } from './types'
+import { CSS_NAMESPACE } from '../styles/isolation'
 
 // ==================== Measurement Configuration ====================
 
@@ -182,34 +183,70 @@ export const DEFAULT_TEXT_ESTIMATE_OPTIONS: Required<TextEstimateOptions> = {
   isChinese: true,
 }
 
+// ==================== CSS Selector Utilities ====================
+
+/**
+ * Create selector that matches both isolated (mpr-) and non-isolated class names
+ * @param classNames - Base class names without prefix
+ * @returns CSS selector matching all variants
+ */
+function createDualSelector(classNames: string[]): string {
+  return classNames
+    .flatMap(cn => [`.${cn}`, `.${CSS_NAMESPACE}-${cn}`])
+    .join(', ')
+}
+
+/**
+ * Create selector for section wrappers (with data-section-id attribute and compound classes)
+ * @param wrapperClass - Wrapper class name (e.g., 'info-grid-wrapper')
+ * @param sectionClass - Section class name (e.g., 'info-grid')
+ * @returns CSS selector matching all wrapper variants
+ */
+function createSectionWrapperSelector(wrapperClass: string, sectionClass: string): string {
+  return [
+    // Wrapper with data-section-id
+    `.${wrapperClass}[data-section-id]`,
+    `.${CSS_NAMESPACE}-${wrapperClass}[data-section-id]`,
+    // Direct section class
+    `.${sectionClass}`,
+    `.${CSS_NAMESPACE}-${sectionClass}`,
+    // Compound class (div.print-section.section-class)
+    `div.print-section.${sectionClass}`,
+    `div.${CSS_NAMESPACE}-print-section.${CSS_NAMESPACE}-${sectionClass}`,
+  ].join(', ')
+}
+
 // ==================== CSS Selector Constants ====================
 
 /**
  * CSS selectors used by content measurer
  * Used to find various measurable elements in DOM
+ * Supports both isolated mode (mpr- prefix) and non-isolated mode
  */
 export const MEASURE_SELECTORS = {
-  /** Header selector */
-  HEADER: ':scope > .print-header',
-  /** Page body selector */
-  BODY: ':scope > .print-body',
+  /** Header selector - matches .print-header and .mpr-print-header */
+  HEADER: createDualSelector(['print-header']),
+  /** Footer selector - matches .print-footer and .mpr-print-footer */
+  FOOTER: createDualSelector(['print-footer']),
+  /** Page body selector - matches .print-body/.print-content variants */
+  BODY: createDualSelector(['print-body', 'print-content']),
   /** Section title selector */
-  SECTION_TITLE: ':scope > .section-title-block',
+  SECTION_TITLE: createDualSelector(['section-title']),
   /** Info grid wrapper selector */
-  INFO_GRID_WRAPPER: ':scope > .info-grid-wrapper[data-section-id]',
+  INFO_GRID_WRAPPER: createSectionWrapperSelector('info-grid-wrapper', 'info-grid'),
   /** Data table wrapper selector */
-  TABLE_WRAPPER: ':scope > .data-table-wrapper[data-section-id]',
+  TABLE_WRAPPER: createSectionWrapperSelector('data-table-wrapper', 'data-table'),
   /** Checkbox grid wrapper selector */
-  CHECKBOX_GRID_WRAPPER: ':scope > .checkbox-grid-wrapper[data-section-id]',
+  CHECKBOX_GRID_WRAPPER: createSectionWrapperSelector('checkbox-grid-wrapper', 'checkbox-grid'),
   /** Medical checkbox row wrapper selector */
-  MEDICAL_CHECKBOX_ROW_WRAPPER: ':scope > .medical-checkbox-row-wrapper[data-section-id]',
+  MEDICAL_CHECKBOX_ROW_WRAPPER: createDualSelector(['medical-checkbox-row-wrapper[data-section-id]']),
   /** Notes selector */
-  NOTES: ':scope > .notes-text',
+  NOTES: createDualSelector(['notes-text', 'notes-section']),
   /** Signature area selector */
-  SIGNATURE: ':scope > .signature-area',
-  /** Table header selector */
+  SIGNATURE: createDualSelector(['signature-area']),
+  /** Table header selector (standard HTML element, no namespace needed) */
   TABLE_HEADER: 'thead',
-  /** Table rows selector */
+  /** Table rows selector (standard HTML element, no namespace needed) */
   TABLE_ROWS: 'tbody tr',
 } as const
 

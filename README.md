@@ -8,6 +8,17 @@ A schema-driven medical form print renderer that transforms structured form data
 
 [中文文档](./README.zh-CN.md)
 
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Design Philosophy](#design-philosophy)
+- [Section Types](#section-types)
+- [API Reference](#api-reference)
+- [CSS Isolation](#css-isolation)
+- [Examples](#examples)
+
 ## Features
 
 - 🖨️ **Dual Environment** - Works seamlessly in both browser and Node.js
@@ -23,17 +34,7 @@ A schema-driven medical form print renderer that transforms structured form data
 ## Installation
 
 ```bash
-# npm
 npm install medical-form-printer
-
-# yarn
-yarn add medical-form-printer
-
-# pnpm
-pnpm add medical-form-printer
-
-# bun
-bun add medical-form-printer
 ```
 
 For PDF generation in Node.js, install Puppeteer as a peer dependency:
@@ -49,12 +50,11 @@ npm install puppeteer
 ```typescript
 import { renderToHtml } from 'medical-form-printer'
 
-const printSchema = {
+const schema = {
   pageSize: 'A4',
   orientation: 'portrait',
   header: {
     hospital: 'Sample Hospital',
-    department: 'Postpartum Care Center',
     title: 'Patient Assessment Form',
   },
   sections: [
@@ -62,403 +62,291 @@ const printSchema = {
       type: 'info-grid',
       config: {
         columns: 4,
-        rows: [
-          {
-            cells: [
-              { label: 'Name', field: 'name', type: 'text' },
-              { label: 'Age', field: 'age', type: 'number' },
-              { label: 'Date', field: 'admissionDate', type: 'date' },
-              { label: 'Room', field: 'roomNumber', type: 'text' },
-            ]
-          }
-        ]
+        rows: [{
+          cells: [
+            { label: 'Name', field: 'name' },
+            { label: 'Age', field: 'age' },
+            { label: 'Date', field: 'date', type: 'date' },
+            { label: 'Room', field: 'room' },
+          ]
+        }]
       }
     }
-  ],
-  footer: {
-    showPageNumber: true
-  }
+  ]
 }
 
-const formData = {
-  name: 'Jane Doe',
-  age: 28,
-  admissionDate: '2024-01-15',
-  roomNumber: 'A-101'
-}
-
-// Render to HTML
-const html = renderToHtml(printSchema, formData, {
-  watermark: 'Internal Use Only'
-})
-
-// Display in iframe or div
-document.getElementById('preview').innerHTML = html
+const data = { name: 'Jane Doe', age: 28, date: '2024-01-15', room: 'A-101' }
+const html = renderToHtml(schema, data)
 ```
 
-### Node.js Usage (PDF Generation)
+### Node.js Usage (PDF)
 
 ```typescript
-import { renderToPdf, mergePdfs } from 'medical-form-printer/node'
+import { renderToPdf } from 'medical-form-printer/node'
 import fs from 'fs'
 
-// Generate single PDF
-const pdfBuffer = await renderToPdf(printSchema, formData, {
-  watermark: 'Confidential'
-})
-fs.writeFileSync('assessment.pdf', pdfBuffer)
+const pdfBuffer = await renderToPdf(schema, data)
+fs.writeFileSync('form.pdf', pdfBuffer)
+```
 
-// Merge multiple forms into one PDF
-const mergedPdf = await mergePdfs([
-  { schema: maternalSchema, data: maternalData },
-  { schema: newbornSchema, data: newbornData },
-])
-fs.writeFileSync('complete-record.pdf', mergedPdf)
+## Design Philosophy
+
+### Why Flat Sections Instead of Nested Components?
+
+Many document rendering systems use deeply nested component hierarchies:
+
+```
+Document → Page → Container → Row → Cell → Element
+```
+
+We deliberately chose a **flat section-based model**. Here's why:
+
+#### 1. Print Documents ≠ UI Components
+
+Print documents are **static output**. A medical form doesn't need a `<Button>` that responds to clicks—it needs a checkbox symbol (☑/□) at the right position. Nested component trees add overhead without benefit.
+
+#### 2. Domain-Driven Design
+
+Sections map directly to **real-world medical form concepts**:
+
+| Section Type | Real-World Concept |
+|--------------|-------------------|
+| `info-grid` | Patient demographics block |
+| `table` | Nursing records log |
+| `checkbox-grid` | Symptom checklist |
+| `signature-area` | Approval signatures |
+
+Medical staff think in these terms, not abstract "containers" and "elements".
+
+#### 3. Pagination-Friendly Architecture
+
+Flat sections enable **predictable pagination**:
+
+```typescript
+type MeasurableItemType = 
+  | 'header'        // Page header - measured once
+  | 'section'       // Atomic block - never split
+  | 'table-header'  // Repeats on continuation pages
+  | 'table-row'     // Can be paginated individually
+  | 'signature'     // Usually pinned to last page
+  | 'footer'        // Page footer - measured once
+```
+
+#### 4. Schema Simplicity
+
+```typescript
+// ❌ Nested approach (verbose)
+{
+  type: 'container',
+  children: [{
+    type: 'container',
+    children: [
+      { type: 'label', text: 'Name:' },
+      { type: 'field', binding: 'name' }
+    ]
+  }]
+}
+
+// ✅ Flat approach (concise)
+{
+  type: 'info-grid',
+  config: {
+    rows: [{ cells: [{ label: 'Name', field: 'name' }] }]
+  }
+}
+```
+
+#### 5. Simple Extensibility
+
+```typescript
+registerSectionRenderer('vital-signs-chart', (config, data) => {
+  return '<div class="chart">...</div>'
+})
+```
+
+No abstract base classes or visitor patterns needed.
+
+### Trade-offs
+
+This design optimizes for **print document generation**. For deeply nested layouts or interactive components, consider general-purpose HTML templating or UI frameworks.
+
+## Section Types
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| `info-grid` | Grid layout for key-value pairs | Patient demographics |
+| `table` | Data table with columns | Nursing records |
+| `checkbox-grid` | Grid of checkbox options | Symptom checklists |
+| `signature-area` | Signature fields | Approvals |
+| `notes` | Static text content | Instructions |
+| `free-text` | Multi-line text input | Comments |
+
+### Info Grid
+
+```typescript
+{
+  type: 'info-grid',
+  config: {
+    columns: 4,
+    rows: [{
+      cells: [
+        { label: 'Name', field: 'name' },
+        { label: 'Age', field: 'age', type: 'number' },
+        { label: 'Status', field: 'status', type: 'checkbox', options: ['Active'] }
+      ]
+    }]
+  }
+}
+```
+
+### Table
+
+```typescript
+{
+  type: 'table',
+  title: 'Nursing Records',
+  config: {
+    dataField: 'records',
+    columns: [
+      { header: 'Date', field: 'date', type: 'date', width: '20%' },
+      { header: 'Notes', field: 'notes' }
+    ]
+  }
+}
+```
+
+### Checkbox Grid
+
+```typescript
+{
+  type: 'checkbox-grid',
+  config: {
+    field: 'symptoms',
+    columns: 4,
+    options: [
+      { value: 'fever', label: 'Fever' },
+      { value: 'headache', label: 'Headache' }
+    ]
+  }
+}
+```
+
+### Signature Area
+
+```typescript
+{
+  type: 'signature-area',
+  config: {
+    fields: [
+      { label: 'Patient', field: 'patientSig' },
+      { label: 'Date', field: 'sigDate', type: 'date' }
+    ]
+  }
+}
 ```
 
 ## API Reference
 
 ### Core Rendering
 
-#### `renderToHtml(schema, data, options?)`
-
-Renders a print schema with form data to an HTML string.
-
-```typescript
-import { renderToHtml } from 'medical-form-printer'
-
-const html = renderToHtml(printSchema, formData, {
-  theme: customTheme,
-  watermark: 'Draft',
-  watermarkOpacity: 0.1
-})
-```
-
-**Parameters:**
-- `schema: PrintSchema` - The print schema defining layout and sections
-- `data: FormData` - The form data to render
-- `options?: RenderOptions` - Optional rendering configuration
-
-**Returns:** `string` - Complete HTML document
-
-#### `renderToIsolatedHtml(schema, data, options?)`
-
-Renders with CSS isolation for consistent cross-environment styling.
-
-```typescript
-import { renderToIsolatedHtml } from 'medical-form-printer'
-
-const html = renderToIsolatedHtml(printSchema, formData, {
-  watermark: 'Internal Use Only'
-})
-```
-
-All content is wrapped in an isolation container with:
-- Namespaced CSS classes (prefixed with `mpr-`)
-- Embedded Source Han Serif SC font
-- Style containment for predictable rendering
-
-#### `renderToIsolatedFragment(schema, data, options?)`
-
-Renders an isolated HTML fragment for embedding in existing pages.
-
-```typescript
-import { renderToIsolatedFragment } from 'medical-form-printer'
-
-const fragment = renderToIsolatedFragment(printSchema, formData)
-document.getElementById('preview').innerHTML = fragment
-```
+| Function | Description |
+|----------|-------------|
+| `renderToHtml(schema, data, options?)` | Render to HTML string |
+| `renderToIsolatedHtml(schema, data, options?)` | Render with CSS isolation |
+| `renderToIsolatedFragment(schema, data, options?)` | Render isolated fragment for embedding |
 
 ### PDF Generation (Node.js)
 
-#### `renderToPdf(schema, data, options?)`
-
-Generates a PDF buffer from a print schema.
-
 ```typescript
-import { renderToPdf } from 'medical-form-printer/node'
+import { renderToPdf, mergePdfs } from 'medical-form-printer/node'
 
-const pdfBuffer = await renderToPdf(printSchema, formData, {
-  watermark: 'Confidential',
-  pdfOptions: {
-    format: 'A4',
-    printBackground: true
-  }
-})
-```
+// Single PDF
+const pdf = await renderToPdf(schema, data, { watermark: 'Draft' })
 
-**Parameters:**
-- `schema: PrintSchema` - The print schema
-- `data: FormData` - The form data
-- `options?: RenderOptions & { pdfOptions?: PdfOptions }` - Rendering and PDF options
-
-**Returns:** `Promise<Buffer>` - PDF file buffer
-
-#### `mergePdfs(documents, options?)`
-
-Merges multiple documents into a single PDF.
-
-```typescript
-import { mergePdfs } from 'medical-form-printer/node'
-
-const mergedPdf = await mergePdfs([
+// Merge multiple documents
+const merged = await mergePdfs([
   { schema: schema1, data: data1 },
-  { schema: schema2, data: data2 },
-], {
-  watermark: 'Complete Record'
-})
+  { schema: schema2, data: data2 }
+])
 ```
 
-### Custom Section Renderers
-
-#### `registerSectionRenderer(type, renderer)`
-
-Registers a custom section renderer for specialized content.
-
-```typescript
-import { registerSectionRenderer } from 'medical-form-printer'
-
-registerSectionRenderer('vital-signs-chart', (config, data, options) => {
-  const values = data[config.dataField] || []
-  return `
-    <div class="vital-signs-chart">
-      <h3>${config.title}</h3>
-      <!-- Custom chart rendering -->
-    </div>
-  `
-})
-```
-
-#### `getSectionRenderer(type)`
-
-Retrieves a registered section renderer.
-
-```typescript
-import { getSectionRenderer } from 'medical-form-printer'
-
-const renderer = getSectionRenderer('info-grid')
-```
-
-### Pagination
-
-#### Strategy Pattern API (Recommended)
-
-The pagination system uses a strategy pattern for flexible rendering:
+### Pagination (Strategy Pattern)
 
 ```typescript
 import { 
   createDefaultPaginationContext,
-  SmartPaginationStrategy,
-  OverflowPaginationStrategy
+  SmartPaginationStrategy 
 } from 'medical-form-printer'
 
-// Option 1: Use PaginationContext for automatic strategy selection
+// Automatic strategy selection
 const context = createDefaultPaginationContext()
 const html = context.render(schema, data, { isolated: true })
 
-// Option 2: Use specific strategy directly
+// Or use specific strategy
 const strategy = new SmartPaginationStrategy()
 if (strategy.shouldApply(schema)) {
-  const html = strategy.render(schema, data, { isolated: true })
-}
-
-// Option 3: Use OverflowPaginationStrategy for long text fields
-const overflowStrategy = new OverflowPaginationStrategy()
-if (overflowStrategy.shouldApply(schema)) {
-  const html = overflowStrategy.render(schema, data, { 
-    isolated: true,
-    textConfig: { seeNextMarker: '(continued on next page)' }
-  })
+  const html = strategy.render(schema, data)
 }
 ```
 
-#### `renderPaginatedHtml(config)` (Deprecated)
-
-> **Deprecated**: Use the Strategy Pattern API above instead.
-
-Renders multi-page content with smart pagination.
+### Custom Section Renderers
 
 ```typescript
-import { 
-  renderPaginatedHtml, 
-  calculatePageBreaks,
-  PAGE_A4 
-} from 'medical-form-printer'
+import { registerSectionRenderer, getSectionRenderer } from 'medical-form-printer'
 
-const pageBreaks = calculatePageBreaks(measuredItems, {
-  pageHeight: PAGE_A4.height,
-  headerHeight: 60,
-  footerHeight: 40,
-  repeatTableHeaders: true
-})
-
-const html = renderPaginatedHtml({
-  schema: printSchema,
-  data: formData,
-  pageBreakResult: pageBreaks,
-  measuredItems: items,
-  config: {
-    isolated: true,
-    showHeaderOnEachPage: true,
-    continuationSuffix: '(continued)'
-  }
+registerSectionRenderer('custom-chart', (config, data, options) => {
+  return `<div class="chart">${config.title}</div>`
 })
 ```
 
-#### Page Size Presets
-
-```typescript
-import { PAGE_A4, PAGE_A5, PAGE_16K, PAGE_PRESETS } from 'medical-form-printer'
-
-// PAGE_A4: { width: 210, height: 297 } (mm)
-// PAGE_A5: { width: 148, height: 210 } (mm)
-// PAGE_16K: { width: 185, height: 260 } (mm)
-```
-
-#### Unit Conversion
-
-```typescript
-import { mmToPx, pxToMm, mmToPt, ptToMm } from 'medical-form-printer'
-
-const heightPx = mmToPx(297)  // 297mm → pixels
-const heightMm = pxToMm(1123) // pixels → mm
-```
-
-#### Overflow Text Configuration (i18n)
-
-Configure overflow field pagination text for different languages:
-
-```typescript
-import { 
-  DEFAULT_OVERFLOW_TEXT,    // Chinese (default)
-  ENGLISH_OVERFLOW_TEXT     // English
-} from 'medical-form-printer'
-import type { OverflowTextConfig } from 'medical-form-printer'
-
-// DEFAULT_OVERFLOW_TEXT:
-// {
-//   seeNextMarker: '（续见附页）',      // Marker on first page
-//   continuationSuffix: '（续）',       // Label suffix on continuation page
-//   pageTitleSuffix: '（续）'           // Page title suffix
-// }
-
-// ENGLISH_OVERFLOW_TEXT:
-// {
-//   seeNextMarker: '(continued on next page)',
-//   continuationSuffix: '(continued)',
-//   pageTitleSuffix: '(continued)'
-// }
-
-// Custom configuration
-const customText: OverflowTextConfig = {
-  seeNextMarker: '(voir page suivante)',
-  continuationSuffix: '(suite)',
-  pageTitleSuffix: '(suite)'
-}
-
-// Use in paginated rendering
-const html = renderPaginatedHtml({
-  schema: printSchema,
-  data: formData,
-  config: {
-    overflowText: ENGLISH_OVERFLOW_TEXT  // or customText
-  }
-})
-```
-
-### Styling
-
-#### `generateCss(theme?)`
-
-Generates CSS styles for print rendering.
-
-```typescript
-import { generateCss, defaultTheme } from 'medical-form-printer'
-
-const css = generateCss(defaultTheme)
-```
-
-#### `generateIsolatedCss(theme?)`
-
-Generates isolated CSS with embedded fonts and namespaced classes.
-
-```typescript
-import { generateIsolatedCss } from 'medical-form-printer'
-
-const css = generateIsolatedCss()
-// Includes @font-face, isolation container, and all component styles
-```
-
-#### Theme Customization
+### Theme Customization
 
 ```typescript
 import { renderToHtml, mergeTheme, defaultTheme } from 'medical-form-printer'
 
-const customTheme = mergeTheme(defaultTheme, {
-  fonts: {
-    body: '"Microsoft YaHei", "PingFang SC", sans-serif',
-    heading: '"Microsoft YaHei", "PingFang SC", sans-serif'
-  },
-  colors: {
-    primary: '#1a1a1a',
-    border: '#333333',
-    background: '#ffffff'
-  },
-  fontSize: {
-    body: '10pt',
-    heading: '14pt',
-    small: '8pt'
-  },
-  spacing: {
-    section: '12pt',
-    cell: '4pt'
-  }
+const theme = mergeTheme(defaultTheme, {
+  colors: { primary: '#1a1a1a', border: '#333' },
+  fontSize: { body: '10pt', heading: '14pt' }
 })
 
-const html = renderToHtml(schema, data, { theme: customTheme })
+const html = renderToHtml(schema, data, { theme })
+```
+
+### Page Sizes & Units
+
+```typescript
+import { PAGE_A4, PAGE_A5, PAGE_16K, mmToPx, pxToMm } from 'medical-form-printer'
+
+// PAGE_A4: { width: 210, height: 297 } (mm)
+const heightPx = mmToPx(297)  // mm → pixels
 ```
 
 ### Formatters
 
 ```typescript
-import { 
-  formatDate, 
-  formatBoolean, 
-  formatNumber, 
-  formatValue,
-  isChecked 
-} from 'medical-form-printer'
+import { formatDate, formatBoolean, formatNumber } from 'medical-form-printer'
 
-formatDate('2024-01-15')           // '2024-01-15'
+formatDate('2024-01-15')                    // '2024-01-15'
 formatDate('2024-01-15', { format: 'YYYY年MM月DD日' })  // '2024年01月15日'
-formatBoolean(true)                // '✓'
-formatBoolean(false)               // '✗'
-formatNumber(1234.5, { decimals: 2 })  // '1234.50'
-isChecked('yes', ['yes', 'true'])  // true
+formatBoolean(true)                         // '✓'
+formatNumber(1234.5, { decimals: 2 })       // '1234.50'
 ```
 
-### HTML Builder Utilities
+## CSS Isolation
+
+For consistent cross-environment rendering:
 
 ```typescript
-import { 
-  HtmlBuilder, 
-  h, 
-  fragment, 
-  when, 
-  each,
-  escapeHtml 
-} from 'medical-form-printer'
+import { renderToIsolatedHtml, CSS_NAMESPACE } from 'medical-form-printer'
 
-// Fluent HTML building
-const html = h('div', { class: 'container' },
-  h('h1', {}, 'Title'),
-  when(showContent, () => h('p', {}, 'Content')),
-  each(items, (item) => h('li', {}, item.name))
-)
-
-// Safe HTML escaping
-const safe = escapeHtml('<script>alert("xss")</script>')
+const html = renderToIsolatedHtml(schema, data)
+// CSS_NAMESPACE = 'mpr' (all classes prefixed with mpr-)
 ```
+
+Isolation mode provides:
+- Namespaced CSS classes (`mpr-` prefix)
+- Embedded Source Han Serif SC font
+- CSS containment for predictable rendering
 
 ## PrintSchema Structure
 
@@ -466,160 +354,28 @@ const safe = escapeHtml('<script>alert("xss")</script>')
 interface PrintSchema {
   pageSize: 'A4' | 'A5' | '16K'
   orientation: 'portrait' | 'landscape'
-  baseUnit?: number  // Scaling factor (default: 1, e.g., 0.95 = 5% smaller)
+  baseUnit?: number  // Scaling factor (default: 1)
   header: {
     hospital: string
     department?: string
     title: string
-    subtitle?: string
   }
   sections: PrintSection[]
   footer?: {
     showPageNumber?: boolean
-    pageNumberFormat?: string
     notes?: string
   }
 }
 ```
 
-### Base Unit Scaling
-
-The `baseUnit` property allows global scaling of all size values in the rendered output:
-
-```typescript
-const schema = {
-  pageSize: 'A4',
-  orientation: 'portrait',
-  baseUnit: 0.95,  // 5% smaller - useful for fitting more content
-  // ...
-}
-```
-
-- `baseUnit: 1` (default) - Normal size
-- `baseUnit: 0.95` - 5% smaller
-- `baseUnit: 1.1` - 10% larger
-
-## Section Types
-
-| Type | Description | Use Case |
-|------|-------------|----------|
-| `info-grid` | Grid layout for key-value pairs | Patient demographics, basic info |
-| `table` | Data table with columns | Nursing records, medication logs |
-| `checkbox-grid` | Grid of checkbox options | Assessment checklists, symptoms |
-| `signature-area` | Signature fields with labels | Approvals, acknowledgments |
-| `notes` | Static text content | Instructions, disclaimers |
-| `free-text` | Multi-line text input | Comments, observations |
-
-### Info Grid Section
-
-```typescript
-{
-  type: 'info-grid',
-  config: {
-    columns: 4,
-    rows: [
-      {
-        cells: [
-          { label: 'Name', field: 'name', type: 'text' },
-          { label: 'Age', field: 'age', type: 'number', span: 1 },
-          { label: 'Date', field: 'date', type: 'date' },
-          { label: 'Status', field: 'status', type: 'checkbox', options: ['Active'] }
-        ]
-      }
-    ]
-  }
-}
-```
-
-### Table Section
-
-```typescript
-{
-  type: 'table',
-  title: 'Nursing Records',
-  config: {
-    dataField: 'nursingRecords',
-    columns: [
-      { header: 'Date', field: 'date', type: 'date', width: '15%' },
-      { header: 'Time', field: 'time', type: 'text', width: '10%' },
-      { header: 'Temperature', field: 'temperature', type: 'number', width: '15%' },
-      { header: 'Notes', field: 'notes', type: 'text' }
-    ]
-  }
-}
-```
-
-### Checkbox Grid Section
-
-```typescript
-{
-  type: 'checkbox-grid',
-  title: 'Symptoms Assessment',
-  config: {
-    field: 'symptoms',
-    columns: 4,
-    options: [
-      { value: 'fever', label: 'Fever' },
-      { value: 'headache', label: 'Headache' },
-      { value: 'fatigue', label: 'Fatigue' },
-      { value: 'nausea', label: 'Nausea' }
-    ]
-  }
-}
-```
-
-### Signature Area Section
-
-```typescript
-{
-  type: 'signature-area',
-  config: {
-    fields: [
-      { label: 'Patient Signature', field: 'patientSignature' },
-      { label: 'Nurse Signature', field: 'nurseSignature' },
-      { label: 'Date', field: 'signatureDate', type: 'date' }
-    ]
-  }
-}
-```
-
-## CSS Isolation
-
-For consistent rendering across different environments, use isolation mode:
-
-```typescript
-import { 
-  renderToIsolatedHtml,
-  CSS_NAMESPACE,
-  ISOLATION_ROOT_CLASS,
-  namespaceClass,
-  namespaceClasses 
-} from 'medical-form-printer'
-
-// CSS_NAMESPACE = 'mpr'
-// ISOLATION_ROOT_CLASS = 'mpr-root'
-
-// Namespace utilities
-namespaceClass('header')           // 'mpr-header'
-namespaceClasses(['header', 'footer'])  // ['mpr-header', 'mpr-footer']
-```
-
-Isolation mode provides:
-- All classes prefixed with `mpr-` namespace
-- Embedded Source Han Serif SC font (subset for CJK support)
-- CSS containment (`contain: layout style`)
-- Consistent rendering regardless of host page styles
-
 ## Examples
 
-See the [examples](./examples) directory for complete working examples:
+See the [examples](./examples) directory:
 
-- [Browser Example](./examples/browser) - Vanilla HTML/JS usage
-- [Node.js Example](./examples/node) - PDF generation with file output
+- [Browser Example](./examples/browser) - Vanilla HTML/JS
+- [Node.js Example](./examples/node) - PDF generation
 
 ## Storybook
-
-Interactive component documentation is available via Storybook:
 
 ```bash
 npm run storybook
@@ -627,15 +383,14 @@ npm run storybook
 
 ## Contributing
 
-Contributions are welcome! Please read our [Contributing Guide](./CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+See [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ## License
 
-[MIT](./LICENSE) © 2024
+[MIT](./LICENSE)
 
 ## Links
 
-- [GitHub Repository](https://github.com/wangchengshi-ship-it/medical-form-printer)
-- [npm Package](https://www.npmjs.com/package/medical-form-printer)
-- [Issue Tracker](https://github.com/wangchengshi-ship-it/medical-form-printer/issues)
+- [GitHub](https://github.com/wangchengshi-ship-it/medical-form-printer)
+- [npm](https://www.npmjs.com/package/medical-form-printer)
 - [Changelog](./CHANGELOG.md)

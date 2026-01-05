@@ -484,6 +484,235 @@ export function estimateTableRowHeight(
 
 // ==================== Batch Measure All Content ====================
 
+/** Alternative table selectors for fallback matching */
+const ALTERNATIVE_TABLE_SELECTORS = 'div.data-table, div.mpr-data-table, table'
+
+/**
+ * Find the print page container within the content
+ * Supports both isolated (mpr-) and non-isolated class names
+ * @param container - Root container element
+ * @returns Print page element or the container itself
+ */
+function findPrintPageContainer(container: HTMLElement): HTMLElement {
+  // Try to find print-page container (isolated or non-isolated)
+  const printPage = container.querySelector('.print-page, .mpr-print-page')
+  if (printPage) {
+    return printPage as HTMLElement
+  }
+  // If no print-page found, use the container itself
+  return container
+}
+
+/**
+ * Check if an element is a table section
+ * @param element - DOM element to check
+ * @returns Whether the element is a table
+ */
+function isTableElement(element: Element): boolean {
+  return (
+    element.matches(MEASURE_SELECTORS.TABLE_WRAPPER) ||
+    element.matches(ALTERNATIVE_TABLE_SELECTORS) ||
+    element.tagName === 'TABLE'
+  )
+}
+
+/**
+ * Measure a table element and push results to the array
+ * Extracts header and row measurements separately
+ * 
+ * @param element - Table container or table element
+ * @param tableId - Unique identifier for the table
+ * @param results - Array to push measurement results into
+ */
+function measureTableInto(
+  element: Element,
+  tableId: string,
+  results: MeasurableItem[]
+): void {
+  const tableElement = element.tagName === 'TABLE'
+    ? element
+    : element.querySelector('table')
+
+  if (!tableElement) return
+
+  // Measure header (thead)
+  const thead = tableElement.querySelector(MEASURE_SELECTORS.TABLE_HEADER)
+  if (thead) {
+    results.push({
+      id: `${tableId}-header`,
+      type: 'table-header',
+      height: thead.getBoundingClientRect().height,
+      tableId,
+    })
+  }
+
+  // Measure each row (tbody tr)
+  const rows = tableElement.querySelectorAll(MEASURE_SELECTORS.TABLE_ROWS)
+  rows.forEach((row, rowIndex) => {
+    results.push({
+      id: `${tableId}-row-${rowIndex}`,
+      type: 'table-row',
+      height: row.getBoundingClientRect().height,
+      tableId,
+      dataIndex: rowIndex,
+    })
+  })
+}
+
+/**
+ * Measure header element and push result to array
+ * @param pageContainer - Page container element
+ * @param results - Array to push measurement results into
+ */
+function measureHeaderInto(
+  pageContainer: HTMLElement,
+  results: MeasurableItem[]
+): void {
+  const header = pageContainer.querySelector(MEASURE_SELECTORS.HEADER)
+  if (header) {
+    results.push({
+      id: 'page-header',
+      type: 'header',
+      height: header.getBoundingClientRect().height,
+    })
+  }
+}
+
+/**
+ * Measure footer elements and push results to array
+ * Includes both print-footer (page number) and notes sections
+ * @param pageContainer - Page container element (for print-footer)
+ * @param printBody - Print body container element (for notes), can be null
+ * @param results - Array to push measurement results into
+ */
+function measureFooterInto(
+  pageContainer: HTMLElement,
+  printBody: Element | null,
+  results: MeasurableItem[]
+): void {
+  // Measure print-footer element (contains page number)
+  const footer = pageContainer.querySelector(MEASURE_SELECTORS.FOOTER)
+  if (footer) {
+    const rect = footer.getBoundingClientRect()
+    // Include margin in height calculation
+    const computedStyle = window.getComputedStyle(footer)
+    const marginTop = parseFloat(computedStyle.marginTop) || 0
+    const marginBottom = parseFloat(computedStyle.marginBottom) || 0
+    const footerHeight = rect.height + marginTop + marginBottom
+    
+    // Only add item if element has positive height
+    if (footerHeight > 0) {
+      results.push({
+        id: 'page-footer',
+        type: 'footer',
+        height: footerHeight,
+      })
+    }
+  }
+
+  // Measure notes sections (only if printBody exists)
+  if (printBody) {
+    const notes = printBody.querySelectorAll(MEASURE_SELECTORS.NOTES)
+    notes.forEach((note, index) => {
+      const rect = note.getBoundingClientRect()
+      // Include margin in height calculation
+      const computedStyle = window.getComputedStyle(note)
+      const marginTop = parseFloat(computedStyle.marginTop) || 0
+      const marginBottom = parseFloat(computedStyle.marginBottom) || 0
+      const noteHeight = rect.height + marginTop + marginBottom
+      
+      // Only add item if element has positive height
+      if (noteHeight > 0) {
+        results.push({
+          id: `notes-${index}`,
+          type: 'footer',
+          height: noteHeight,
+        })
+      }
+    })
+  }
+}
+
+/**
+ * Measure signature elements and push results to array
+ * @param container - Container element to search within
+ * @param results - Array to push measurement results into
+ */
+function measureSignaturesInto(
+  container: HTMLElement,
+  results: MeasurableItem[]
+): void {
+  const signatures = container.querySelectorAll(MEASURE_SELECTORS.SIGNATURE)
+  signatures.forEach((sig, index) => {
+    results.push({
+      id: `signature-${index}`,
+      type: 'signature',
+      height: sig.getBoundingClientRect().height,
+    })
+  })
+}
+
+/**
+ * Measure all section elements (info-grid, table, checkbox-grid, etc.)
+ * Uses unified section index to match PrintSchema.sections array order
+ * 
+ * @param printBody - Print body container element
+ * @param results - Array to push measurement results into
+ * @param options - Measurement options
+ */
+function measureSectionsInto(
+  printBody: Element,
+  results: MeasurableItem[],
+  options: { measureSections: boolean; measureTables: boolean }
+): void {
+  const { measureSections, measureTables } = options
+
+  /**
+   * Unified section index counter
+   * 
+   * All section types share a single index counter to match the order
+   * in PrintSchema.sections array. This ensures measureAll IDs match
+   * buildSectionMap keys.
+   */
+  let sectionIndex = 0
+
+  // Collect all section elements in DOM order using a combined selector
+  const allSectionSelectors = [
+    MEASURE_SELECTORS.INFO_GRID_WRAPPER,
+    MEASURE_SELECTORS.TABLE_WRAPPER,
+    MEASURE_SELECTORS.CHECKBOX_GRID_WRAPPER,
+    MEASURE_SELECTORS.MEDICAL_CHECKBOX_ROW_WRAPPER,
+  ].join(', ')
+
+  const allSectionElements = printBody.querySelectorAll(allSectionSelectors)
+
+  // Process each section element in DOM order
+  allSectionElements.forEach((element) => {
+    const isTable = isTableElement(element)
+
+    if (isTable && measureTables) {
+      measureTableInto(element, `table-${sectionIndex}`, results)
+      sectionIndex++
+    } else if (!isTable && measureSections) {
+      results.push({
+        id: `section-${sectionIndex}`,
+        type: 'section',
+        height: element.getBoundingClientRect().height,
+      })
+      sectionIndex++
+    }
+  })
+
+  // Fallback: if no sections found, try tables directly
+  if (allSectionElements.length === 0 && measureTables) {
+    const tableContainers = printBody.querySelectorAll(ALTERNATIVE_TABLE_SELECTORS)
+    tableContainers.forEach((tableContainer) => {
+      measureTableInto(tableContainer, `table-${sectionIndex}`, results)
+      sectionIndex++
+    })
+  }
+}
+
 /**
  * Measure all elements in the entire content container
  * @requirements 10.5 - Support batch measuring multiple elements
@@ -493,6 +722,22 @@ export function estimateTableRowHeight(
  * @param container - Measurement container
  * @param options - Batch measurement options
  * @returns Array of all measurable items
+ *
+ * @remarks
+ * ## ID Format Convention
+ * 
+ * Section items use unified `section-{index}` format where `index` corresponds to
+ * the section's position in `PrintSchema.sections` array. This ensures consistency
+ * between measurement and rendering phases.
+ * 
+ * | Type | ID Format | Example |
+ * |------|-----------|---------|
+ * | section (info-grid, checkbox-grid, etc.) | `section-{index}` | `section-0`, `section-1` |
+ * | table-header | `{tableId}-header` | `table-0-header` |
+ * | table-row | `{tableId}-row-{rowIndex}` | `table-0-row-0` |
+ * | header | `page-header` | `page-header` |
+ * | footer | `notes-{index}` | `notes-0` |
+ * | signature | `signature-{index}` | `signature-0` |
  *
  * @example
  * const measureContainer = createMeasureContainer()
@@ -523,130 +768,29 @@ export function measureAll(
   clone.style.position = 'static'
   container.appendChild(clone)
 
-  // 1. Page header (.print-header) - direct child element
+  // Find the actual print page container (handles both isolated and non-isolated modes)
+  const pageContainer = findPrintPageContainer(clone)
+
+  // 1. Measure header
   if (measureHeader) {
-    const header = clone.querySelector(MEASURE_SELECTORS.HEADER)
-    if (header) {
-      const rect = header.getBoundingClientRect()
-      results.push({
-        id: 'page-header',
-        type: 'header',
-        height: rect.height,
-      })
-    }
+    measureHeaderInto(pageContainer, results)
   }
 
-  // Get print-body container
-  const printBody = clone.querySelector(MEASURE_SELECTORS.BODY)
-  if (printBody) {
-    if (measureSections) {
-      // 2. Section titles (.section-title-block) - direct child elements
-      const sectionTitles = printBody.querySelectorAll(MEASURE_SELECTORS.SECTION_TITLE)
-      sectionTitles.forEach((title, index) => {
-        const rect = title.getBoundingClientRect()
-        results.push({
-          id: `section-title-${index}`,
-          type: 'section',
-          height: rect.height,
-        })
-      })
-
-      // 3. Info grids - find wrapper div with data-section-id
-      const infoGridWrappers = printBody.querySelectorAll(MEASURE_SELECTORS.INFO_GRID_WRAPPER)
-      infoGridWrappers.forEach((wrapper, index) => {
-        const rect = wrapper.getBoundingClientRect()
-        results.push({
-          id: `info-grid-${index}`,
-          type: 'section',
-          height: rect.height,
-        })
-      })
-
-      // 5. Checkbox grids - find wrapper div with data-section-id
-      const checkboxGridWrappers = printBody.querySelectorAll(
-        MEASURE_SELECTORS.CHECKBOX_GRID_WRAPPER
-      )
-      checkboxGridWrappers.forEach((wrapper, index) => {
-        const rect = wrapper.getBoundingClientRect()
-        results.push({
-          id: `checkbox-grid-${index}`,
-          type: 'section',
-          height: rect.height,
-        })
-      })
-
-      // 7. Medical checkbox row - Find wrapper div with data-section-id
-      const medicalCheckboxRows = printBody.querySelectorAll(
-        MEASURE_SELECTORS.MEDICAL_CHECKBOX_ROW_WRAPPER
-      )
-      medicalCheckboxRows.forEach((wrapper, index) => {
-        const rect = wrapper.getBoundingClientRect()
-        results.push({
-          id: `medical-checkbox-row-${index}`,
-          type: 'section',
-          height: rect.height,
-        })
-      })
-    }
-
-    // 4. Tables - find wrapper div with data-section-id
-    if (measureTables) {
-      const tableWrappers = printBody.querySelectorAll(MEASURE_SELECTORS.TABLE_WRAPPER)
-      tableWrappers.forEach((wrapper, tableIndex) => {
-        const tableId = `table-${tableIndex}`
-
-        // Measure header (thead) - find within wrapper div
-        const thead = wrapper.querySelector(MEASURE_SELECTORS.TABLE_HEADER)
-        if (thead) {
-          const theadRect = thead.getBoundingClientRect()
-          results.push({
-            id: `${tableId}-header`,
-            type: 'table-header',
-            height: theadRect.height,
-            tableId,
-          })
-        }
-
-        // Measure each row (tbody tr)
-        const rows = wrapper.querySelectorAll(MEASURE_SELECTORS.TABLE_ROWS)
-        rows.forEach((row, rowIndex) => {
-          const rowRect = row.getBoundingClientRect()
-          results.push({
-            id: `${tableId}-row-${rowIndex}`,
-            type: 'table-row',
-            height: rowRect.height,
-            tableId,
-            dataIndex: rowIndex,
-          })
-        })
-      })
-    }
-
-    // 6. Notes (.notes-text) - direct child elements
-    if (measureFooter) {
-      const notes = printBody.querySelectorAll(MEASURE_SELECTORS.NOTES)
-      notes.forEach((note, index) => {
-        const rect = note.getBoundingClientRect()
-        results.push({
-          id: `notes-${index}`,
-          type: 'footer',
-          height: rect.height,
-        })
-      })
-    }
+  // 2. Measure sections (info-grid, table, checkbox-grid, etc.)
+  const printBody = pageContainer.querySelector(MEASURE_SELECTORS.BODY)
+  if (printBody && (measureSections || measureTables)) {
+    measureSectionsInto(printBody, results, { measureSections, measureTables })
   }
 
-  // 8. Signature area (.signature-area) - direct child elements
+  // 3. Measure footer (print-footer + notes)
+  // Footer is measured from pageContainer, notes from printBody
+  if (measureFooter) {
+    measureFooterInto(pageContainer, printBody, results)
+  }
+
+  // 4. Measure signatures
   if (measureSignature) {
-    const signatures = clone.querySelectorAll(MEASURE_SELECTORS.SIGNATURE)
-    signatures.forEach((sig, index) => {
-      const rect = sig.getBoundingClientRect()
-      results.push({
-        id: `signature-${index}`,
-        type: 'signature',
-        height: rect.height,
-      })
-    })
+    measureSignaturesInto(clone, results)
   }
 
   // Cleanup

@@ -38,7 +38,10 @@ import { OverflowPaginationStrategy } from './overflow'
 
 export {
   SmartPaginationStrategy,
+  DomMeasurementStrategy,
   calculatePageBreaks,
+  type MeasurementStrategy,
+  type MeasurementConfig,
   type PageBreakOptions,
   type PageBreakResult,
   type PageContent,

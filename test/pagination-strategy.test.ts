@@ -191,6 +191,10 @@ describe('Property 1: Strategy Interface Compliance', () => {
   /**
    * Test: SmartPaginationStrategy.render returns non-empty string for valid inputs
    * **Validates: Requirements 1.4**
+   * 
+   * Note: Since v1.4.0, SmartPaginationStrategy uses DomMeasurementStrategy by default,
+   * which requires browser environment. In Node.js tests, we provide pre-measured items
+   * to bypass DOM measurement.
    */
   it('SmartPaginationStrategy.render should return non-empty string for valid inputs', () => {
     const smartStrategy = new SmartPaginationStrategy()
@@ -202,7 +206,13 @@ describe('Property 1: Strategy Interface Compliance', () => {
           return true // Skip this case
         }
 
-        const result = smartStrategy.render(schema, data)
+        // Provide pre-measured items to bypass DOM measurement requirement
+        // This is necessary because DomMeasurementStrategy requires browser environment
+        const measuredItems = [
+          { id: 'section-0', type: 'section' as const, height: 100 },
+        ]
+
+        const result = smartStrategy.render(schema, data, { measuredItems })
         
         expect(typeof result).toBe('string')
         expect(result.length).toBeGreaterThan(0)
@@ -979,6 +989,213 @@ describe('Property 3: Overflow Pagination Strategy Applicability', () => {
         
         expect(result).toBe(expected)
         return result === expected
+      }),
+      { numRuns: 100 }
+    )
+  })
+})
+
+
+// ==================== Property 3 (Design): Custom Strategy Override ====================
+
+describe('Property 3: Custom Strategy Override', () => {
+  /**
+   * Property 3: Custom Strategy Override
+   *
+   * *For any* `SmartPaginationStrategy` constructed with a custom `MeasurementStrategy`,
+   * calling `render()` SHALL use the provided strategy instead of the default `DomMeasurementStrategy`.
+   *
+   * **Feature: smart-pagination-fix, Property 3: Custom Strategy Override**
+   * **Validates: Requirements 1.3**
+   */
+
+  /**
+   * Arbitrary for valid PrintSchemaWithPagination that enables smart pagination
+   */
+  const validSmartSchemaArb: fc.Arbitrary<PrintSchemaWithPagination> = fc.record({
+    pageSize: fc.constantFrom('A4', 'A5', '16K') as fc.Arbitrary<'A4' | 'A5' | '16K'>,
+    orientation: fc.constantFrom('portrait', 'landscape') as fc.Arbitrary<'portrait' | 'landscape'>,
+    header: fc.record({
+      hospital: fc.string({ minLength: 1, maxLength: 50 }),
+      department: fc.option(fc.string({ minLength: 1, maxLength: 30 }), { nil: undefined }),
+      title: fc.string({ minLength: 1, maxLength: 50 }),
+    }),
+    sections: fc.constant([]),
+    footer: fc.option(
+      fc.record({
+        notes: fc.option(fc.string({ maxLength: 100 }), { nil: undefined }),
+        showPageNumber: fc.boolean(),
+      }),
+      { nil: undefined }
+    ),
+    pagination: fc.record({
+      enabled: fc.constant(true),
+      mode: fc.option(fc.constantFrom('auto', 'manual') as fc.Arbitrary<'auto' | 'manual'>, { nil: undefined }),
+      smartPagination: fc.record({
+        enabled: fc.constant(true),
+        minRowHeight: fc.option(fc.integer({ min: 4, max: 20 }), { nil: undefined }),
+      }),
+    }),
+  })
+
+  /**
+   * Arbitrary for valid FormData
+   */
+  const validDataArb: fc.Arbitrary<FormData> = fc.dictionary(
+    fc.string({ minLength: 1, maxLength: 20 }).filter(s => /^[a-zA-Z][a-zA-Z0-9_]*$/.test(s)),
+    fc.oneof(
+      fc.string({ maxLength: 100 }),
+      fc.integer(),
+      fc.boolean(),
+      fc.constant(null),
+      fc.constant(undefined)
+    )
+  )
+
+  /**
+   * Test: Custom measurement strategy is used instead of default
+   * **Validates: Requirements 1.3**
+   */
+  it('should use custom measurement strategy when provided', () => {
+    fc.assert(
+      fc.property(validSmartSchemaArb, validDataArb, (schema, data) => {
+        // Track if custom strategy was called
+        let customStrategyCalled = false
+        const customMeasuredItems = [
+          { id: 'custom-section-0', type: 'section' as const, height: 150 },
+        ]
+
+        // Create a custom measurement strategy that tracks calls
+        const customStrategy = {
+          measure: () => {
+            customStrategyCalled = true
+            return customMeasuredItems
+          },
+        }
+
+        // Create SmartPaginationStrategy with custom measurement strategy
+        const smartStrategy = new SmartPaginationStrategy(customStrategy)
+
+        // Render should use the custom strategy
+        const result = smartStrategy.render(schema, data)
+
+        // Verify custom strategy was called
+        expect(customStrategyCalled).toBe(true)
+
+        // Verify render returns valid HTML
+        expect(typeof result).toBe('string')
+        expect(result.length).toBeGreaterThan(0)
+
+        return true
+      }),
+      { numRuns: 100 }
+    )
+  })
+
+  /**
+   * Test: Default DomMeasurementStrategy is used when no custom strategy provided
+   * **Validates: Requirements 1.3**
+   */
+  it('should use DomMeasurementStrategy by default (throws in Node.js)', () => {
+    fc.assert(
+      fc.property(validSmartSchemaArb, validDataArb, (schema, data) => {
+        // Create SmartPaginationStrategy without custom strategy
+        const smartStrategy = new SmartPaginationStrategy()
+
+        // In Node.js environment, render should throw because DomMeasurementStrategy
+        // requires browser environment
+        expect(() => smartStrategy.render(schema, data)).toThrow(
+          'DomMeasurementStrategy requires browser environment'
+        )
+
+        return true
+      }),
+      { numRuns: 100 }
+    )
+  })
+
+  /**
+   * Test: Custom strategy receives correct parameters
+   * **Validates: Requirements 1.3**
+   */
+  it('should pass correct parameters to custom measurement strategy', () => {
+    fc.assert(
+      fc.property(validSmartSchemaArb, validDataArb, (schema, data) => {
+        // Track parameters passed to custom strategy
+        let receivedSchema: PrintSchemaWithPagination | null = null
+        let receivedData: FormData | null = null
+        let receivedConfig: { minRowHeight: number; pageHeight: number } | null = null
+
+        // Create a custom measurement strategy that captures parameters
+        const customStrategy = {
+          measure: (
+            s: PrintSchemaWithPagination,
+            d: FormData,
+            c: { minRowHeight: number; pageHeight: number }
+          ) => {
+            receivedSchema = s
+            receivedData = d
+            receivedConfig = c
+            return [{ id: 'section-0', type: 'section' as const, height: 100 }]
+          },
+        }
+
+        // Create SmartPaginationStrategy with custom measurement strategy
+        const smartStrategy = new SmartPaginationStrategy(customStrategy)
+
+        // Render to trigger measurement
+        smartStrategy.render(schema, data)
+
+        // Verify correct parameters were passed
+        expect(receivedSchema).toBe(schema)
+        expect(receivedData).toBe(data)
+        expect(receivedConfig).not.toBeNull()
+        expect(receivedConfig!.minRowHeight).toBe(schema.pagination?.smartPagination?.minRowHeight ?? 8)
+        expect(receivedConfig!.pageHeight).toBeGreaterThan(0)
+
+        return true
+      }),
+      { numRuns: 100 }
+    )
+  })
+
+  /**
+   * Test: Pre-measured items bypass measurement strategy entirely
+   * **Validates: Requirements 1.3**
+   */
+  it('should not call measurement strategy when measuredItems provided in options', () => {
+    fc.assert(
+      fc.property(validSmartSchemaArb, validDataArb, (schema, data) => {
+        // Track if custom strategy was called
+        let customStrategyCalled = false
+
+        // Create a custom measurement strategy that tracks calls
+        const customStrategy = {
+          measure: () => {
+            customStrategyCalled = true
+            return [{ id: 'custom-section', type: 'section' as const, height: 100 }]
+          },
+        }
+
+        // Create SmartPaginationStrategy with custom measurement strategy
+        const smartStrategy = new SmartPaginationStrategy(customStrategy)
+
+        // Provide pre-measured items in options
+        const preMeasuredItems = [
+          { id: 'pre-measured-section', type: 'section' as const, height: 200 },
+        ]
+
+        // Render with pre-measured items
+        const result = smartStrategy.render(schema, data, { measuredItems: preMeasuredItems })
+
+        // Verify custom strategy was NOT called (pre-measured items used instead)
+        expect(customStrategyCalled).toBe(false)
+
+        // Verify render returns valid HTML
+        expect(typeof result).toBe('string')
+        expect(result.length).toBeGreaterThan(0)
+
+        return true
       }),
       { numRuns: 100 }
     )

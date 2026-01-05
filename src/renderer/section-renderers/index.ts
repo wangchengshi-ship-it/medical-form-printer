@@ -1,7 +1,10 @@
 /**
  * @fileoverview Section renderer registry
  * @module renderer/section-renderers
- * @modified 2024-04-06
+ * @version 1.1.0
+ * @author Kiro
+ * @created 2024-04-06
+ * @modified 2026-01-05
  */
 
 import type { SectionType, SectionConfig, FormData } from '../../types/print-schema'
@@ -126,3 +129,5 @@ export {
   renderInlineRow,
   renderContainer,
 }
+
+export type { PartialTableOptions } from './table'

@@ -115,6 +115,7 @@ function createEmptyPage(
  * 3. Ensure table rows are not split (move entire row to next page)
  * 4. Continuation pages need to repeat corresponding table headers (Requirements 9.3)
  * 5. Reserve header height during calculation (Requirements 9.6)
+ * 6. Reserve extra height on last page for signature (when lastPageExtraHeight is set)
  *
  * @param items - All measurable content items
  * @param options - Page break calculation options
@@ -129,6 +130,7 @@ export function calculatePageBreaks(
     headerHeight = 0,
     footerHeight = 0,
     repeatTableHeaders = true,
+    lastPageExtraHeight = 0,
   } = options
 
   // Empty content returns single page
@@ -165,6 +167,12 @@ export function calculatePageBreaks(
 
     // Calculate height after adding this item
     let heightAfterAdd = currentHeight + item.height
+    
+    // Check if this is the last item - if so, need to reserve space for signature
+    const isLastItem = i === items.length - 1
+    if (isLastItem && lastPageExtraHeight > 0) {
+      heightAfterAdd += lastPageExtraHeight
+    }
 
     // If it's a table row and current page doesn't have this table's header, need to reserve header height
     let needsHeaderRepeat = false
@@ -202,6 +210,16 @@ export function calculatePageBreaks(
           currentPage.repeatedHeaders.push(tableHeader.id)
           currentHeight += tableHeader.height
           currentPageTableHeaders.add(item.tableId!)
+        }
+      }
+      
+      // Recalculate height for last item on new page (with signature space)
+      if (isLastItem && lastPageExtraHeight > 0) {
+        // Check if item + signature fits on new page
+        const newPageHeightNeeded = currentHeight + item.height + lastPageExtraHeight
+        if (newPageHeightNeeded > currentAvailableHeight) {
+          // This shouldn't happen normally, but handle gracefully
+          // Just add the item without extra check
         }
       }
     } else if (needsHeaderRepeat && tableHeader) {

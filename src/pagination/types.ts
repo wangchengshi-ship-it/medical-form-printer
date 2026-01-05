@@ -291,6 +291,11 @@ export interface PageBreakOptions {
   footerHeight?: number
   /** Whether to repeat table headers, default true */
   repeatTableHeaders?: boolean
+  /** 
+   * Extra height to reserve on the last page only (px), default 0
+   * Used for signature area when signatureOnEachPage is false
+   */
+  lastPageExtraHeight?: number
 }
 
 // ==================== Overflow Text I18n Configuration ====================

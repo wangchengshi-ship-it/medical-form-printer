@@ -540,6 +540,7 @@ function generateFooterStyles(theme: Theme, cls: (name: string) => string): stri
 /* Footer */
 .${cls('print-footer')} {
   margin-top: ${theme.spacing.footerMarginTop};
+  min-height: ${theme.fontSize.small};
   display: flex;
   justify-content: space-between;
   font-size: ${theme.fontSize.small};

@@ -19,7 +19,7 @@
  * - 10.4: 处理文本换行估算
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import {
   // 类型守卫
   isValidMeasureConfig,
@@ -331,6 +331,185 @@ describe('Property-Based Tests', () => {
       })
 
       expect(heightNarrow).toBeGreaterThanOrEqual(heightWide)
+    })
+  })
+})
+
+
+// ==================== JSDOM 测试 ====================
+
+import { JSDOM } from 'jsdom'
+
+describe('Content Measurer with JSDOM', () => {
+  let dom: JSDOM
+  let originalWindow: typeof globalThis.window
+  let originalDocument: typeof globalThis.document
+
+  beforeEach(() => {
+    // Save original globals
+    originalWindow = globalThis.window
+    originalDocument = globalThis.document
+
+    // Create JSDOM instance
+    dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
+      pretendToBeVisual: true,
+    })
+
+    // Set up global DOM environment
+    globalThis.window = dom.window as unknown as typeof globalThis.window
+    globalThis.document = dom.window.document
+  })
+
+  afterEach(() => {
+    // Restore original globals
+    globalThis.window = originalWindow
+    globalThis.document = originalDocument
+  })
+
+  describe('MEASURE_SELECTORS.FOOTER', () => {
+    it('should be defined', () => {
+      expect(MEASURE_SELECTORS.FOOTER).toBeDefined()
+    })
+
+    it('should match .print-footer class', () => {
+      const container = document.createElement('div')
+      container.innerHTML = '<div class="print-footer">Footer</div>'
+      document.body.appendChild(container)
+
+      const footer = container.querySelector(MEASURE_SELECTORS.FOOTER)
+      expect(footer).not.toBeNull()
+      expect(footer?.textContent).toBe('Footer')
+
+      document.body.removeChild(container)
+    })
+
+    it('should match .mpr-print-footer class (isolated mode)', () => {
+      const container = document.createElement('div')
+      container.innerHTML = '<div class="mpr-print-footer">Isolated Footer</div>'
+      document.body.appendChild(container)
+
+      const footer = container.querySelector(MEASURE_SELECTORS.FOOTER)
+      expect(footer).not.toBeNull()
+      expect(footer?.textContent).toBe('Isolated Footer')
+
+      document.body.removeChild(container)
+    })
+
+    it('should match both class variants in same container', () => {
+      const container = document.createElement('div')
+      container.innerHTML = `
+        <div class="print-footer">Normal Footer</div>
+        <div class="mpr-print-footer">Isolated Footer</div>
+      `
+      document.body.appendChild(container)
+
+      const footers = container.querySelectorAll(MEASURE_SELECTORS.FOOTER)
+      expect(footers.length).toBe(2)
+
+      document.body.removeChild(container)
+    })
+  })
+
+  describe('Footer selector in page structure', () => {
+    it('should find print-footer in complete page structure', () => {
+      const pageContainer = document.createElement('div')
+      pageContainer.innerHTML = `
+        <div class="print-page">
+          <div class="print-header">Header</div>
+          <div class="print-body">
+            <div class="info-grid" data-section-id="0">Content</div>
+          </div>
+          <div class="print-footer">
+            <span class="page-number">Page 1 of 1</span>
+          </div>
+        </div>
+      `
+      document.body.appendChild(pageContainer)
+
+      // Find print-page first
+      const printPage = pageContainer.querySelector('.print-page')
+      expect(printPage).not.toBeNull()
+
+      // Find footer within print-page
+      const footer = printPage?.querySelector(MEASURE_SELECTORS.FOOTER)
+      expect(footer).not.toBeNull()
+      expect(footer?.querySelector('.page-number')?.textContent).toBe('Page 1 of 1')
+
+      document.body.removeChild(pageContainer)
+    })
+
+    it('should not find footer when print-footer is missing', () => {
+      const pageContainer = document.createElement('div')
+      pageContainer.innerHTML = `
+        <div class="print-page">
+          <div class="print-header">Header</div>
+          <div class="print-body">
+            <div class="info-grid" data-section-id="0">Content</div>
+          </div>
+        </div>
+      `
+      document.body.appendChild(pageContainer)
+
+      const printPage = pageContainer.querySelector('.print-page')
+      const footer = printPage?.querySelector(MEASURE_SELECTORS.FOOTER)
+      expect(footer).toBeNull()
+
+      document.body.removeChild(pageContainer)
+    })
+
+    it('should find mpr-print-footer in isolated mode page structure', () => {
+      const pageContainer = document.createElement('div')
+      pageContainer.innerHTML = `
+        <div class="mpr-print-page">
+          <div class="mpr-print-header">Header</div>
+          <div class="mpr-print-body">
+            <div class="mpr-info-grid" data-section-id="0">Content</div>
+          </div>
+          <div class="mpr-print-footer">
+            <span class="page-number">Page 1 of 1</span>
+          </div>
+        </div>
+      `
+      document.body.appendChild(pageContainer)
+
+      const printPage = pageContainer.querySelector('.mpr-print-page')
+      expect(printPage).not.toBeNull()
+
+      const footer = printPage?.querySelector(MEASURE_SELECTORS.FOOTER)
+      expect(footer).not.toBeNull()
+      expect(footer?.classList.contains('mpr-print-footer')).toBe(true)
+
+      document.body.removeChild(pageContainer)
+    })
+
+    it('should find both footer and notes in same page', () => {
+      const pageContainer = document.createElement('div')
+      pageContainer.innerHTML = `
+        <div class="print-page">
+          <div class="print-header">Header</div>
+          <div class="print-body">
+            <div class="info-grid" data-section-id="0">Content</div>
+            <div class="notes-section">Notes content</div>
+          </div>
+          <div class="print-footer">
+            <span class="page-number">Page 1 of 1</span>
+          </div>
+        </div>
+      `
+      document.body.appendChild(pageContainer)
+
+      const printPage = pageContainer.querySelector('.print-page')
+      const printBody = printPage?.querySelector('.print-body')
+
+      // Find footer
+      const footer = printPage?.querySelector(MEASURE_SELECTORS.FOOTER)
+      expect(footer).not.toBeNull()
+
+      // Find notes
+      const notes = printBody?.querySelectorAll(MEASURE_SELECTORS.NOTES)
+      expect(notes?.length).toBeGreaterThan(0)
+
+      document.body.removeChild(pageContainer)
     })
   })
 })

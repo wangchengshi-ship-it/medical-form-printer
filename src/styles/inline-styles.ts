@@ -266,6 +266,7 @@ export function createInlineStyles(theme: Theme = defaultTheme): InlineStyleMap 
     // Footer
     printFooter: {
       marginTop: '10mm',
+      minHeight: theme.fontSize.small,
       display: 'flex',
       justifyContent: 'space-between',
       fontSize: theme.fontSize.small,

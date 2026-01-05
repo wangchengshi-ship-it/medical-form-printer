@@ -1,10 +1,10 @@
 /**
  * @fileoverview Paginated renderer
  * @module pagination/paginated-renderer
- * @version 1.2.0
+ * @version 1.3.0
  * @author Kiro
  * @created 2026-01-02
- * @modified 2026-01-04
+ * @modified 2026-01-05
  *
  * @description
  * Renders pagination results to multi-page HTML, each page independent and printable.
@@ -54,10 +54,11 @@ import {
   mergeOverflowTextConfig,
   OVERFLOW_CSS_CLASSES,
 } from './strategies/overflow/overflow-pagination'
-import { renderSection } from '../renderer/section-renderers'
-import { generateCss, generateIsolatedCss, mergeTheme, namespaceClass, ISOLATION_ROOT_CLASS } from '../styles'
+import { renderSection, renderTable } from '../renderer/section-renderers'
+import { generateCss, generateIsolatedCss, mergeTheme, namespaceClass, ISOLATION_ROOT_CLASS, CSS_NAMESPACE } from '../styles'
 import { escapeHtml, h, div, header, footer, main, renderWatermarkHtml, extractWatermarkOptions } from '../utils'
 import { PAGE_16K } from './page-dimensions'
+
 
 // ==================== Type Definitions ====================
 
@@ -469,14 +470,53 @@ const contentRenderers: Record<MeasurableItem['type'], ContentRenderer> = {
     if (!section) return ''
     return renderSectionWithTitle(section, data, options, cls)
   },
-  // Table row rendering needs to be wrapped in table, recommend using renderAllSections fallback
+  // Table row rendering is handled by renderTableRows function
   'table-row': () => '',
-  // Table headers are usually handled in repeatedHeaders
+  // Table headers are handled by renderTableRows function
   'table-header': () => '',
   // Following types are handled in dedicated functions
   header: () => '',
   footer: () => '',
   signature: () => '',
+}
+
+/**
+ * Render table rows for a specific table on a page
+ * Delegates to renderTable with partial rendering options for high cohesion
+ *
+ * @param section - Table section configuration
+ * @param data - Form data
+ * @param options - Render options
+ * @param cls - Class name generator function
+ * @param rowIndices - Array of row indices to render
+ * @param includeHeader - Whether to include table header
+ * @returns Rendered table HTML string
+ */
+function renderPartialTable(
+  section: PrintSection,
+  data: FormData,
+  options: RenderOptions | undefined,
+  cls: ClassNameFn,
+  rowIndices: number[],
+  includeHeader: boolean
+): string {
+  if (section.type !== 'table') return ''
+  
+  // Import TableConfig type for proper type assertion
+  type TableConfig = Parameters<typeof renderTable>[0]
+  
+  // Use renderTable with partial options for high cohesion
+  const tableHtml = renderTable(section.config as TableConfig, data, options, {
+    rowIndices,
+    includeHeader,
+  })
+  
+  // Render section title if present and this is the first occurrence (has header)
+  const titleHtml = section.title && includeHeader
+    ? div().class(cls(CSS_CLASSES.SECTION_TITLE)).text(section.title).build()
+    : ''
+  
+  return `${titleHtml}${tableHtml}`
 }
 
 /**
@@ -607,7 +647,7 @@ function renderSectionWithOverflow(
 
 /**
  * Render page body content
- * Prioritize fine-grained pagination rendering, fallback to full rendering when no valid measured items
+ * Handles both section items and table rows with proper grouping
  * Always uses renderAllSections for first page when overflow fields are configured to ensure proper truncation
  *
  * @param ctx - Single page render context
@@ -624,19 +664,13 @@ function renderPageBody(
 
   const parts: string[] = []
 
-  // Render repeated headers
-  const repeatedHeaders = renderRepeatedHeaders(ctx, sectionMap, cls)
-  if (repeatedHeaders) {
-    parts.push(repeatedHeaders)
-  }
-
   // Pre-build measured item map to avoid repeated O(n) lookups
   const itemMap = new Map(measuredItems.map(m => [m.id, m]))
 
-  // Check if there are valid content item mappings
+  // Check if there are valid content item mappings (sections or table items)
   const hasValidItems = page.items.length > 0 && page.items.some(itemId => {
     const item = itemMap.get(itemId)
-    return item?.type === 'section'
+    return item?.type === 'section' || item?.type === 'table-header' || item?.type === 'table-row'
   })
 
   // For first page with overflow fields, always use renderAllSections to ensure proper truncation
@@ -644,15 +678,79 @@ function renderPageBody(
   const hasOverflowFields = isFirstPage && overflowFieldNames && overflowFieldNames.length > 0
 
   if (hasValidItems && !hasOverflowFields) {
-    // Use measured items for fine-grained rendering (only when no overflow fields on first page)
+    // Use measured items for fine-grained rendering
+    // Note: Don't render repeated headers separately - they are handled by renderPartialTable
+    
+    // Group table items by tableId for proper rendering
+    const tableRowsByTableId = new Map<string, { indices: number[]; hasHeader: boolean }>()
+    const renderedTables = new Set<string>()
+    
+    // First pass: collect table rows and headers
     for (const itemId of page.items) {
-      const content = renderContentItem(itemId, itemMap, sectionMap, data, options, cls)
-      if (content) {
-        parts.push(content)
+      const item = itemMap.get(itemId)
+      if (!item) continue
+      
+      if (item.type === 'table-header' && item.tableId) {
+        if (!tableRowsByTableId.has(item.tableId)) {
+          tableRowsByTableId.set(item.tableId, { indices: [], hasHeader: true })
+        } else {
+          tableRowsByTableId.get(item.tableId)!.hasHeader = true
+        }
+      } else if (item.type === 'table-row' && item.tableId && item.dataIndex !== undefined) {
+        if (!tableRowsByTableId.has(item.tableId)) {
+          tableRowsByTableId.set(item.tableId, { indices: [], hasHeader: false })
+        }
+        tableRowsByTableId.get(item.tableId)!.indices.push(item.dataIndex)
+      }
+    }
+    
+    // Second pass: render items in order
+    for (const itemId of page.items) {
+      const item = itemMap.get(itemId)
+      if (!item) continue
+      
+      if (item.type === 'section') {
+        // Render section directly
+        const content = renderContentItem(itemId, itemMap, sectionMap, data, options, cls)
+        if (content) {
+          parts.push(content)
+        }
+      } else if ((item.type === 'table-header' || item.type === 'table-row') && item.tableId) {
+        // Render table only once when we encounter the first item of that table
+        if (!renderedTables.has(item.tableId)) {
+          renderedTables.add(item.tableId)
+          
+          const tableData = tableRowsByTableId.get(item.tableId)
+          const section = sectionMap.get(item.tableId)
+          
+          if (section && tableData) {
+            // Check if this table has a repeated header on this page (continuation page)
+            const hasRepeatedHeader = page.repeatedHeaders.includes(`${item.tableId}-header`)
+            // Include header if: original header is in page.items OR it's a repeated header
+            const includeHeader = tableData.hasHeader || hasRepeatedHeader
+            
+            const tableHtml = renderPartialTable(
+              section,
+              data,
+              options,
+              cls,
+              tableData.indices,
+              includeHeader
+            )
+            if (tableHtml) {
+              parts.push(tableHtml)
+            }
+          }
+        }
       }
     }
   } else {
     // Fallback: render all sections (handles overflow field truncation)
+    // For fallback mode, render repeated headers separately
+    const repeatedHeaders = renderRepeatedHeaders(ctx, sectionMap, cls)
+    if (repeatedHeaders) {
+      parts.push(repeatedHeaders)
+    }
     parts.push(renderAllSections(ctx, cls))
   }
 
@@ -713,22 +811,30 @@ function buildSectionMap(
 ): Map<string, PrintSection> {
   const map = new Map<string, PrintSection>()
   
+  // Track table section indices for tableId mapping
+  let tableIndex = 0
+  
   // Create mapping for each section
   schema.sections.forEach((section, index) => {
     const sectionId = `section-${index}`
     map.set(sectionId, section)
     
     // If it's a table, also use tableId as key
+    // Use both table-{sectionIndex} format (from measureAll) and table-{dataField} format (legacy)
     if (section.type === 'table') {
       const tableConfig = section.config as { dataField: string }
+      // Legacy format: table-{dataField}
       map.set(`table-${tableConfig.dataField}`, section)
+      // New format: table-{sectionIndex} - matches measureAll output
+      map.set(`table-${index}`, section)
+      tableIndex++
     }
   })
   
-  // Extract tableId mapping from measuredItems
+  // Extract tableId mapping from measuredItems (for any additional formats)
   for (const item of measuredItems) {
     if (item.tableId && !map.has(item.tableId)) {
-      // Try to find corresponding table section
+      // Try to find corresponding table section by dataField
       const tableSection = schema.sections.find(s => {
         if (s.type !== 'table') return false
         const config = s.config as { dataField: string }
@@ -870,6 +976,11 @@ export function renderPaginatedHtml(context: PaginatedRenderContext): string {
   const theme = mergeTheme(options?.theme)
   const cls = createClassNameFn(mergedConfig.isolated)
   
+  // Ensure section renderers use namespaced class names in isolated mode
+  const renderOptions: RenderOptions | undefined = mergedConfig.isolated
+    ? { ...options, classPrefix: CSS_NAMESPACE }
+    : options
+  
   // Select CSS generation method based on isolation mode
   const baseCss = mergedConfig.isolated
     ? generateIsolatedCss(options?.theme)
@@ -918,7 +1029,7 @@ export function renderPaginatedHtml(context: PaginatedRenderContext): string {
       isLastPage: pageNumber === totalPages && !needsOverflowPage,
       schema,
       data,
-      options,
+      options: renderOptions,
       measuredItems,
       config: mergedConfig,
       theme,
@@ -937,7 +1048,7 @@ export function renderPaginatedHtml(context: PaginatedRenderContext): string {
     if (mergedConfig.showSignatureOnEachPage) {
       const signatureSection = schema.sections.find(s => s.type === 'signature-area')
       if (signatureSection) {
-        signatureHtml = renderSection(signatureSection.type, signatureSection.config, data, options)
+        signatureHtml = renderSection(signatureSection.type, signatureSection.config, data, renderOptions)
       }
     }
 
