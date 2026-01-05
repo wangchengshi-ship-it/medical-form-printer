@@ -35,7 +35,7 @@ jobs:
         run: npm run typecheck
 
       - name: Run tests
-        run: npm run test -- --project=unit
+        run: npm run test -- --run
 
       - name: Build package
         run: npm run build
