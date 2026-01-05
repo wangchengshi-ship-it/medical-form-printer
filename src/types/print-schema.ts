@@ -127,6 +127,68 @@ export interface TableColumn {
   options?: string[]
 }
 
+/**
+ * Header cell configuration for multi-row table headers
+ * 
+ * @since v2.0.0
+ * @description
+ * Defines a single cell in a table header row, supporting colspan and rowspan
+ * for creating complex nested header structures.
+ * 
+ * @example
+ * ```typescript
+ * const cell: HeaderCell = {
+ *   text: 'Blood Pressure (mmHg)',
+ *   colspan: 2,  // Spans 2 columns
+ *   rowspan: 1   // Default, spans 1 row
+ * }
+ * ```
+ */
+export interface HeaderCell {
+  /** Header cell text content */
+  text: string
+  /** 
+   * Number of columns this cell spans (default: 1)
+   * @default 1
+   */
+  colspan?: number
+  /** 
+   * Number of rows this cell spans (default: 1)
+   * @default 1
+   */
+  rowspan?: number
+  /** Cell width (e.g., '100px', '20%') */
+  width?: string
+  /** 
+   * Associated data column field name (used for bottom-level header cells)
+   * Links this header cell to a specific data column for alignment
+   */
+  field?: string
+}
+
+/**
+ * Header row configuration for multi-row table headers
+ * 
+ * @since v2.0.0
+ * @description
+ * Defines a single row in a multi-row table header structure.
+ * Each row contains an array of header cells.
+ * 
+ * @example
+ * ```typescript
+ * const row: HeaderRow = {
+ *   cells: [
+ *     { text: 'Date', rowspan: 2 },
+ *     { text: 'Blood Pressure', colspan: 2 }
+ *   ]
+ * }
+ * ```
+ */
+export interface HeaderRow {
+  /** Array of header cells in this row */
+  cells: HeaderCell[]
+}
+
 /** Table configuration */
 export interface TableConfig {
   /** Column configuration */
@@ -135,6 +197,27 @@ export interface TableConfig {
   dataField: string
   /** Whether to show row numbers */
   showRowNumber?: boolean
+  /**
+   * Multi-row header configuration (optional)
+   * 
+   * @since v2.0.0
+   * @description
+   * When provided, enables complex multi-row header structures with
+   * colspan and rowspan support. Takes priority over generating
+   * headers from the columns configuration.
+   * 
+   * When not provided, a single-row header is generated from the
+   * columns configuration for backward compatibility.
+   * 
+   * @example
+   * ```typescript
+   * headerRows: [
+   *   { cells: [{ text: 'Date', rowspan: 2 }, { text: 'Blood Pressure', colspan: 2 }] },
+   *   { cells: [{ text: 'Systolic' }, { text: 'Diastolic' }] }
+   * ]
+   * ```
+   */
+  headerRows?: HeaderRow[]
 }
 
 /** Checkbox option */

@@ -215,6 +215,41 @@ This design optimizes for **print document generation**. For deeply nested layou
 }
 ```
 
+#### Multi-Row Headers
+
+Tables support complex multi-row headers with colspan and rowspan:
+
+```typescript
+{
+  type: 'table',
+  title: 'Vital Signs',
+  config: {
+    dataField: 'vitalSigns',
+    columns: [
+      { header: 'Date', field: 'date', type: 'date' },
+      { header: 'Systolic', field: 'systolic', type: 'number' },
+      { header: 'Diastolic', field: 'diastolic', type: 'number' },
+      { header: 'Temperature', field: 'temperature', type: 'number' },
+    ],
+    headerRows: [
+      {
+        cells: [
+          { text: 'Date', rowspan: 2 },
+          { text: 'Blood Pressure (mmHg)', colspan: 2 },
+          { text: 'Temperature (℃)', rowspan: 2 },
+        ]
+      },
+      {
+        cells: [
+          { text: 'Systolic', field: 'systolic' },
+          { text: 'Diastolic', field: 'diastolic' },
+        ]
+      }
+    ]
+  }
+}
+```
+
 ### Checkbox Grid
 
 ```typescript

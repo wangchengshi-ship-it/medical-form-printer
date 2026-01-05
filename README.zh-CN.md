@@ -215,6 +215,41 @@ registerSectionRenderer('vital-signs-chart', (config, data) => {
 }
 ```
 
+#### 多行表头
+
+表格支持复杂的多行表头，可使用 colspan 和 rowspan 进行单元格合并：
+
+```typescript
+{
+  type: 'table',
+  title: '生命体征',
+  config: {
+    dataField: 'vitalSigns',
+    columns: [
+      { header: '日期', field: 'date', type: 'date' },
+      { header: '收缩压', field: 'systolic', type: 'number' },
+      { header: '舒张压', field: 'diastolic', type: 'number' },
+      { header: '体温', field: 'temperature', type: 'number' },
+    ],
+    headerRows: [
+      {
+        cells: [
+          { text: '日期', rowspan: 2 },
+          { text: '血压 (mmHg)', colspan: 2 },
+          { text: '体温 (℃)', rowspan: 2 },
+        ]
+      },
+      {
+        cells: [
+          { text: '收缩压', field: 'systolic' },
+          { text: '舒张压', field: 'diastolic' },
+        ]
+      }
+    ]
+  }
+}
+```
+
 ### 复选框网格
 
 ```typescript

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Table Multi-Row Header Support** - 表格组件新增复杂表头支持:
+  - `HeaderCell` 接口：支持 `text`、`colspan`、`rowspan`、`width`、`field` 属性
+  - `HeaderRow` 接口：定义表头行配置
+  - `TableConfig.headerRows` 属性：可选的多行表头配置，优先于 `columns` 生成的单行表头
+  - 支持单元格行合并（rowspan）和列合并（colspan）
+  - 完全向后兼容，不使用 `headerRows` 时行为不变
+
 ### Fixed
 
 - **Footer 测量修复** - 修复 `measureFooterInto` 函数未正确测量 `print-footer` 元素的问题:
