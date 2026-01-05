@@ -131,3 +131,20 @@ export {
 }
 
 export type { PartialTableOptions } from './table'
+
+// Table header module exports (v2.0.0)
+export {
+  type HeaderRenderStrategy,
+  type CellPosition,
+  type HeaderRenderer,
+  SimpleHeaderStrategy,
+  MultiRowHeaderStrategy,
+  calculateCellMatrix,
+  getHeaderStrategy,
+  HeaderCellBuilder,
+  HeaderRowBuilder,
+  TableHeaderBuilder,
+  BaseHeaderRenderer,
+  RowNumberHeaderDecorator,
+  createHeaderRenderer,
+} from './table/index'

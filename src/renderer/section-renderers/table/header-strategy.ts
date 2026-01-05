@@ -33,7 +33,7 @@ import { escapeHtml, h, tr, th, thead, fragment } from '../../../utils'
 /**
  * Cell position information for matrix calculation
  *
- * @since v2.0.0
+ * @since next
  * @description
  * Represents a cell's position in the header matrix, tracking
  * whether a position is occupied by a rowspan from above.
@@ -52,7 +52,7 @@ export interface CellPosition {
 /**
  * Table header render strategy interface
  *
- * @since v2.0.0
+ * @since next
  * @description
  * Defines the contract for header rendering strategies.
  *
@@ -89,7 +89,7 @@ export interface HeaderRenderStrategy {
 /**
  * Simple header strategy - generates single-row header from columns
  *
- * @since v2.0.0
+ * @since next
  * @description
  * Renders a simple single-row header using the columns configuration.
  * This is the default strategy for backward compatibility.
@@ -138,7 +138,7 @@ export class SimpleHeaderStrategy implements HeaderRenderStrategy {
 /**
  * Multi-row header strategy - uses headerRows configuration
  *
- * @since v2.0.0
+ * @since next
  * @description
  * Renders complex multi-row headers with colspan and rowspan support.
  * Uses a cell matrix to correctly handle rowspan positioning.
@@ -235,7 +235,7 @@ export class MultiRowHeaderStrategy implements HeaderRenderStrategy {
 /**
  * Calculate cell position matrix for multi-row headers
  *
- * @since v2.0.0
+ * @since next
  * @description
  * Builds a matrix representing cell positions in the header grid.
  * Tracks which positions are occupied by rowspan from cells above.
@@ -320,7 +320,7 @@ export function calculateCellMatrix(
 /**
  * Get the appropriate header render strategy for a configuration
  *
- * @since v2.0.0
+ * @since next
  * @description
  * Factory function that returns the appropriate strategy based on
  * the table configuration.

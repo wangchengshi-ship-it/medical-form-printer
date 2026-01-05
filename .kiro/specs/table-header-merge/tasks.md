@@ -28,8 +28,8 @@
     - **Property 3: 多行表头渲染**
     - **Validates: Requirements 1.1, 1.2, 2.1, 2.2, 3.1, 3.2**
 
-- [ ] 3. 建造者模式实现
-  - [ ] 3.1 创建 `src/renderer/section-renderers/table/header-builder.ts`
+- [x] 3. 建造者模式实现
+  - [x] 3.1 创建 `src/renderer/section-renderers/table/header-builder.ts`
     - 实现 HeaderCellBuilder 类
     - 实现 HeaderRowBuilder 类
     - 实现 TableHeaderBuilder 类
@@ -37,36 +37,36 @@
     - 添加设计模式 JSDoc 注释
     - _Requirements: 4.1, 4.2_
 
-  - [ ] 3.2 编写建造者模式属性测试
+  - [x] 3.2 编写建造者模式属性测试
     - **Property 4: 配置序列化往返**
     - **Validates: Requirements 4.1, 4.2, 4.3**
 
-- [ ] 4. 装饰器模式实现
-  - [ ] 4.1 创建 `src/renderer/section-renderers/table/header-renderer.ts`
+- [x] 4. 装饰器模式实现
+  - [x] 4.1 创建 `src/renderer/section-renderers/table/header-renderer.ts`
     - 定义 HeaderRenderer 接口
     - 实现 BaseHeaderRenderer 类 (使用策略模式)
     - 实现 RowNumberHeaderDecorator 类
     - 添加设计模式 JSDoc 注释
     - _Requirements: 5.4_
 
-  - [ ] 4.2 编写装饰器模式属性测试
+  - [x] 4.2 编写装饰器模式属性测试
     - **Property 5: 有效 HTML 输出**
     - **Validates: Requirements 5.1, 5.3, 5.4**
 
-- [ ] 5. 集成和重构
-  - [ ] 5.1 重构 `src/renderer/section-renderers/table.ts`
+- [x] 5. 集成和重构
+  - [x] 5.1 重构 `src/renderer/section-renderers/table.ts`
     - 使用新的 HeaderRenderer 替换原有表头渲染逻辑
     - 保持向后兼容性
     - 添加 @deprecated 注释到旧代码
     - 添加 @migration 文件头注释
     - _Requirements: 3.2, 5.1_
 
-  - [ ] 5.2 创建模块导出 `src/renderer/section-renderers/table/index.ts`
+  - [x] 5.2 创建模块导出 `src/renderer/section-renderers/table/index.ts`
     - 导出所有公共接口和类
     - 导出 TableHeaderBuilder 供外部使用
     - _Requirements: 4.1_
 
-  - [ ] 5.3 编写集成属性测试
+  - [x] 5.3 编写集成属性测试
     - **Property 2: 单元格位置正确性**
     - **Validates: Requirements 2.3, 3.3, 5.2**
 
@@ -75,8 +75,8 @@
   - 确保向后兼容性测试通过
   - 如有问题请询问用户
 
-- [ ] 7. Storybook 示例
-  - [ ] 7.1 更新 `stories/sections/Table.stories.ts`
+- [x] 7. Storybook 示例
+  - [x] 7.1 更新 `stories/sections/Table.stories.ts`
     - 添加多行表头示例 (血压分收缩压/舒张压)
     - 添加建造者模式使用示例
     - 添加复杂三行表头示例

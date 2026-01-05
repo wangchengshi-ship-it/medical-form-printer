@@ -130,7 +130,7 @@ export interface TableColumn {
 /**
  * Header cell configuration for multi-row table headers
  * 
- * @since v2.0.0
+ * @since next
  * @description
  * Defines a single cell in a table header row, supporting colspan and rowspan
  * for creating complex nested header structures.
@@ -169,7 +169,7 @@ export interface HeaderCell {
 /**
  * Header row configuration for multi-row table headers
  * 
- * @since v2.0.0
+ * @since next
  * @description
  * Defines a single row in a multi-row table header structure.
  * Each row contains an array of header cells.
@@ -200,7 +200,7 @@ export interface TableConfig {
   /**
    * Multi-row header configuration (optional)
    * 
-   * @since v2.0.0
+   * @since next
    * @description
    * When provided, enables complex multi-row header structures with
    * colspan and rowspan support. Takes priority over generating

@@ -1,10 +1,18 @@
 /**
  * @fileoverview 表格区块 Story
  * @module stories/sections/Table
+ *
+ * @description
+ * Demonstrates table section rendering including:
+ * - Basic tables with various column types
+ * - Tables with row numbers
+ * - Multi-row headers with colspan/rowspan
+ * - Builder pattern for complex header construction
  */
 
 import type { Meta, StoryObj } from '@storybook/html'
-import type { TableConfig } from '../../src/types/print-schema'
+import type { TableConfig, HeaderRow } from '../../src/types/print-schema'
+import { TableHeaderBuilder } from '../../src/renderer/section-renderers/table/header-builder'
 import { createSectionStory } from './_story-utils'
 
 const meta: Meta = {
@@ -114,5 +122,197 @@ export const EmptyData: Story = {
     },
     { records: [] },
     { title: '空数据表格', description: '数据为空时的表格显示', height: '250px' }
+  ),
+}
+
+// 多行表头 - 血压分收缩压/舒张压
+export const MultiRowHeader: Story = {
+  name: '多行表头',
+  render: createSectionStory(
+    {
+      type: 'table',
+      config: {
+        dataField: 'vitalSigns',
+        columns: [
+          { header: '日期', field: 'date', type: 'date', width: '100px' },
+          { header: '收缩压', field: 'systolic', type: 'number', width: '80px' },
+          { header: '舒张压', field: 'diastolic', type: 'number', width: '80px' },
+          { header: '体温', field: 'temperature', type: 'number', width: '80px' },
+        ],
+        headerRows: [
+          {
+            cells: [
+              { text: '日期', rowspan: 2, width: '100px' },
+              { text: '血压 (mmHg)', colspan: 2 },
+              { text: '体温 (℃)', rowspan: 2, width: '80px' },
+            ],
+          },
+          {
+            cells: [
+              { text: '收缩压', field: 'systolic', width: '80px' },
+              { text: '舒张压', field: 'diastolic', width: '80px' },
+            ],
+          },
+        ] as HeaderRow[],
+      } as TableConfig,
+    },
+    {
+      vitalSigns: [
+        { date: '2024-01-15', systolic: 120, diastolic: 80, temperature: 36.5 },
+        { date: '2024-01-16', systolic: 118, diastolic: 78, temperature: 36.8 },
+        { date: '2024-01-17', systolic: 122, diastolic: 82, temperature: 36.6 },
+      ],
+    },
+    {
+      title: '多行表头表格',
+      description: '使用 headerRows 配置实现多行表头，血压分为收缩压和舒张压两个子列',
+      height: '350px',
+    }
+  ),
+}
+
+// 建造者模式示例
+const builderHeaderRows = new TableHeaderBuilder()
+  .addRow()
+    .addCell('日期').rowspan(2).width('100px').done()
+    .addCell('血压 (mmHg)').colspan(2).done()
+    .addCell('体温 (℃)').rowspan(2).width('80px').done()
+  .done()
+  .addRow()
+    .addCell('收缩压').field('systolic').width('80px').done()
+    .addCell('舒张压').field('diastolic').width('80px').done()
+  .done()
+  .build()
+
+export const BuilderPattern: Story = {
+  name: '建造者模式',
+  render: createSectionStory(
+    {
+      type: 'table',
+      config: {
+        dataField: 'vitalSigns',
+        columns: [
+          { header: '日期', field: 'date', type: 'date', width: '100px' },
+          { header: '收缩压', field: 'systolic', type: 'number', width: '80px' },
+          { header: '舒张压', field: 'diastolic', type: 'number', width: '80px' },
+          { header: '体温', field: 'temperature', type: 'number', width: '80px' },
+        ],
+        headerRows: builderHeaderRows,
+      } as TableConfig,
+    },
+    {
+      vitalSigns: [
+        { date: '2024-01-15', systolic: 120, diastolic: 80, temperature: 36.5 },
+        { date: '2024-01-16', systolic: 118, diastolic: 78, temperature: 36.8 },
+        { date: '2024-01-17', systolic: 122, diastolic: 82, temperature: 36.6 },
+      ],
+    },
+    {
+      title: '建造者模式表格',
+      description: '使用 TableHeaderBuilder 流畅 API 构建复杂表头配置',
+      height: '350px',
+    }
+  ),
+}
+
+// 复杂三行表头示例
+const complexHeaderRows = new TableHeaderBuilder()
+  .addRow()
+    .addCell('基本信息').colspan(2).done()
+    .addCell('生命体征').colspan(4).done()
+    .addCell('备注').rowspan(3).done()
+  .done()
+  .addRow()
+    .addCell('日期').rowspan(2).width('100px').done()
+    .addCell('时间').rowspan(2).width('80px').done()
+    .addCell('血压 (mmHg)').colspan(2).done()
+    .addCell('体温 (℃)').rowspan(2).width('80px').done()
+    .addCell('心率 (次/分)').rowspan(2).width('80px').done()
+  .done()
+  .addRow()
+    .addCell('收缩压').field('systolic').width('80px').done()
+    .addCell('舒张压').field('diastolic').width('80px').done()
+  .done()
+  .build()
+
+export const ComplexThreeRowHeader: Story = {
+  name: '复杂三行表头',
+  render: createSectionStory(
+    {
+      type: 'table',
+      config: {
+        dataField: 'vitalSigns',
+        columns: [
+          { header: '日期', field: 'date', type: 'date', width: '100px' },
+          { header: '时间', field: 'time', type: 'text', width: '80px' },
+          { header: '收缩压', field: 'systolic', type: 'number', width: '80px' },
+          { header: '舒张压', field: 'diastolic', type: 'number', width: '80px' },
+          { header: '体温', field: 'temperature', type: 'number', width: '80px' },
+          { header: '心率', field: 'heartRate', type: 'number', width: '80px' },
+          { header: '备注', field: 'notes', type: 'text' },
+        ],
+        headerRows: complexHeaderRows,
+      } as TableConfig,
+    },
+    {
+      vitalSigns: [
+        { date: '2024-01-15', time: '08:00', systolic: 120, diastolic: 80, temperature: 36.5, heartRate: 72, notes: '状态良好' },
+        { date: '2024-01-15', time: '14:00', systolic: 118, diastolic: 78, temperature: 36.8, heartRate: 75, notes: '' },
+        { date: '2024-01-15', time: '20:00', systolic: 122, diastolic: 82, temperature: 36.6, heartRate: 70, notes: '待复查' },
+        { date: '2024-01-16', time: '08:00', systolic: 119, diastolic: 79, temperature: 36.4, heartRate: 68, notes: '' },
+      ],
+    },
+    {
+      title: '复杂三行表头表格',
+      description: '三行嵌套表头结构：基本信息和生命体征分组，血压进一步细分为收缩压和舒张压',
+      height: '400px',
+    }
+  ),
+}
+
+// 多行表头带行号
+export const MultiRowHeaderWithRowNumber: Story = {
+  name: '多行表头带行号',
+  render: createSectionStory(
+    {
+      type: 'table',
+      config: {
+        dataField: 'vitalSigns',
+        showRowNumber: true,
+        columns: [
+          { header: '日期', field: 'date', type: 'date', width: '100px' },
+          { header: '收缩压', field: 'systolic', type: 'number', width: '80px' },
+          { header: '舒张压', field: 'diastolic', type: 'number', width: '80px' },
+          { header: '体温', field: 'temperature', type: 'number', width: '80px' },
+        ],
+        headerRows: [
+          {
+            cells: [
+              { text: '日期', rowspan: 2, width: '100px' },
+              { text: '血压 (mmHg)', colspan: 2 },
+              { text: '体温 (℃)', rowspan: 2, width: '80px' },
+            ],
+          },
+          {
+            cells: [
+              { text: '收缩压', field: 'systolic', width: '80px' },
+              { text: '舒张压', field: 'diastolic', width: '80px' },
+            ],
+          },
+        ] as HeaderRow[],
+      } as TableConfig,
+    },
+    {
+      vitalSigns: [
+        { date: '2024-01-15', systolic: 120, diastolic: 80, temperature: 36.5 },
+        { date: '2024-01-16', systolic: 118, diastolic: 78, temperature: 36.8 },
+        { date: '2024-01-17', systolic: 122, diastolic: 82, temperature: 36.6 },
+      ],
+    },
+    {
+      title: '多行表头带行号',
+      description: '多行表头与行号列的组合使用，行号列自动跨越所有表头行',
+      height: '350px',
+    }
   ),
 }
