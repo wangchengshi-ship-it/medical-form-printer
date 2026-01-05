@@ -561,6 +561,10 @@ function measureTableInto(
 
 /**
  * Measure header element and push result to array
+ * 
+ * Header is the top section of the page containing hospital name, department, and title.
+ * DOM element: .print-header / .mpr-print-header
+ * 
  * @param pageContainer - Page container element
  * @param results - Array to push measurement results into
  */
@@ -580,7 +584,31 @@ function measureHeaderInto(
 
 /**
  * Measure footer elements and push results to array
- * Includes both print-footer (page number) and notes sections
+ * 
+ * ## Footer Structure
+ * 
+ * The "Footer" area at the bottom of the page consists of:
+ * 
+ * 1. **Page Number & Notes** (DOM: .print-footer / .mpr-print-footer)
+ *    - Configured via `schema.footer.showPageNumber` and `schema.footer.notes`
+ *    - Always appears on each page when enabled
+ *    - MeasurableItem type: 'footer', id: 'page-footer'
+ * 
+ * 2. **Notes Sections** (DOM: .notes-section / .mpr-notes-section)
+ *    - Content notes within the body area
+ *    - MeasurableItem type: 'footer', id: 'notes-{index}'
+ * 
+ * Note: Signature area is measured separately by measureSignaturesInto()
+ * and has type 'signature', not 'footer'.
+ * 
+ * @todo REFACTOR: Simplify footer measurement
+ * Currently we measure print-footer and notes-section separately and sum their heights.
+ * This is overly complex. Future refactor should:
+ * 1. Treat the entire footer area as a single unit
+ * 2. Just measure the total footer container height directly
+ * 3. Don't care about what's inside (page number, notes, etc.)
+ * This will simplify the code and make it more maintainable.
+ * 
  * @param pageContainer - Page container element (for print-footer)
  * @param printBody - Print body container element (for notes), can be null
  * @param results - Array to push measurement results into
@@ -590,7 +618,8 @@ function measureFooterInto(
   printBody: Element | null,
   results: MeasurableItem[]
 ): void {
-  // Measure print-footer element (contains page number)
+  // Measure print-footer element (contains page number and footer notes)
+  // This is the .print-footer DOM element, configured via schema.footer
   const footer = pageContainer.querySelector(MEASURE_SELECTORS.FOOTER)
   if (footer) {
     const rect = footer.getBoundingClientRect()
@@ -634,7 +663,19 @@ function measureFooterInto(
 }
 
 /**
- * Measure signature elements and push results to array
+ * Measure signature area elements and push results to array
+ * 
+ * ## Signature vs Footer
+ * 
+ * Signature area is a separate section from the footer:
+ * - DOM element: .signature-area / .mpr-signature-area
+ * - MeasurableItem type: 'signature' (NOT 'footer')
+ * - Configured via `signature-area` section in schema.sections
+ * 
+ * Pagination behavior (controlled by schema.pagination.display.signatureOnEachPage):
+ * - true: Signature appears on every page
+ * - false: Signature only appears on the last page
+ * 
  * @param container - Container element to search within
  * @param results - Array to push measurement results into
  */

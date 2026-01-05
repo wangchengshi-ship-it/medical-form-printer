@@ -354,3 +354,42 @@ export const LargeDataset: Story = {
     },
   },
 }
+
+/**
+ * With footer notes - demonstrates footer height measurement
+ * @requirements Footer measurement fix - correct height calculation
+ */
+export const WithFooterNotes: Story = {
+  name: 'With Footer Notes',
+  render: () => {
+    const schema: PrintSchemaWithPagination = {
+      ...createSchema(),
+      footer: {
+        showPageNumber: true,
+        notes: 'Important: This nursing record must be reviewed by the head nurse before archiving.',
+      },
+    }
+    const data = {
+      ...baseData,
+      nursingRecords: generateNursingRecords(14),
+    }
+
+    const strategy = new SmartPaginationStrategy()
+    const html = strategy.render(schema, data, { isolated: true })
+
+    const iframe = document.createElement('iframe')
+    iframe.style.width = '100%'
+    iframe.style.height = '900px'
+    iframe.style.border = '1px solid #ccc'
+    iframe.style.background = '#f5f5f5'
+    iframe.srcdoc = html
+    return iframe
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Demonstrates correct footer height measurement including page numbers and notes. The footer area is properly reserved during pagination to prevent content overlap.',
+      },
+    },
+  },
+}

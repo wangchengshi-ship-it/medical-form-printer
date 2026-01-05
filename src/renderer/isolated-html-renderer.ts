@@ -93,8 +93,9 @@ function renderFooter(schema: PrintSchema): string {
     ? `<span class="${ns}-footer-notes">${escapeHtml(footer.notes)}</span>`
     : ''
 
+  // For single page rendering, show "Page 1 of 1"
   const pageNumber = footer.showPageNumber
-    ? `<span class="${ns}-page-number"></span>`
+    ? `<span class="${ns}-page-number">Page 1 of 1</span>`
     : ''
 
   return `<footer class="${ns}-print-footer">

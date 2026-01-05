@@ -73,7 +73,8 @@ function renderFooter(schema: PrintSchema): string {
   
   let pageNumberHtml = ''
   if (footer.showPageNumber) {
-    pageNumberHtml = '<span class="page-number"></span>'
+    // For single page rendering, show "Page 1 of 1"
+    pageNumberHtml = '<span class="page-number">Page 1 of 1</span>'
   }
   
   return `<footer class="print-footer">

@@ -62,14 +62,57 @@ export const MM_PER_INCH = PAGINATION_DEFAULTS.MM_PER_INCH
 
 /**
  * Measurable content item type enum
+ * 
+ * ## Page Structure and Item Types
+ * 
+ * ```
+ * ┌─────────────────────────────────────┐
+ * │           Header                    │  → type: 'header'
+ * │   Hospital, Department, Title       │
+ * ├─────────────────────────────────────┤
+ * │           Body                      │
+ * │   - info-grid, checkbox-grid        │  → type: 'section'
+ * │   - table header                    │  → type: 'table-header'
+ * │   - table rows                      │  → type: 'table-row'
+ * │   - notes-section                   │  → type: 'footer' (!)
+ * ├─────────────────────────────────────┤
+ * │           Footer                    │
+ * │   - Signature Area                  │  → type: 'signature'
+ * │   - Page Number + Notes             │  → type: 'footer'
+ * └─────────────────────────────────────┘
+ * ```
+ * 
+ * ## Type Definitions
+ * 
+ * - **header**: Page header (.print-header), contains hospital/department/title
+ * - **section**: Content sections like info-grid, checkbox-grid
+ * - **table-header**: Table header row (thead)
+ * - **table-row**: Table body row (tbody tr)
+ * - **signature**: Signature area (.signature-area), separate from footer
+ * - **footer**: Page footer (.print-footer) containing page number and notes,
+ *               also includes notes-section elements
+ * 
+ * ## Important: Signature vs Footer
+ * 
+ * Signature area has its own type 'signature', NOT 'footer'.
+ * This allows different pagination behavior:
+ * - Footer (page number): Always shown on each page
+ * - Signature: Configurable via signatureOnEachPage (true/false)
+ * 
  * @requirements 9.1 - Identify different types of content items
  */
 export const MEASURABLE_ITEM_TYPES = {
+  /** Page header with hospital, department, title */
   HEADER: 'header',
+  /** Content section (info-grid, checkbox-grid, etc.) */
   SECTION: 'section',
+  /** Table header row */
   TABLE_HEADER: 'table-header',
+  /** Table body row */
   TABLE_ROW: 'table-row',
+  /** Signature area (separate from footer, has own pagination rules) */
   SIGNATURE: 'signature',
+  /** Page footer with page number and notes */
   FOOTER: 'footer',
 } as const
 
