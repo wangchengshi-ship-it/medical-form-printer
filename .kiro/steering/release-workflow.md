@@ -1,3 +1,8 @@
+---
+inclusion: fileMatch
+fileMatchPattern: "CHANGELOG.md,.release-please-manifest.json,release-please-config.json,.github/**"
+---
+
 # 版本发布流程
 
 本项目使用 [release-please](https://github.com/googleapis/release-please) 自动管理版本号和 CHANGELOG。
