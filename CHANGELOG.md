@@ -5,6 +5,15 @@ All notable changes to `medical-form-printer` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1](https://github.com/wangchengshi-ship-it/medical-form-printer/compare/v0.3.0...v0.3.1) (2026-03-17)
+
+
+### Bug Fixes
+
+* add manual trigger for publish workflow ([fb8069c](https://github.com/wangchengshi-ship-it/medical-form-printer/commit/fb8069c157edcb2fe57976d0c3aa1d5b6d40dd08))
+* run all tests in publish workflow ([1af1367](https://github.com/wangchengshi-ship-it/medical-form-printer/commit/1af136747c75ca69bc9ccd17051ee17fbc1abb67))
+* trigger publish on release created event ([21fb965](https://github.com/wangchengshi-ship-it/medical-form-printer/commit/21fb9654e331fb492d421c46d3dd10af947b1003))
+
 ## [0.3.0](https://github.com/wangchengshi-ship-it/medical-form-printer/compare/v0.2.0...v0.3.0) (2026-01-05)
 
 

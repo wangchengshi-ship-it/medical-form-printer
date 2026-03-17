@@ -1,6 +1,6 @@
 {
   "name": "medical-form-printer",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A medical form print renderer - render structured form data to printable HTML/PDF",
   "type": "module",
   "main": "./dist/index.cjs",
